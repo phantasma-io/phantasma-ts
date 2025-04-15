@@ -153,7 +153,7 @@ var PBinaryWriter = /** @class */ (function () {
         return this;
     };
     PBinaryWriter.prototype.writeDateTime = function (obj) {
-        var num = (obj.getTime() + obj.getTimezoneOffset() * 60 * 1000) / 1000;
+        var num = (obj.getTime() / 1000) | 0;
         var a = (num & 0xff000000) >> 24;
         var b = (num & 0x00ff0000) >> 16;
         var c = (num & 0x0000ff00) >> 8;
