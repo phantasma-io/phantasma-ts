@@ -1,4 +1,4 @@
-import Buffer from 'Buffer';
+import Buffer from 'buffer';
 import { PollChoice } from '../../';
 import crypto from 'crypto';
 import {
