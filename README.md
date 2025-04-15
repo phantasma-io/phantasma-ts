@@ -1,4 +1,4 @@
-# phantasma-ts
+# phantasma-sdk-ts
 
 A TypeScript SDK for the Phantasma blockchain.
 
@@ -7,19 +7,19 @@ A TypeScript SDK for the Phantasma blockchain.
 Use the package manager [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) to install phatasma-ts.
 
 ```bash
-npm install phantasma-ts
+npm install phantasma-sdk-ts
 ```
 
 ## Importing
 
 ```javascript
-const { PhantasmaTS } = require("phantasma-ts");
+const { PhantasmaTS } = require("phantasma-sdk-ts");
 ```
 
 ## Standalone HTML Import
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/phantasma-io/phantasma-ts/html/phantasma.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/phantasma-sdk-ts@latest/html/phantasma.js"></script>
 ```
 
 ```javascript
@@ -101,7 +101,7 @@ These functions, `.CallContract` and `.CallInterop`, are your bread and butter f
 
 - You can find out all the diffrent `.CallInterop` functions below.
 
-- For `.CallContract`, you will have to look through the ABI's of all the diffrent smart contracts currently deployed on the Phantasma 'mainnet': [Link Here](https://explorer.phantasma.io/chain/main#tab_contracts)
+- For `.CallContract`, you will have to look through the ABI's of all the diffrent smart contracts currently deployed on the Phantasma 'mainnet': [Link Here](https://explorer.phantasma.info/chain/main#tab_contracts)
 
 #### Example:
 
@@ -136,10 +136,10 @@ let targetNet = 'main';
 // NOTE - we assume RPC was instantiated previously already, check other samples to see how
 let response = await RPC.invokeRawScript(targetNet, script);
 
-const decoder = new PhantasmaTS.Decoder(response.result);	
+const decoder = new PhantasmaTS.Decoder(response.result);
 const value = decoder.readVmObject();
 console.log(value); // print the decoded value to the console
-	
+
 ```
 
 #### Interop Functions:
@@ -181,14 +181,14 @@ To build a transaction you will first need to build a script.
 Note, building a Transaction is for transactional scripts only. Non transactional scripts should use the RPC function `RPC.invokeRawScript(chainInput: string, scriptData: string)`
 
 ```javascript
-const { PhantasmaTS } = require("phantasma-ts");
+const { PhantasmaTS } = require("phantasma-sdk-ts");
 
 
 async function sendTransaction() {
 
-  let WIF = "WIF"; //In WIF Format 
-  let fromAddress = "yourPublicWalletAddress"; 
-  let toAddress = "addressYoureSendingTo"; 
+  let WIF = "WIF"; //In WIF Format
+  let fromAddress = "yourPublicWalletAddress";
+  let toAddress = "addressYoureSendingTo";
 
   //Creating RPC Connection **(Needs To Be Updated)
   let RPC = new PhantasmaTS.PhantasmaAPI(
@@ -334,9 +334,9 @@ async function deployContract() {
   let sb = new PhantasmaTS.ScriptBuilder();
 
   //New RPC and Peers Needed
-  //Creating RPC Connection, use ('http://testnet.phantasma.io:5101/rpc', null, 'testnet') for testing
+  //Creating RPC Connection, use ('http://testnet.phantasma.info/rpc', null, 'testnet') for testing
   let RPC = new PhantasmaTS.PhantasmaAPI(
-    "http://localhost:7077/rpc",
+    "http://localhost:5172/rpc",
     null,
     "simnet"
   );
@@ -389,10 +389,10 @@ async function deployContract() {
 ### Scanning the blockchain for incoming transactions
 
 ```javascript
-const { PhantasmaTS } = require("phantasma-ts");
+const { PhantasmaTS } = require("phantasma-sdk-ts");
 
 let RPC = new PhantasmaTS.PhantasmaAPI(
-  "http://pharpc1.phantasma.io:7077/rpc",
+  "https://pharpc1.phantasma.info/rpc",
   null,
   "mainnet"
 );
@@ -444,7 +444,7 @@ checkForNewBlocks();
 
 ```javascript
 let RPC = new PhantasmaTS.PhantasmaAPI(
-  "http://pharpc1.phantasma.io:7077/rpc",
+  "https://pharpc1.phantasma.info/rpc",
   null,
   "mainnet"
 );

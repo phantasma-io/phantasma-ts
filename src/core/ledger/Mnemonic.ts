@@ -3,7 +3,7 @@
 import { bufferToHex, hexToBuffer } from '../utils';
 import { LedgerConfig } from './interfaces/LedgerConfig';
 
-// 60   | 0x80000273 | SOUL   | [Phantasma](https://phantasma.io/)
+// 60   | 0x80000273 | SOUL   | [Phantasma](https://phantasma.info/)
 export const SOUL_COIN: number = 60;
 
 /**

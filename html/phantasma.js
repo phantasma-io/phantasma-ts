@@ -1374,7 +1374,7 @@ exports.SignLedger = SignLedger;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetBip44Path = exports.GetPoltergeistMnemonic = exports.GetPrivateKeyFromSeed = exports.GetPrivateKeyFromMnemonic = exports.SOUL_COIN = void 0;
 var utils_1 = require("../utils");
-// 60   | 0x80000273 | SOUL   | [Phantasma](https://phantasma.io/)
+// 60   | 0x80000273 | SOUL   | [Phantasma](https://phantasma.info/)
 exports.SOUL_COIN = 60;
 /**
  * converts a mnemonic into a private key, using the phantasma coin's bip44 path.
