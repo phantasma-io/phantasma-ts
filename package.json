@@ -1,8 +1,8 @@
 {
-  "name": "phantasma-ts",
-  "version": "0.1.70",
-  "description": "Javascript SDK for interacting with the PhantasmaChain",
-  "author": "Phantasma Team <João 'Tek' Novo, Smokinclutch>",
+  "name": "phantasma-sdk-ts",
+  "version": "0.1.71",
+  "description": "Javascript SDK for interacting with the Phantasma Chain",
+  "author": "Phantasma Team",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
