@@ -1,17 +1,17 @@
-import base58 from "bs58";
-import { ISerializable } from "../interfaces";
-import { Address, PBinaryWriter, Serialization, Timestamp } from "../types";
+import base58 from 'bs58';
+import { ISerializable } from '../interfaces';
+import { Address, PBinaryWriter, Serialization, Timestamp } from '../types';
 import {
   bigIntToByteArray,
   numberToByteArray,
   stringToUint8Array,
   uint8ArrayToBytes,
   uint8ArrayToHex,
-} from "../utils";
-import { Opcode } from "./Opcode";
-import { VMObject } from "./VMObject";
-import { VMType } from "./VMType";
-import { Contracts } from "./Contracts";
+} from '../utils';
+import { Opcode } from './Opcode';
+import { VMObject } from './VMObject';
+import { VMType } from './VMType';
+import { Contracts } from './Contracts';
 
 type byte = number;
 
@@ -25,19 +25,19 @@ export class ScriptBuilder {
 
   public writer: PBinaryWriter;
 
-  public NullAddress = "S1111111111111111111111111111111111";
+  public NullAddress = 'S1111111111111111111111111111111111';
 
-  public static ScriptBuilder() : ScriptBuilder{
+  public static ScriptBuilder(): ScriptBuilder {
     return new ScriptBuilder();
   }
 
   public constructor() {
-    this.str = "";
+    this.str = '';
     this.writer = new PBinaryWriter();
   }
 
   public BeginScript() {
-    this.str = "";
+    this.str = '';
     this.writer = new PBinaryWriter();
     return this;
   }
@@ -87,13 +87,13 @@ export class ScriptBuilder {
   public EmitBigInteger(value: string) {
     let bytes: number[] = [];
 
-    if (value == "0") {
+    if (value == '0') {
       bytes = [0];
-    } else if (value.startsWith("-1")) {
-      throw new Error("Unsigned bigint serialization not suppoted");
+    } else if (value.startsWith('-1')) {
+      throw new Error('Unsigned bigint serialization not suppoted');
     } else {
       let hex = BigInt(value).toString(16);
-      if (hex.length % 2) hex = "0" + hex;
+      if (hex.length % 2) hex = '0' + hex;
       const len = hex.length / 2;
       var i = 0;
       var j = 0;
@@ -127,32 +127,34 @@ export class ScriptBuilder {
     let structType = Object.getPrototypeOf(obj).constructor.name;
 
     switch (typeof obj) {
-      case "string": {
+      case 'string': {
         let bytes = this.RawString(obj);
         this.EmitLoadBytes(reg, bytes, VMType.String);
         break;
       }
 
-      case "boolean": {
+      case 'boolean': {
         let bytes = [(obj as boolean) ? 1 : 0];
         this.EmitLoadBytes(reg, bytes, VMType.Bool);
         break;
       }
 
-      case "number": {
+      case 'number': {
         // obj is BigInteger
         // var bytes = val.ToSignedByteArray();
         // this.emitLoadBytes(reg, bytes, VMType.Number);
         //let bytes = this.RawString(BigInt(obj).toString());
-        if (Object.getPrototypeOf(structType).constructor.name == "enum") {
+        if (Object.getPrototypeOf(structType).constructor.name == 'enum') {
           this.AppendByte(obj);
         } else {
-          this.EmitLoadVarInt(reg, obj);
+          // this.EmitLoadVarInt(reg, obj);
+          let bytes = this.RawString(obj.toString());
+          this.EmitLoadBytes(reg, bytes, VMType.String);
         }
         break;
       }
 
-      case "object":
+      case 'object':
         if (obj instanceof Uint8Array) {
           this.EmitLoadBytes(reg, Array.from(obj));
         } else if (obj instanceof VMObject) {
@@ -164,8 +166,7 @@ export class ScriptBuilder {
         } else if (obj instanceof Address) {
           this.EmitLoadAddress(reg, obj);
         } else if (
-          (typeof obj.UnserializeData === "function" &&
-            typeof obj.SerializeData === "function") ||
+          (typeof obj.UnserializeData === 'function' && typeof obj.SerializeData === 'function') ||
           obj instanceof ISerializable
         ) {
           this.EmitLoadISerializable(reg, obj);
@@ -173,22 +174,18 @@ export class ScriptBuilder {
           if (Array.isArray(obj)) {
             this.EmitLoadArray(reg, obj);
           } else {
-            throw Error("Load type " + typeof obj + " not supported");
+            throw Error('Load type ' + typeof obj + ' not supported');
           }
         }
         break;
       default:
-        throw Error("Load type " + typeof obj + " not supported");
+        throw Error('Load type ' + typeof obj + ' not supported');
     }
     return this;
   }
 
-  public EmitLoadBytes(
-    reg: number,
-    bytes: byte[],
-    type: VMType = VMType.Bytes
-  ): this {
-    if (bytes.length > 0xffff) throw new Error("tried to load too much data");
+  public EmitLoadBytes(reg: number, bytes: byte[], type: VMType = VMType.Bytes): this {
+    if (bytes.length > 0xffff) throw new Error('tried to load too much data');
     this.Emit(Opcode.LOAD);
     this.AppendByte(reg);
     this.AppendByte(type);
@@ -234,10 +231,7 @@ export class ScriptBuilder {
 
     if (result == undefined) {
       //console.log("enter");
-      if (
-        obj.Data instanceof Map ||
-        obj.Data instanceof Map && obj.Data instanceof VMObject
-      ) {
+      if (obj.Data instanceof Map || (obj.Data instanceof Map && obj.Data instanceof VMObject)) {
         let resultData = obj.Data as Map<VMObject, VMObject>;
         this.EmitVarInt(resultData.size);
         for (let entry of resultData) {
@@ -350,7 +344,7 @@ export class ScriptBuilder {
         break;
 
       default:
-        throw new Error("Invalid jump opcode: " + opcode);
+        throw new Error('Invalid jump opcode: ' + opcode);
     }
 
     if (opcode != Opcode.JMP) {
@@ -365,7 +359,7 @@ export class ScriptBuilder {
 
   public EmitCall(label: string, regCount: byte): this {
     if (regCount < 1 || regCount > MaxRegisterCount) {
-      throw new Error("Invalid number of registers");
+      throw new Error('Invalid number of registers');
     }
 
     var ofs = this.str.length; //(int)stream.Position;
@@ -378,13 +372,9 @@ export class ScriptBuilder {
     return this;
   }
 
-  public EmitConditionalJump(
-    opcode: Opcode,
-    src_reg: byte,
-    label: string
-  ): this {
+  public EmitConditionalJump(opcode: Opcode, src_reg: byte, label: string): this {
     if (opcode != Opcode.JMPIF && opcode != Opcode.JMPNOT) {
-      throw new Error("Opcode is not a conditional jump");
+      throw new Error('Opcode is not a conditional jump');
     }
 
     var ofs = this.str.length;
@@ -440,28 +430,20 @@ export class ScriptBuilder {
     gasPrice: number,
     gasLimit: number
   ): this {
-    return this.CallContract(Contracts.GasContractName, "AllowGas", [
-      from,
-      to,
-      gasPrice,
-      gasLimit,
-    ]);
+    return this.CallContract(Contracts.GasContractName, 'AllowGas', [from, to, gasPrice, gasLimit]);
   }
 
   public SpendGas(address: string | Address): this {
-    return this.CallContract(Contracts.GasContractName, "SpendGas", [address]);
+    return this.CallContract(Contracts.GasContractName, 'SpendGas', [address]);
   }
 
   async CallRPC<T>(methodName: string, params: any[]): Promise<T> {
-    return "bla" as unknown as T;
+    return 'bla' as unknown as T;
   }
 
-  async GetAddressTransactionCount(
-    address: string,
-    chainInput: string
-  ): Promise<number> {
+  async GetAddressTransactionCount(address: string, chainInput: string): Promise<number> {
     let params = [address, chainInput];
-    return await this.CallRPC<number>("getAddressTransactionCount", params);
+    return await this.CallRPC<number>('getAddressTransactionCount', params);
   }
 
   //#endregion
@@ -493,7 +475,7 @@ export class ScriptBuilder {
   }
 
   public EmitVarInt(value: number): this {
-    if (value < 0) throw "negative value invalid";
+    if (value < 0) throw 'negative value invalid';
 
     if (value < 0xfd) {
       this.AppendByte(value);
@@ -532,7 +514,7 @@ export class ScriptBuilder {
   }
 
   public EmitUInt32(value: number): this {
-    if (value < 0) throw "negative value invalid";
+    if (value < 0) throw 'negative value invalid';
 
     let D = (value & 0xff000000) >> 24;
     let C = (value & 0x00ff0000) >> 16;
@@ -558,7 +540,7 @@ export class ScriptBuilder {
 
   //Custom Modified
   ByteToHex(byte: number) {
-    let result = ("0" + (byte & 0xff).toString(16)).slice(-2);
+    let result = ('0' + (byte & 0xff).toString(16)).slice(-2);
     return result;
   }
 
@@ -575,8 +557,7 @@ export class ScriptBuilder {
   }
 
   AppendUshort(ushort: number) {
-    this.str +=
-      this.ByteToHex(ushort & 0xff) + this.ByteToHex((ushort >> 8) & 0xff);
+    this.str += this.ByteToHex(ushort & 0xff) + this.ByteToHex((ushort >> 8) & 0xff);
     this.writer.writeUnsignedShort(ushort);
   }
 

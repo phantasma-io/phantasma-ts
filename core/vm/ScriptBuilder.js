@@ -89,15 +89,15 @@ var ScriptBuilder = /** @class */ (function () {
     function ScriptBuilder() {
         this._labelLocations = {};
         this._jumpLocations = {};
-        this.NullAddress = "S1111111111111111111111111111111111";
-        this.str = "";
+        this.NullAddress = 'S1111111111111111111111111111111111';
+        this.str = '';
         this.writer = new types_1.PBinaryWriter();
     }
     ScriptBuilder.ScriptBuilder = function () {
         return new ScriptBuilder();
     };
     ScriptBuilder.prototype.BeginScript = function () {
-        this.str = "";
+        this.str = '';
         this.writer = new types_1.PBinaryWriter();
         return this;
     };
@@ -139,16 +139,16 @@ var ScriptBuilder = /** @class */ (function () {
     };
     ScriptBuilder.prototype.EmitBigInteger = function (value) {
         var bytes = [];
-        if (value == "0") {
+        if (value == '0') {
             bytes = [0];
         }
-        else if (value.startsWith("-1")) {
-            throw new Error("Unsigned bigint serialization not suppoted");
+        else if (value.startsWith('-1')) {
+            throw new Error('Unsigned bigint serialization not suppoted');
         }
         else {
             var hex = BigInt(value).toString(16);
             if (hex.length % 2)
-                hex = "0" + hex;
+                hex = '0' + hex;
             var len = hex.length / 2;
             var i = 0;
             var j = 0;
@@ -178,30 +178,32 @@ var ScriptBuilder = /** @class */ (function () {
     ScriptBuilder.prototype.EmitLoad = function (reg, obj) {
         var structType = Object.getPrototypeOf(obj).constructor.name;
         switch (typeof obj) {
-            case "string": {
+            case 'string': {
                 var bytes = this.RawString(obj);
                 this.EmitLoadBytes(reg, bytes, VMType_1.VMType.String);
                 break;
             }
-            case "boolean": {
+            case 'boolean': {
                 var bytes = [obj ? 1 : 0];
                 this.EmitLoadBytes(reg, bytes, VMType_1.VMType.Bool);
                 break;
             }
-            case "number": {
+            case 'number': {
                 // obj is BigInteger
                 // var bytes = val.ToSignedByteArray();
                 // this.emitLoadBytes(reg, bytes, VMType.Number);
                 //let bytes = this.RawString(BigInt(obj).toString());
-                if (Object.getPrototypeOf(structType).constructor.name == "enum") {
+                if (Object.getPrototypeOf(structType).constructor.name == 'enum') {
                     this.AppendByte(obj);
                 }
                 else {
-                    this.EmitLoadVarInt(reg, obj);
+                    // this.EmitLoadVarInt(reg, obj);
+                    var bytes = this.RawString(obj.toString());
+                    this.EmitLoadBytes(reg, bytes, VMType_1.VMType.String);
                 }
                 break;
             }
-            case "object":
+            case 'object':
                 if (obj instanceof Uint8Array) {
                     this.EmitLoadBytes(reg, Array.from(obj));
                 }
@@ -217,8 +219,7 @@ var ScriptBuilder = /** @class */ (function () {
                 else if (obj instanceof types_1.Address) {
                     this.EmitLoadAddress(reg, obj);
                 }
-                else if ((typeof obj.UnserializeData === "function" &&
-                    typeof obj.SerializeData === "function") ||
+                else if ((typeof obj.UnserializeData === 'function' && typeof obj.SerializeData === 'function') ||
                     obj instanceof interfaces_1.ISerializable) {
                     this.EmitLoadISerializable(reg, obj);
                 }
@@ -227,19 +228,19 @@ var ScriptBuilder = /** @class */ (function () {
                         this.EmitLoadArray(reg, obj);
                     }
                     else {
-                        throw Error("Load type " + typeof obj + " not supported");
+                        throw Error('Load type ' + typeof obj + ' not supported');
                     }
                 }
                 break;
             default:
-                throw Error("Load type " + typeof obj + " not supported");
+                throw Error('Load type ' + typeof obj + ' not supported');
         }
         return this;
     };
     ScriptBuilder.prototype.EmitLoadBytes = function (reg, bytes, type) {
         if (type === void 0) { type = VMType_1.VMType.Bytes; }
         if (bytes.length > 0xffff)
-            throw new Error("tried to load too much data");
+            throw new Error('tried to load too much data');
         this.Emit(Opcode_1.Opcode.LOAD);
         this.AppendByte(reg);
         this.AppendByte(type);
@@ -277,8 +278,7 @@ var ScriptBuilder = /** @class */ (function () {
         this.AppendByte(obj.Type);
         if (result == undefined) {
             //console.log("enter");
-            if (obj.Data instanceof Map ||
-                obj.Data instanceof Map && obj.Data instanceof VMObject_1.VMObject) {
+            if (obj.Data instanceof Map || (obj.Data instanceof Map && obj.Data instanceof VMObject_1.VMObject)) {
                 var resultData = obj.Data;
                 this.EmitVarInt(resultData.size);
                 try {
@@ -388,7 +388,7 @@ var ScriptBuilder = /** @class */ (function () {
                 this.Emit(opcode);
                 break;
             default:
-                throw new Error("Invalid jump opcode: " + opcode);
+                throw new Error('Invalid jump opcode: ' + opcode);
         }
         if (opcode != Opcode_1.Opcode.JMP) {
             this.AppendByte(reg);
@@ -400,7 +400,7 @@ var ScriptBuilder = /** @class */ (function () {
     };
     ScriptBuilder.prototype.EmitCall = function (label, regCount) {
         if (regCount < 1 || regCount > MaxRegisterCount) {
-            throw new Error("Invalid number of registers");
+            throw new Error('Invalid number of registers');
         }
         var ofs = this.str.length; //(int)stream.Position;
         ofs += 2;
@@ -412,7 +412,7 @@ var ScriptBuilder = /** @class */ (function () {
     };
     ScriptBuilder.prototype.EmitConditionalJump = function (opcode, src_reg, label) {
         if (opcode != Opcode_1.Opcode.JMPIF && opcode != Opcode_1.Opcode.JMPNOT) {
-            throw new Error("Opcode is not a conditional jump");
+            throw new Error('Opcode is not a conditional jump');
         }
         var ofs = this.str.length;
         ofs += 2;
@@ -451,20 +451,15 @@ var ScriptBuilder = /** @class */ (function () {
     };
     //#region ScriptBuilderExtensions
     ScriptBuilder.prototype.AllowGas = function (from, to, gasPrice, gasLimit) {
-        return this.CallContract(Contracts_1.Contracts.GasContractName, "AllowGas", [
-            from,
-            to,
-            gasPrice,
-            gasLimit,
-        ]);
+        return this.CallContract(Contracts_1.Contracts.GasContractName, 'AllowGas', [from, to, gasPrice, gasLimit]);
     };
     ScriptBuilder.prototype.SpendGas = function (address) {
-        return this.CallContract(Contracts_1.Contracts.GasContractName, "SpendGas", [address]);
+        return this.CallContract(Contracts_1.Contracts.GasContractName, 'SpendGas', [address]);
     };
     ScriptBuilder.prototype.CallRPC = function (methodName, params) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, "bla"];
+                return [2 /*return*/, 'bla'];
             });
         });
     };
@@ -475,7 +470,7 @@ var ScriptBuilder = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [address, chainInput];
-                        return [4 /*yield*/, this.CallRPC("getAddressTransactionCount", params)];
+                        return [4 /*yield*/, this.CallRPC('getAddressTransactionCount', params)];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
@@ -505,7 +500,7 @@ var ScriptBuilder = /** @class */ (function () {
     };
     ScriptBuilder.prototype.EmitVarInt = function (value) {
         if (value < 0)
-            throw "negative value invalid";
+            throw 'negative value invalid';
         if (value < 0xfd) {
             this.AppendByte(value);
         }
@@ -543,7 +538,7 @@ var ScriptBuilder = /** @class */ (function () {
     };
     ScriptBuilder.prototype.EmitUInt32 = function (value) {
         if (value < 0)
-            throw "negative value invalid";
+            throw 'negative value invalid';
         var D = (value & 0xff000000) >> 24;
         var C = (value & 0x00ff0000) >> 16;
         var B = (value & 0x0000ff00) >> 8;
@@ -564,7 +559,7 @@ var ScriptBuilder = /** @class */ (function () {
     };
     //Custom Modified
     ScriptBuilder.prototype.ByteToHex = function (byte) {
-        var result = ("0" + (byte & 0xff).toString(16)).slice(-2);
+        var result = ('0' + (byte & 0xff).toString(16)).slice(-2);
         return result;
     };
     ScriptBuilder.prototype.AppendByte = function (byte) {
@@ -578,8 +573,7 @@ var ScriptBuilder = /** @class */ (function () {
         }
     };
     ScriptBuilder.prototype.AppendUshort = function (ushort) {
-        this.str +=
-            this.ByteToHex(ushort & 0xff) + this.ByteToHex((ushort >> 8) & 0xff);
+        this.str += this.ByteToHex(ushort & 0xff) + this.ByteToHex((ushort >> 8) & 0xff);
         this.writer.writeUnsignedShort(ushort);
     };
     ScriptBuilder.prototype.AppendHexEncoded = function (bytes) {

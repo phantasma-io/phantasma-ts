@@ -1,8 +1,8 @@
-import { ISerializable } from "../interfaces";
-import { Address, PBinaryWriter, Timestamp } from "../types";
-import { Opcode } from "./Opcode";
-import { VMObject } from "./VMObject";
-import { VMType } from "./VMType";
+import { ISerializable } from '../interfaces';
+import { Address, PBinaryWriter, Timestamp } from '../types';
+import { Opcode } from './Opcode';
+import { VMObject } from './VMObject';
+import { VMType } from './VMType';
 type byte = number;
 export declare class ScriptBuilder {
     _labelLocations: {

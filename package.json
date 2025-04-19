@@ -1,6 +1,6 @@
 {
   "name": "phantasma-sdk-ts",
-  "version": "0.1.72",
+  "version": "0.1.73",
   "description": "Javascript SDK for interacting with the Phantasma Chain",
   "author": "Phantasma Team",
   "main": "index.js",
