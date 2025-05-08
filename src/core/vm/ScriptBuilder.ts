@@ -290,7 +290,7 @@ export class ScriptBuilder {
       let bytes = Array.from(Serialization.Serialize(obj));
       this.EmitLoadBytes(reg, bytes, VMType.Timestamp);
     } else if (obj instanceof Date) {
-      let num = (obj.getTime() + obj.getTimezoneOffset() * 60 * 1000) / 1000;
+      let num = (obj.getTime() / 1000) | 0;
 
       let a = (num & 0xff000000) >> 24;
       let b = (num & 0x00ff0000) >> 16;
