@@ -343,7 +343,7 @@ var ScriptBuilder = /** @class */ (function () {
             this.EmitLoadBytes(reg, bytes, VMType_1.VMType.Timestamp);
         }
         else if (obj instanceof Date) {
-            var num = (obj.getTime() + obj.getTimezoneOffset() * 60 * 1000) / 1000;
+            var num = (obj.getTime() / 1000) | 0;
             var a = (num & 0xff000000) >> 24;
             var b = (num & 0x00ff0000) >> 16;
             var c = (num & 0x0000ff00) >> 8;
@@ -478,7 +478,7 @@ var ScriptBuilder = /** @class */ (function () {
     };
     //#endregion
     ScriptBuilder.prototype.EmitTimestamp = function (obj) {
-        var num = (obj.getTime() + obj.getTimezoneOffset() * 60 * 1000) / 1000;
+        var num = (obj.getTime() / 1000) | 0;
         var a = (num & 0xff000000) >> 24;
         var b = (num & 0x00ff0000) >> 16;
         var c = (num & 0x0000ff00) >> 8;

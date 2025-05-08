@@ -11,5 +11,5 @@ build:
     npm run build
 
 [group('publish')]
-publish:
+publish: build
     npm publish
