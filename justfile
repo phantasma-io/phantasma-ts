@@ -6,6 +6,11 @@ just:
 test:
     npm run test
 
+[group('manage')]
+reinstall:
+    rm -rf node_modules package-lock.json
+    npm install
+
 [group('build')]
 build:
     npm run build
