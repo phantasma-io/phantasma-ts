@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "export": "tsc && browserify dist/index.js -s phantasma > html/phantasma.js",
+    "build:umd": "tsc && browserify dist/index.js -s phantasma > html/phantasma.js",
     "test": "jest",
     "tests": "jest",
     "coverage": "jest --coverage",
