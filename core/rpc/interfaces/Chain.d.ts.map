@@ -1,1 +1,0 @@
-{"version":3,"file":"Chain.d.ts","sourceRoot":"","sources":["../../../src/core/rpc/interfaces/Chain.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,KAAK;IACpB,IAAI,EAAE,MAAM,CAAC;IACb,OAAO,EAAE,MAAM,CAAC;IAChB,MAAM,EAAE,MAAM,CAAC;IACf,MAAM,EAAE,MAAM,CAAC;IACf,YAAY,EAAE,MAAM,CAAC;IACrB,SAAS,EAAE,KAAK,CAAC,MAAM,CAAC,CAAC;IACzB,KAAK,EAAE,KAAK,CAAC,MAAM,CAAC,CAAC;CACtB"}

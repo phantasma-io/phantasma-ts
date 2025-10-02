@@ -1,4 +1,4 @@
-import {} from '../..';
+import {} from '../../src';
 import crypto from 'crypto';
 import wif from 'wif';
 import {

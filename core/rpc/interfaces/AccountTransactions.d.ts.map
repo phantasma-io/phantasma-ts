@@ -1,1 +1,0 @@
-{"version":3,"file":"AccountTransactions.d.ts","sourceRoot":"","sources":["../../../src/core/rpc/interfaces/AccountTransactions.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,mBAAmB,CAAC;AAEpD,MAAM,WAAW,mBAAmB;IAClC,OAAO,EAAE,MAAM,CAAC;IAChB,GAAG,EAAE,KAAK,CAAC,eAAe,CAAC,CAAC;CAC7B"}

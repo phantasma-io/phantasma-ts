@@ -1,1 +1,0 @@
-{"version":3,"file":"LedgerDeviceInfoResponse.d.ts","sourceRoot":"","sources":["../../../src/core/ledger/interfaces/LedgerDeviceInfoResponse.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,mBAAmB,CAAC;AACpD,OAAO,EAAE,uBAAuB,EAAE,MAAM,2BAA2B,CAAC;AAEpE,MAAM,WAAW,wBAAwB;IACvC,OAAO,EAAE,eAAe,CAAC;IACzB,eAAe,EAAE,uBAAuB,CAAC;CAC1C"}

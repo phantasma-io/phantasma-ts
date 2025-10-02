@@ -3,18 +3,23 @@
   "version": "0.1.76",
   "description": "Javascript SDK for interacting with the Phantasma Chain",
   "author": "Phantasma Team",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "export": "tsc && browserify index.js -s phantasma > html/phantasma.js",
-    "test": "tsc && jest",
-    "tests": "tsc && jest",
+    "export": "tsc && browserify dist/index.js -s phantasma > html/phantasma.js",
+    "test": "jest",
+    "tests": "jest",
     "coverage": "jest --coverage",
     "lint": "prettier --check . && eslint .",
     "format": "prettier --write .",
     "prettier-watch": "onchange 'src/**/*.ts' -- prettier --write {{changed}}"
   },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/phantasma-io/phantasma-ts.git"
@@ -40,6 +45,7 @@
     "elliptic": "^6.5.4",
     "ethereumjs-wallet": "^1.0.2",
     "tiny-secp256k1": "^2.2.1",
+    "ts-jest": "^29.4.4",
     "wif": "^2.0.6"
   },
   "devDependencies": {

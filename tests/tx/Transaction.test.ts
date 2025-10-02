@@ -1,5 +1,5 @@
 import Buffer from 'buffer';
-import { PollChoice } from '../../';
+import { PollChoice } from '../../src';
 import crypto from 'crypto';
 import {
   Address,
@@ -21,7 +21,7 @@ import {
   uint8ArrayToStringDefault,
   VMObject,
   VMType,
-} from '../../core';
+} from '../../src/core';
 
 describe('test phantasma_ts', function () {
   test('test phantasma-ts.Transaction.SerializeData', function (done) {

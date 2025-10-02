@@ -11,7 +11,8 @@
     "experimentalDecorators": true,
     "removeComments": false,
     //"noImplicitAny": false,
-    "outDir": "./",
+    "outDir": "./dist",
+    "rootDir": "./src",
     // Added - Comment if needed
     "composite": false,
     "declaration": true,
@@ -22,8 +23,8 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "preserveWatchOutput": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true
     //"strict": true
   },
-  "files": ["./src/index.ts", "src/core/ledger/interfaces/LedgerBalanceFromLedgerResponse.ts", "src/core/ledger/interfaces/LedgerSigner.ts"]
+  "include": ["src"]
 }

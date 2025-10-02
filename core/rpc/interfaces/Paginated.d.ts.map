@@ -1,1 +1,0 @@
-{"version":3,"file":"Paginated.d.ts","sourceRoot":"","sources":["../../../src/core/rpc/interfaces/Paginated.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,SAAS,CAAC,CAAC;IAC1B,IAAI,EAAE,MAAM,CAAC;IACb,QAAQ,EAAE,MAAM,CAAC;IACjB,KAAK,EAAE,MAAM,CAAC;IACd,UAAU,EAAE,MAAM,CAAC;IACnB,MAAM,EAAE,CAAC,CAAC;CACX"}
