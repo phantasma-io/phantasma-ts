@@ -15,6 +15,14 @@ reinstall:
 outdated:
     npm outdated --omit=dev
 
+[group('manage')]
+update-dev:
+    npx npm-check-updates -u --dep dev --target minor
+
+[group('manage')]
+update-prod:
+    npx npm-check-updates -u --dep prod --target minor
+
 [group('build')]
 clean:
     rm -rf dist
