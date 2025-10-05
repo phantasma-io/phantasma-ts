@@ -535,7 +535,15 @@ export class VMObject implements ISerializable {
       if (VMObject.isEnum(typeof structType[field]) && !VMObject.isEnum(val)) {
         val = localType[field][val?.toString()];
       }
-      result[field] = val;
+
+      // If field hasn't been found, val will be 'undefined'.
+      // This will override constructors which initialize empty fields correctly.
+      // Example: ConsensusPoll initialize empty array 'entries' but code below will convert in into undefined,
+      // breaking corresponding test when using ES2020.
+      // Adding check here.
+      if (val !== undefined) {
+        result[field] = val;
+      }
     }
     return result;
   }
