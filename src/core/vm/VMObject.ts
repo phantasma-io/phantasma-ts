@@ -1,23 +1,16 @@
-import BigInteger from "big-integer";
-import { VMType } from "./VMType";
-import { Timestamp } from "../types/Timestamp";
-import {
-  Address,
-  Base16,
-  Describer,
-  PBinaryReader,
-  PBinaryWriter,
-  Serialization,
-} from "../types";
-import { ISerializable } from "../interfaces";
+import BigInteger from 'big-integer';
+import { VMType } from './VMType';
+import { Timestamp } from '../types/Timestamp';
+import { Address, Base16, Describer, PBinaryReader, PBinaryWriter, Serialization } from '../types';
+import { ISerializable } from '../interfaces';
 import {
   uint8ArrayToBytes,
   uint8ArrayToHex,
   uint8ArrayToString,
   uint8ArrayToStringDefault,
-} from "../utils";
-import { Type } from "typescript";
-import bigInt from "big-integer";
+} from '../utils';
+import { Type } from 'typescript';
+import bigInt from 'big-integer';
 
 export class VMObject implements ISerializable {
   public Type: VMType;
@@ -26,12 +19,10 @@ export class VMObject implements ISerializable {
     return this.Data == null || this.Data == undefined;
   }
   private _localSize = 0;
-  private static readonly TimeFormat: string = "MM/dd/yyyy HH:mm:ss";
+  private static readonly TimeFormat: string = 'MM/dd/yyyy HH:mm:ss';
 
   public GetChildren(): Map<VMObject, VMObject> | null {
-    return this.Type == VMType.Struct
-      ? (this.Data as Map<VMObject, VMObject>)
-      : null;
+    return this.Type == VMType.Struct ? (this.Data as Map<VMObject, VMObject>) : null;
   }
 
   public get Size(): number {
@@ -109,21 +100,19 @@ export class VMObject implements ISerializable {
         /*if (this.Data instanceof Hash) {
               return this.Data.toString();
           }*/
-        return "Interop:" + this.Data?.constructor.name;
+        return 'Interop:' + this.Data?.constructor.name;
       case VMType.Struct:
         const arrayType = this.GetArrayType();
         if (arrayType === VMType.Number) {
           // convert array of unicode numbers into a string
           const children = this.GetChildren();
-          let sb = "";
+          let sb = '';
 
           for (let i = 0; i < children!.size; i++) {
             const key = VMObject.FromObject(i);
             const val = children?.get(key);
 
-            const ch = String.fromCharCode(
-              val!.AsNumber() as unknown as number
-            );
+            const ch = String.fromCharCode(val!.AsNumber() as unknown as number);
             sb += ch;
           }
 
@@ -135,7 +124,7 @@ export class VMObject implements ISerializable {
               return btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)));*/
         }
       case VMType.Bool:
-        return this.Data ? "true" : "false";
+        return this.Data ? 'true' : 'false';
       case VMType.Timestamp:
         return (this.Data as Timestamp).value.toString();
       default:
@@ -160,19 +149,17 @@ export class VMObject implements ISerializable {
         /*if (this.Data instanceof Hash) {
               return this.Data.toString();
           }*/
-        return "Interop:" + (this.Data as object).constructor.name;
+        return 'Interop:' + (this.Data as object).constructor.name;
       case VMType.Struct:
         const arrayType = this.GetArrayType();
         if (arrayType === VMType.Number) {
           // convert array of unicode numbers into a string
           const children = this.GetChildren();
-          let sb = "";
+          let sb = '';
           for (let i = 0; i < children!.size; i++) {
             const key = VMObject.FromObject(i);
             const val = children!.get(key);
-            const ch = String.fromCharCode(
-              val!.AsNumber() as unknown as number
-            );
+            const ch = String.fromCharCode(val!.AsNumber() as unknown as number);
             sb += ch;
           }
           return sb;
@@ -183,7 +170,7 @@ export class VMObject implements ISerializable {
               return new TextDecoder().decode(stream.toArray());*/
         }
       case VMType.Bool:
-        return this.Data ? "true" : "false";
+        return this.Data ? 'true' : 'false';
       case VMType.Timestamp:
         return (this.Data as Timestamp).value.toString();
       default:
@@ -205,15 +192,13 @@ export class VMObject implements ISerializable {
         if (number.toString() === (this.Data as unknown as string)) {
           return number as unknown as number;
         } else {
-          throw new Error(
-            `Cannot convert String '${this.Data}' to BigInteger.`
-          );
+          throw new Error(`Cannot convert String '${this.Data}' to BigInteger.`);
         }
       }
 
       case VMType.Bytes: {
         const bytes = new Uint8Array(this.Data as ArrayBuffer);
-        const num = BigInt(`0x${bytes.join("")}`);
+        const num = BigInt(`0x${bytes.join('')}`);
         return num as unknown as number;
       }
 
@@ -239,7 +224,7 @@ export class VMObject implements ISerializable {
 
   public AsEnum<T extends any>(): T {
     if (!VMObject.isEnum(this.Data as any)) {
-      throw new Error("T must be an enumerated type");
+      throw new Error('T must be an enumerated type');
     }
 
     if (this.Type !== VMType.Enum) {
@@ -290,7 +275,7 @@ export class VMObject implements ISerializable {
       case VMType.Timestamp:
         return this.AsTimestamp();
       default:
-        throw "Unsupported VM cast";
+        throw 'Unsupported VM cast';
     }
   }
 
@@ -302,7 +287,7 @@ export class VMObject implements ISerializable {
     for (let key of keys) {
       let value = instance[key];
 
-      if (typeof value === "number") {
+      if (typeof value === 'number') {
         value = value.toString();
       }
 
@@ -326,14 +311,14 @@ export class VMObject implements ISerializable {
             const num = this.AsNumber();
             this.Data = Number(this.Data);
           }
-          
+
           return (T) Enum.Parse(typeof T, this.Data.toString());
     }*/
 
   public AsBool(): boolean {
     switch (this.Type) {
       case VMType.String:
-        return (this.Data as unknown as string).toLowerCase() == "true";
+        return (this.Data as unknown as string).toLowerCase() == 'true';
       case VMType.Number:
         return (this.Data as BigInt) != BigInt(0);
       case VMType.Bool:
@@ -345,9 +330,7 @@ export class VMObject implements ISerializable {
 
   public static isStructOrClass(type: Type): boolean {
     return (
-      (!VMObject.isPrimitive(type) &&
-        VMObject.isValueType(type) &&
-        !VMObject.isEnum(type)) ||
+      (!VMObject.isPrimitive(type) && VMObject.isValueType(type) && !VMObject.isEnum(type)) ||
       VMObject.isClass(type) ||
       VMObject.isInterface(type)
     );
@@ -363,9 +346,7 @@ export class VMObject implements ISerializable {
   }
 
   public static isPrimitive(type: any): boolean {
-    return (
-      type === String || type === Number || type === Boolean || type === BigInt
-    );
+    return type === String || type === Number || type === Boolean || type === BigInt;
   }
 
   public static isValueType(type: any): boolean {
@@ -378,7 +359,7 @@ export class VMObject implements ISerializable {
       type === Map ||
       type === Set ||
       type instanceof Object ||
-      (typeof type).toLowerCase() === "object"
+      (typeof type).toLowerCase() === 'object'
     );
   }
 
@@ -388,15 +369,11 @@ export class VMObject implements ISerializable {
 
   private static ConvertObjectInternal(fieldValue: any, fieldType: any): any {
     if (
-      (VMObject.isStructOrClass(fieldType) &&
-        fieldValue instanceof Uint8Array) ||
+      (VMObject.isStructOrClass(fieldType) && fieldValue instanceof Uint8Array) ||
       fieldValue instanceof Array
     ) {
       const bytes = fieldValue as Uint8Array;
-      fieldValue = Serialization.Unserialize<typeof fieldType>(
-        bytes,
-        typeof fieldType
-      );
+      fieldValue = Serialization.Unserialize<typeof fieldType>(bytes, typeof fieldType);
     } else if (VMObject.isEnum(fieldType)) {
       let tempValue: typeof fieldType = fieldValue as keyof typeof fieldType;
       fieldValue = tempValue;
@@ -406,27 +383,25 @@ export class VMObject implements ISerializable {
 
   public ToArray(arrayElementType: any): any[] {
     if (this.Type !== VMType.Struct) {
-      throw new Error("not a valid source struct");
+      throw new Error('not a valid source struct');
     }
 
     const children = this.GetChildren();
     let maxIndex = -1;
     for (const child of children) {
       if (child[0].Type !== VMType.Number) {
-        throw new Error("source contains an element with invalid array index");
+        throw new Error('source contains an element with invalid array index');
       }
 
       const temp = child[0].AsNumber();
       // TODO use a constant for VM max array size
       if (temp >= 1024) {
-        throw new Error(
-          "source contains an element with a very large array index"
-        );
+        throw new Error('source contains an element with a very large array index');
       }
 
       const index = Math.floor(temp);
       if (index < 0) {
-        throw new Error("source contains an array index with negative value");
+        throw new Error('source contains an array index with negative value');
       }
 
       maxIndex = Math.max(index, maxIndex);
@@ -457,7 +432,7 @@ export class VMObject implements ISerializable {
       } else if (VMObject.isStructOrClass(type)) {
         return this.ToStruct(type);
       } else {
-        throw new Error("some stuff still missing: eg: lists, dictionaries..");
+        throw new Error('some stuff still missing: eg: lists, dictionaries..');
       }
     } else {
       const temp = this.ToObject();
@@ -467,7 +442,7 @@ export class VMObject implements ISerializable {
 
   public ToObject(): any {
     if (this.Type === VMType.None) {
-      throw new Error("not a valid object");
+      throw new Error('not a valid object');
     }
 
     switch (this.Type) {
@@ -501,10 +476,10 @@ export class VMObject implements ISerializable {
 
   public ToStruct<T>(structType: any): T {
     if (this.Type !== VMType.Struct) {
-      throw new Error("not a valid source struct");
+      throw new Error('not a valid source struct');
     }
     if (!VMObject.isStructOrClass(structType)) {
-      throw new Error("not a valid destination struct");
+      throw new Error('not a valid destination struct');
     }
 
     //let localType = Object.apply(typeof structType);
@@ -523,9 +498,9 @@ export class VMObject implements ISerializable {
     let fields2 = Describer.describe(structType, false);
 
     //console.log("fields", keyof typeof structType);
-    fields2 = fields2.map((x) => x.replace("this.", ""));
+    fields2 = fields2.map((x) => x.replace('this.', ''));
     for (let field of fields2) {
-      field.replace("this.", "");
+      field.replace('this.', '');
       const key = VMObject.FromObject(field);
       //const key = field;
       const dictKey = dictKeys.next().value;
@@ -569,28 +544,24 @@ export class VMObject implements ISerializable {
     if (VMObject.isEnum(type)) {
       return VMType.Enum;
     }
-    if (type === Boolean || type.toLowerCase() === "boolean") {
+    if (type === Boolean || type.toLowerCase() === 'boolean') {
       return VMType.Bool;
     }
-    if (
-      typeof type == typeof String ||
-      type === String ||
-      type.toLowerCase() === "string"
-    ) {
+    if (typeof type == typeof String || type === String || type.toLowerCase() === 'string') {
       return VMType.String;
     }
     if (
       typeof type === typeof Uint8Array ||
       type === Uint8Array ||
-      type.toLowerCase() === "uint8array"
+      type.toLowerCase() === 'uint8array'
     ) {
       return VMType.Bytes;
     }
     if (
-      type === "BigInt" ||
+      type === 'BigInt' ||
       type === Number ||
       type === BigInt ||
-      type.toLowerCase() === "number"
+      type.toLowerCase() === 'number'
     ) {
       return VMType.Number;
     }
@@ -664,20 +635,14 @@ export class VMObject implements ISerializable {
           }
           break;
         } else {
-          throw new Error("Cannot set value for vmtype: " + type);
+          throw new Error('Cannot set value for vmtype: ' + type);
         }
     }
   }
 
   public static ValidateStructKey(key: VMObject) {
-    if (
-      key.Type == VMType.None ||
-      key.Type == VMType.Struct ||
-      key.Type == VMType.Object
-    ) {
-      throw new Error(
-        `Cannot use value of type ${key.Type} as key for struct field`
-      );
+    if (key.Type == VMType.None || key.Type == VMType.Struct || key.Type == VMType.Object) {
+      throw new Error(`Cannot use value of type ${key.Type} as key for struct field`);
     }
   }
 
@@ -704,16 +669,11 @@ export class VMObject implements ISerializable {
       const targetType = VMObject.GetVMType(srcType);
 
       let result: any;
-      let isKnownType =
-        srcType === VMType.Number || srcType === VMType.Timestamp;
+      let isKnownType = srcType === VMType.Number || srcType === VMType.Timestamp;
 
       let localType = Object.apply(typeof srcType);
 
-      if (
-        !isKnownType &&
-        dontConvertSerializables &&
-        VMObject.isSerializable(localType)
-      ) {
+      if (!isKnownType && dontConvertSerializables && VMObject.isSerializable(localType)) {
         isKnownType = true;
       }
 
@@ -867,7 +827,7 @@ export class VMObject implements ISerializable {
 
     const type = this.GetVMType(objType);
     if (type === VMType.None) {
-      throw new Error("not a valid object");
+      throw new Error('not a valid object');
     }
 
     const result = new VMObject();
