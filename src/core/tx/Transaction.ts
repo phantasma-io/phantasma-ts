@@ -8,9 +8,7 @@ import {
   stringToUint8Array,
   uint8ArrayToHex,
   uint8ArrayToString,
-  uint8ArrayToStringDefault,
-  hexStringToUint8Array,
-  hexToByteArray,
+  uint8ArrayToStringDefault
 } from '../utils';
 import hexEncoding from 'crypto-js/enc-hex';
 import SHA256 from 'crypto-js/sha256';

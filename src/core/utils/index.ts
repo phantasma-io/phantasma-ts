@@ -1,20 +1,14 @@
-export function hexToByteArray(hexBytes: string) {
-  const res = [hexBytes.length / 2];
-  for (let i = 0; i < hexBytes.length; i += 2) {
-    const hexdig = hexBytes.substr(i, 2);
-    if (hexdig == '') {
-      res.push(0);
-    } else res.push(parseInt(hexdig, 16));
+export function hexToByteArray(hexBytes: string): Uint8Array {
+  if (hexBytes.length % 2 !== 0) {
+    throw new Error('Invalid hex string');
   }
-  return res;
-}
 
-export function HexToBytes(hex: string) {
-  return hexToByteArray(hex);
-}
+  const result = new Uint8Array(hexBytes.length / 2);
 
-export function hexToBuffer(hex: string) {
-  return new Uint8Array(hexToByteArray(hex));
+  for (let i = 0; i < hexBytes.length; i += 2) {
+    result[i / 2] = parseInt(hexBytes.slice(i, i + 2), 16);
+  }
+  return result;
 }
 
 export function bufferToHex(buffer: ArrayBuffer | ArrayLike<number> | Uint8Array) {

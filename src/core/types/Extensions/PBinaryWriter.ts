@@ -1,14 +1,9 @@
 //import { BinaryWriter, BinaryReader, Encoding } from "csharp-binary-stream";
-import bigInt from "big-integer";
-import { BinaryWriter, Encoding } from "csharp-binary-stream";
-import {
-  hexStringToBytes,
-  hexStringToUint8Array,
-  hexToByteArray,
-  stringToUint8Array,
-} from "../..";
-import { ISignature, Signature, SignatureKind } from "../../interfaces";
-import { Timestamp } from "../Timestamp";
+import bigInt from 'big-integer';
+import { BinaryWriter, Encoding } from 'csharp-binary-stream';
+import { hexStringToBytes } from '../..';
+import { ISignature, Signature, SignatureKind } from '../../interfaces';
+import { Timestamp } from '../Timestamp';
 
 type byte = number;
 
@@ -120,7 +115,7 @@ export class PBinaryWriter {
   }
 
   public writeVarInt(value: number): this {
-    if (value < 0) throw "negative value invalid";
+    if (value < 0) throw 'negative value invalid';
 
     if (value < 0xfd) {
       this.appendByte(value);
@@ -209,7 +204,7 @@ export class PBinaryWriter {
   }
 
   public emitUInt32(value: number): this {
-    if (value < 0) throw "negative value invalid";
+    if (value < 0) throw 'negative value invalid';
 
     let D = (value & 0xff000000) >> 24;
     let C = (value & 0x00ff0000) >> 16;
@@ -233,13 +228,13 @@ export class PBinaryWriter {
   public writeBigIntegerString(value: string) {
     let bytes: number[] = [];
 
-    if (value == "0") {
+    if (value == '0') {
       bytes = [0];
-    } else if (value.startsWith("-1")) {
-      throw new Error("Unsigned bigint serialization not suppoted");
+    } else if (value.startsWith('-1')) {
+      throw new Error('Unsigned bigint serialization not suppoted');
     } else {
       let hex = BigInt(value).toString(16);
-      if (hex.length % 2) hex = "0" + hex;
+      if (hex.length % 2) hex = '0' + hex;
       const len = hex.length / 2;
       var i = 0;
       var j = 0;
