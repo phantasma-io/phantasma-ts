@@ -1,10 +1,14 @@
 {
   "name": "phantasma-sdk-ts",
-  "version": "0.2.0",
+  "version": "0.2.0-rc.0",
   "description": "Javascript SDK for interacting with the Phantasma Chain",
   "author": "Phantasma Team",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "tag": "rc"
+  },
   "engines": {
     "node": ">=14"
   },

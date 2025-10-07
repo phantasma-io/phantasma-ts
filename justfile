@@ -39,3 +39,8 @@ rb:
 [group('publish')]
 publish: build
     npm publish
+
+[group('publish')]
+publish-rc: build
+    npm publish --tag rc
+
