@@ -28,7 +28,6 @@ export class Throw {
   }
 }
 
-/** Simple growable byte buffer */
 export class CarbonBinaryWriter {
   private chunks: Uint8Array[] = [];
   private size = 0;
