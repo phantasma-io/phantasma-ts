@@ -245,6 +245,12 @@ export class PhantasmaAPI {
     return (await this.JSONRPC('sendRawTransaction', params)) as string;
   }
 
+  //Allows to broadcast a signed carbon transaction on the network.
+  async sendCarbonTransaction(txData: string): Promise<string> {
+    let params: Array<any> = [txData];
+    return (await this.JSONRPC('sendCarbonTransaction', params)) as string;
+  }
+
   //Allows to invoke script based on network state, without state changes.
   async invokeRawScript(chainInput: string, scriptData: string): Promise<Script> {
     let params: Array<any> = [chainInput, scriptData];
