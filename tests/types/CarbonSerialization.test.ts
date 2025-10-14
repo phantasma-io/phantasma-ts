@@ -7,6 +7,7 @@ import { CarbonBlob } from '../../src/core/types/Carbon/CarbonBlob';
 import { Bytes32 } from '../../src/core/types/Carbon/Bytes32';
 import { Bytes64 } from '../../src/core/types/Carbon/Bytes64';
 import { SmallString } from '../../src/core/types/Carbon/SmallString';
+import { IntX } from '../../src/core/types/Carbon/IntX';
 import { TxTypes } from '../../src/core/types/Carbon/TxTypes';
 
 import { SignedTxMsg } from '../../src/core/types/Carbon/Blockchain/SignedTxMsg';
@@ -16,6 +17,7 @@ import { TxMsgTransferFungible } from '../../src/core/types/Carbon/Blockchain/Tx
 import { PhantasmaKeys } from '../../src/core/types/PhantasmaKeys';
 import { Ed25519Signature } from '../../src/core/types/Ed25519Signature';
 import { Witness } from '../../src/core/types/Carbon/Witness';
+import { byteArrayToHex } from '../../src/core/utils';
 
 type Kind =
   | 'U8'
@@ -37,13 +39,14 @@ type Kind =
   | 'ARRBYTES-1D'
   | 'ARRBYTES-2D'
   | 'BI'
+  | 'INTX'
   | 'ARRBI'
   | 'TX1'
   | 'TX2';
 
 type Row =
-  | { kind: Exclude<Kind, 'BI'>; value: string; hex: string }
-  | { kind: 'BI'; value: string; hex: string; decOrig: string; decBack: string };
+  | { kind: Exclude<Kind, 'BI' | 'INTX'>; value: string; hex: string }
+  | { kind: 'BI' | 'INTX'; value: string; hex: string; decOrig: string; decBack: string };
 
 const FIXTURE = path.join(__dirname, '..', 'fixtures', 'carbon_vectors.tsv');
 
@@ -75,6 +78,23 @@ const parseBI = (s: string): bigint => {
   return BigInt(t);
 };
 
+const parseIntX = (s: string): IntX => {
+  const t = s.trim();
+
+  const num = BigInt(t);
+  const MIN_INT64 = -(1n << 63n);
+  const MAX_INT64 = (1n << 63n) - 1n;
+
+  let intX: IntX;
+  if (num >= MIN_INT64 && num <= MAX_INT64) {
+    intX = IntX.fromI64(num);
+  } else {
+    intX = IntX.fromBigInt(num);
+  }
+
+  return intX;
+};
+
 const parseCsv = (s: string): string[] => (s.length ? s.split(',') : []);
 
 const parseArrBytes2D = (s: string): Uint8Array[] => {
@@ -100,13 +120,13 @@ const parseFixture = (tsv: string): Row[] => {
 
   const rows: Row[] = lines.map((line, idx): Row => {
     const cols = line.split('\t');
-    if (cols.length === 5 && cols[0] === 'BI') {
-      const [, value, hex, decOrig, decBack] = cols;
-      return { kind: 'BI', value, hex, decOrig, decBack };
+    if (cols.length === 5 && (cols[0] === 'BI' || cols[0] === 'INTX')) {
+      const [kind, value, hex, decOrig, decBack] = cols;
+      return { kind, value, hex, decOrig, decBack };
     }
     if (cols.length === 3) {
       const [kind, value, hex] = cols;
-      return { kind: kind as Exclude<Kind, 'BI'>, value, hex };
+      return { kind: kind as Exclude<Kind, 'BI' | 'INTX'>, value, hex };
     }
     throw new Error(`Bad TSV at line ${idx + 1}`);
   });
@@ -144,6 +164,9 @@ const encoders: Partial<Record<Kind, Enc>> = {
   'ARRBYTES-2D': (c, w) => w.writeArrayOfArrays(parseArrBytes2D(c.value)),
 
   BI: (c, w) => w.writeBigInt(parseBI(c.value)),
+
+  INTX: (c, w) => IntX.fromBigInt(BigInt(c.value)).write(w),
+
   ARRBI: (c, w) => {
     const items = parseCsv(c.value).map(parseBI);
     w.writeArrayBigInt(items);
@@ -178,6 +201,7 @@ const decoders: Partial<Record<Kind, Dec>> = {
   'ARRBYTES-2D': (_c, r) => r.readArrayOfArrays?.(),
 
   BI: (_c, r) => r.readBigInt(),
+  INTX: (_c, r) => IntX.read(r),
   ARRBI: (_c, r) => r.readArrayBigInt(),
 
   TX1: (_c, r) => TxMsg.read(r),
@@ -223,6 +247,13 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
           expect(String(v)).toBe(parseBI((c as any).decBack).toString());
         } else {
           expect(String(v)).toBe(parseBI((c as any).value).toString());
+        }
+        break;
+      case 'INTX':
+        if ((c as any).decBack) {
+          expect(String(v)).toBe(parseIntX((c as any).decBack).toString());
+        } else {
+          expect(String(v)).toBe(parseIntX((c as any).value).toString());
         }
         break;
       case 'FIX16':
@@ -346,8 +377,6 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
           payload,
           new TxMsgTransferFungible(to, tokenId, amount)
         );
-
-        CarbonBlob.Serialize(msg);
 
         const sig = new Bytes64(
           Ed25519Signature.Generate(txSender, CarbonBlob.Serialize(msg)).Bytes
