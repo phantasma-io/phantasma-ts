@@ -10,9 +10,25 @@ import { SmallString } from '../../src/core/types/Carbon/SmallString';
 import { IntX } from '../../src/core/types/Carbon/IntX';
 import { TxTypes } from '../../src/core/types/Carbon/TxTypes';
 
+import { ModuleId } from '../../src/core/types/Carbon/Blockchain/ModuleId';
 import { SignedTxMsg } from '../../src/core/types/Carbon/Blockchain/SignedTxMsg';
+import { TokenFlags } from '../../src/core/types/Carbon/Blockchain/TokenFlags';
 import { TxMsg } from '../../src/core/types/Carbon/Blockchain/TxMsg';
+import { TxMsgCall } from '../../src/core/types/Carbon/Blockchain/TxMsgCall';
 import { TxMsgTransferFungible } from '../../src/core/types/Carbon/Blockchain/TxMsgTransferFungible';
+import { TxMsgMintNonFungible } from '../../src/core/types/Carbon/Blockchain/TxMsgMintNonFungible';
+import { StandardMeta } from '../../src/core/types/Carbon/Blockchain/Modules/StandardMeta';
+import { SeriesInfo } from '../../src/core/types/Carbon/Blockchain/Modules/SeriesInfo';
+import { TokenContract_Methods } from '../../src/core/types/Carbon/Blockchain/Modules/TokenContract_Methods';
+import { TokenInfo } from '../../src/core/types/Carbon/Blockchain/Modules/TokenInfo';
+import { TokenSchemas } from '../../src/core/types/Carbon/Blockchain/Modules/TokenSchemas';
+import { VmDynamicStruct } from '../../src/core/types/Carbon/Blockchain/Vm/VmDynamicStruct';
+import { VmDynamicVariable } from '../../src/core/types/Carbon/Blockchain/Vm/VmDynamicVariable';
+import { VmNamedDynamicVariable } from '../../src/core/types/Carbon/Blockchain/Vm/VmNamedDynamicVariable';
+import { VmNamedVariableSchema } from '../../src/core/types/Carbon/Blockchain/Vm/VmNamedVariableSchema';
+import { VmStructSchema } from '../../src/core/types/Carbon/Blockchain/Vm/VmStructSchema';
+import { VmType } from '../../src/core/types/Carbon/Blockchain/Vm/VmType';
+import { VmVariableSchema } from '../../src/core/types/Carbon/Blockchain/Vm/VmVariableSchema';
 
 import { PhantasmaKeys } from '../../src/core/types/PhantasmaKeys';
 import { Ed25519Signature } from '../../src/core/types/Ed25519Signature';
@@ -41,8 +57,13 @@ type Kind =
   | 'BI'
   | 'INTX'
   | 'ARRBI'
+  | 'VMSTRUCT01'
+  | 'VMSTRUCT02'
   | 'TX1'
-  | 'TX2';
+  | 'TX2'
+  | 'TX-CREATE-TOKEN'
+  | 'TX-CREATE-TOKEN-SERIES'
+  | 'TX-MINT-NON-FUNGIBLE';
 
 type Row =
   | { kind: Exclude<Kind, 'BI' | 'INTX'>; value: string; hex: string }
@@ -93,6 +114,62 @@ const parseArrBytes2D = (s: string): Uint8Array[] => {
     return hexToByteArray(flat);
   });
 };
+
+function prepareTokenSchemas(): TokenSchemas {
+  // seriesMetadata schema
+  const seriesSchema = new VmStructSchema();
+  seriesSchema.fields = [];
+  {
+    const f1 = new VmNamedVariableSchema();
+    f1.name = StandardMeta.id; // SmallString instance from your codebase
+    f1.schema = new VmVariableSchema();
+    f1.schema.type = VmType.Int256;
+    seriesSchema.fields.push(f1);
+
+    const f2 = new VmNamedVariableSchema();
+    f2.name = new SmallString('mode');
+    f2.schema = new VmVariableSchema();
+    f2.schema.type = VmType.Int8;
+    seriesSchema.fields.push(f2);
+
+    const f3 = new VmNamedVariableSchema();
+    f3.name = new SmallString('rom');
+    f3.schema = new VmVariableSchema();
+    f3.schema.type = VmType.Bytes;
+    seriesSchema.fields.push(f3);
+  }
+  seriesSchema.flags = VmStructSchema.Flags.None;
+
+  // rom schema
+  const romSchema = new VmStructSchema();
+  romSchema.fields = [];
+  {
+    const f1 = new VmNamedVariableSchema();
+    f1.name = StandardMeta.id;
+    f1.schema = new VmVariableSchema();
+    f1.schema.type = VmType.Int256;
+    romSchema.fields.push(f1);
+
+    const f2 = new VmNamedVariableSchema();
+    f2.name = new SmallString('rom');
+    f2.schema = new VmVariableSchema();
+    f2.schema.type = VmType.Bytes;
+    romSchema.fields.push(f2);
+  }
+  romSchema.flags = VmStructSchema.Flags.None;
+
+  // ram schema (dynamic extras)
+  const ramSchema = new VmStructSchema();
+  ramSchema.fields = [];
+  ramSchema.flags = VmStructSchema.Flags.DynamicExtras;
+
+  const tokenSchemas = new TokenSchemas();
+  tokenSchemas.seriesMetadata = seriesSchema;
+  tokenSchemas.rom = romSchema;
+  tokenSchemas.ram = ramSchema;
+
+  return tokenSchemas;
+}
 
 // ---------- TSV parser ----------
 
@@ -156,8 +233,13 @@ const encoders: Partial<Record<Kind, Enc>> = {
     w.writeArrayBigInt(items);
   },
 
+  VMSTRUCT01: (_c, w) => {},
+  VMSTRUCT02: (_c, w) => {},
   TX1: (_c, w) => {},
   TX2: (_c, w) => {},
+  'TX-CREATE-TOKEN': (_c, w) => {},
+  'TX-CREATE-TOKEN-SERIES': (_c, w) => {},
+  'TX-MINT-NON-FUNGIBLE': (_c, w) => {},
 };
 
 const decoders: Partial<Record<Kind, Dec>> = {
@@ -188,8 +270,13 @@ const decoders: Partial<Record<Kind, Dec>> = {
   INTX: (_c, r) => IntX.read(r),
   ARRBI: (_c, r) => r.readArrayBigInt(),
 
+  VMSTRUCT01: (_c, r) => TokenSchemas.read(r),
+  VMSTRUCT02: (_c, r) => VmDynamicStruct.read(r),
   TX1: (_c, r) => TxMsg.read(r),
   TX2: (_c, r) => SignedTxMsg.read(r),
+  'TX-CREATE-TOKEN': (_c, r) => TxMsg.read(r),
+  'TX-CREATE-TOKEN-SERIES': (_c, r) => TxMsg.read(r),
+  'TX-MINT-NON-FUNGIBLE': (_c, r) => TxMsg.read(r),
 };
 
 // ---------- load fixture ----------
@@ -200,7 +287,16 @@ const rows: Row[] = parseFixture(fs.readFileSync(FIXTURE, 'utf8'));
 
 describe('CarbonSerialization.ts ↔ C# fixtures (encode)', () => {
   test.each(rows.map((r, i) => [i, r]))('encode line #%d: %s', (_i, c) => {
-    if (c.kind === 'TX1' || c.kind === 'TX2') return;
+    if (
+      c.kind === 'VMSTRUCT01' ||
+      c.kind === 'VMSTRUCT02' ||
+      c.kind === 'TX1' ||
+      c.kind === 'TX2' ||
+      c.kind === 'TX-CREATE-TOKEN' ||
+      c.kind === 'TX-CREATE-TOKEN-SERIES' ||
+      c.kind === 'TX-MINT-NON-FUNGIBLE'
+    )
+      return;
     const enc = encoders[c.kind];
     expect(enc).toBeDefined();
     const w = new CarbonBinaryWriter();
@@ -303,9 +399,37 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         expect(got).toStrictEqual(exp);
         break;
       }
-      case 'TX1': {
-        const expected = c.hex.toUpperCase();
+      case 'VMSTRUCT01': {
+        const tokenSchemas = prepareTokenSchemas();
 
+        const schemaBuf = new CarbonBinaryWriter();
+        tokenSchemas.write(schemaBuf);
+
+        expect(byteArrayToHex(schemaBuf.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+
+        break;
+      }
+      case 'VMSTRUCT02': {
+        const fieldsJson = '{"name": "My test token!", "url": "http://example.com"}';
+
+        // --- Build metadata struct from fieldsJson ---
+        const fields: Record<string, string> = JSON.parse(fieldsJson);
+
+        const metaStruct = new VmDynamicStruct();
+        metaStruct.fields = [];
+        for (const [k, v] of Object.entries(fields)) {
+          metaStruct.fields.push(VmNamedDynamicVariable.from(k, VmType.String, v));
+        }
+
+        const metadataBufW = new CarbonBinaryWriter();
+        // No fixed schema for metadata; write as dynamic struct
+        metaStruct.write(metadataBufW);
+
+        expect(byteArrayToHex(metadataBufW.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+
+        break;
+      }
+      case 'TX1': {
         // Data is copied from C#'s TestDataGenerator:
         const gasFrom = new Bytes32();
         const to = new Bytes32();
@@ -326,18 +450,11 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const w = new CarbonBinaryWriter();
         msg.write(w);
 
-        const hex = Array.from(w.toUint8Array())
-          .map((b) => b.toString(16).padStart(2, '0'))
-          .join('')
-          .toUpperCase();
-
-        expect(String(hex)).toBe(expected);
+        expect(byteArrayToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
 
         break;
       }
       case 'TX2': {
-        const expected = c.hex.toUpperCase();
-
         var txSender = PhantasmaKeys.fromWIF(
           'KwPpBSByydVKqStGHAnZzQofCqhDmD2bfRgc9BmZqM3ZmsdWJw4d'
         );
@@ -371,17 +488,219 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const w = new CarbonBinaryWriter();
         signed.write(w);
 
-        const hex = Array.from(w.toUint8Array())
-          .map((b) => b.toString(16).padStart(2, '0'))
-          .join('')
-          .toUpperCase();
-
-        expect(String(hex)).toBe(expected);
+        expect(byteArrayToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
 
         break;
       }
-      default:
-        throw new Error(`Unhandled kind ${(c as any).kind}`);
+      case 'TX-CREATE-TOKEN': {
+        // Input copied from TxCreateToken.cs
+        const wif = 'KwPpBSByydVKqStGHAnZzQofCqhDmD2bfRgc9BmZqM3ZmsdWJw4d';
+        const symbol = 'MYNFT';
+        const fieldsJson = '{"name": "My test token!", "url": "http://example.com"}';
+
+        const maxData = 100000000n;
+        const gasFeeBase = 10000n;
+        const gasFeeCreateTokenBase = 10000000000n;
+        const gasFeeCreateTokenSymbol = 10000000000n;
+
+        // Sender keys (your project should already have this)
+        const txSender = PhantasmaKeys.fromWIF(wif);
+        const senderPubKey = new Bytes32(txSender.PublicKey);
+
+        // --- Build tokenSchemas exactly like PrepareTokenSchemas() ---
+
+        const tokenSchemas = prepareTokenSchemas();
+
+        const schemaBuf = new CarbonBinaryWriter();
+        tokenSchemas.write(schemaBuf);
+
+        // --- Build metadata struct from fieldsJson ---
+        const fields: Record<string, string> = JSON.parse(fieldsJson);
+
+        const metaStruct = new VmDynamicStruct();
+        metaStruct.fields = [];
+        for (const [k, v] of Object.entries(fields)) {
+          const nv = new VmNamedDynamicVariable();
+          nv.name = new SmallString(k);
+
+          const dyn = VmDynamicVariable.fromType(VmType.String);
+          dyn.data = v;
+
+          nv.value = dyn;
+          metaStruct.fields.push(nv);
+        }
+
+        const metadataBufW = new CarbonBinaryWriter();
+        // No fixed schema for metadata; write as dynamic struct
+        metaStruct.write(metadataBufW);
+
+        // --- Build TokenInfo ---
+        const info = new TokenInfo();
+        info.maxSupply = IntX.fromI64(0n);
+        info.flags = TokenFlags.NonFungible;
+        info.decimals = 0;
+        info.owner = senderPubKey;
+        info.symbol = new SmallString(symbol);
+        info.metadata = metadataBufW.toUint8Array(); // Uint8Array
+        info.tokenSchemas = schemaBuf.toUint8Array(); // Uint8Array
+
+        const argsW = new CarbonBinaryWriter();
+        info.write(argsW);
+
+        // --- Gas calculation (copy of C# logic) ---
+        const shift = BigInt(symbol.length - 1);
+        const maxGas =
+          (gasFeeBase + gasFeeCreateTokenBase + (gasFeeCreateTokenSymbol >> shift)) * 10000n;
+
+        // --- Tx message: Call(Token.CreateToken, args) ---
+        const msg = new TxMsg();
+        msg.type = TxTypes.Call;
+        msg.expiry = 1759711416000n;
+        msg.maxGas = maxGas;
+        msg.maxData = maxData;
+        msg.gasFrom = senderPubKey;
+        msg.payload = SmallString.empty;
+
+        const call = new TxMsgCall();
+        call.moduleId = ModuleId.Token;
+        call.methodId = TokenContract_Methods.CreateToken;
+        call.args = argsW.toUint8Array();
+        msg.msg = call;
+
+        // --- Serialize and compare ---
+        const w = new CarbonBinaryWriter();
+        msg.write(w);
+
+        expect(byteArrayToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+        break;
+      }
+      case 'TX-CREATE-TOKEN-SERIES': {
+        // Input copied from TxCreateTokenSeries.cs
+        const wif = 'KwPpBSByydVKqStGHAnZzQofCqhDmD2bfRgc9BmZqM3ZmsdWJw4d';
+        const tokenId = (1n << 64n) - 1n;
+
+        const maxData = 100000000n;
+        const gasFeeBase = 10000n;
+        const gasFeeCreateTokenSeries = 2500000000n;
+
+        // Sender keys
+        const txSender = PhantasmaKeys.fromWIF(wif);
+        const senderPubKey = new Bytes32(txSender.PublicKey);
+
+        // --- Build tokenSchemas ---
+        let sharedRom = new Uint8Array(0);
+
+        const tokenSchemas = prepareTokenSchemas();
+
+        const metadataBufW = new CarbonBinaryWriter();
+
+        const newPhantasmaSeriesId = (1n << 256n) - 1n;
+
+        let vmDynamicStruct = new VmDynamicStruct();
+        vmDynamicStruct.fields = [
+          VmNamedDynamicVariable.from(StandardMeta.id, VmType.Int256, newPhantasmaSeriesId),
+          VmNamedDynamicVariable.from('mode', VmType.Int8, sharedRom.length == 0 ? 0 : 1),
+          VmNamedDynamicVariable.from('rom', VmType.Bytes, sharedRom),
+        ];
+        vmDynamicStruct.writeWithSchema(tokenSchemas.seriesMetadata, metadataBufW);
+
+        // --- Build SeriesInfo ---
+        const info = new SeriesInfo();
+        info.maxMint = 0;
+        info.maxSupply = 0;
+        info.owner = senderPubKey;
+        info.metadata = metadataBufW.toUint8Array(); // Uint8Array
+        info.rom = new VmStructSchema();
+        info.ram = new VmStructSchema();
+
+        const argsW = new CarbonBinaryWriter();
+        argsW.write8(tokenId);
+        info.write(argsW);
+
+        // --- Gas calculation (copy of C# logic) ---
+        const maxGas = (gasFeeBase + gasFeeCreateTokenSeries) * 10000n;
+
+        // --- Tx message: Call(Token.CreateTokenSeries, args) ---
+        const msg = new TxMsg();
+        msg.type = TxTypes.Call;
+        msg.expiry = 1759711416000n;
+        msg.maxGas = maxGas;
+        msg.maxData = maxData;
+        msg.gasFrom = senderPubKey;
+        msg.payload = SmallString.empty;
+
+        const call = new TxMsgCall();
+        call.moduleId = ModuleId.Token;
+        call.methodId = TokenContract_Methods.CreateTokenSeries;
+        call.args = argsW.toUint8Array();
+        msg.msg = call;
+
+        // --- Serialize and compare ---
+        const w = new CarbonBinaryWriter();
+        msg.write(w);
+
+        expect(byteArrayToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+        break;
+      }
+      case 'TX-MINT-NON-FUNGIBLE': {
+        // Input copied from TxMintNonFungible.cs
+        const wif = 'KwPpBSByydVKqStGHAnZzQofCqhDmD2bfRgc9BmZqM3ZmsdWJw4d';
+        const carbonTokenId = (1n << 64n) - 1n;
+        const carbonSeriesId = 0xffffffff;
+
+        const maxData = 100000000n;
+        const gasFeeBase = 10000n;
+
+        // Sender keys (your project should already have this)
+        const txSender = PhantasmaKeys.fromWIF(wif);
+        const senderPubKey = new Bytes32(txSender.PublicKey);
+
+        // --- Build tokenSchemas exactly like PrepareTokenSchemas() ---
+
+        let sharedRom = new Uint8Array(0);
+
+        const tokenSchemas = prepareTokenSchemas();
+
+        const wRom = new CarbonBinaryWriter();
+
+        const phantasmaId = (1n << 256n) - 1n;
+        const phantasmaRomData = new Uint8Array([0x01, 0x42]);
+
+        let vmDynamicStruct = new VmDynamicStruct();
+        vmDynamicStruct.fields = [
+          VmNamedDynamicVariable.from(StandardMeta.id, VmType.Int256, phantasmaId),
+          VmNamedDynamicVariable.from('rom', VmType.Bytes, phantasmaRomData),
+        ];
+        vmDynamicStruct.writeWithSchema(tokenSchemas.rom, wRom);
+
+        // --- Gas calculation (copy of C# logic) ---
+        const maxGas = gasFeeBase * 1000n;
+
+        // --- Tx message ---
+        const msg = new TxMsg();
+        msg.type = TxTypes.MintNonFungible;
+        msg.expiry = 1759711416000n;
+        msg.maxGas = maxGas;
+        msg.maxData = maxData;
+        msg.gasFrom = senderPubKey;
+        msg.payload = SmallString.empty;
+
+        let mint = new TxMsgMintNonFungible();
+        mint.tokenId = carbonTokenId;
+        mint.seriesId = carbonSeriesId;
+        mint.to = new Bytes32(txSender.PublicKey);
+        mint.rom = wRom.toUint8Array();
+        mint.ram = new Uint8Array(0);
+
+        msg.msg = mint;
+
+        // --- Serialize and compare ---
+        const w = new CarbonBinaryWriter();
+        msg.write(w);
+
+        expect(byteArrayToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+        break;
+      }
     }
   });
 });

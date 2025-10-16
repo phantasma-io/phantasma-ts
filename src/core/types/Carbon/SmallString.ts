@@ -23,5 +23,10 @@ export class SmallString implements ICarbonBlob {
     v.read(r);
     return v;
   }
-  static readonly Empty = new SmallString('');
+  static readonly empty = new SmallString('');
+
+  compareTo(other: SmallString): number {
+    if (this.data === other.data) return 0;
+    return this.data < other.data ? -1 : 1;
+  }
 }

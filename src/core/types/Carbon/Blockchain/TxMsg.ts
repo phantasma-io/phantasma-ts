@@ -3,6 +3,8 @@ import { CarbonBinaryReader, CarbonBinaryWriter } from '../../CarbonSerializatio
 import { Bytes32 } from '../Bytes32';
 import { SmallString } from '../SmallString';
 import { TxTypes } from '../TxTypes';
+import { TxMsgCall } from './TxMsgCall';
+import { TxMsgMintNonFungible } from './TxMsgMintNonFungible';
 import { TxMsgTransferFungible } from './TxMsgTransferFungible';
 
 export class TxMsg implements ICarbonBlob {
@@ -13,7 +15,7 @@ export class TxMsg implements ICarbonBlob {
     public maxData?: bigint, // uint64
     public gasFrom?: Bytes32,
     public payload?: SmallString,
-    public msg?: TxMsgTransferFungible
+    public msg?: TxMsgTransferFungible | TxMsgMintNonFungible
     // TODO: Add other message types here
   ) {}
 
@@ -25,8 +27,14 @@ export class TxMsg implements ICarbonBlob {
     this.gasFrom.write(w);
     this.payload.write(w);
     switch (this.type) {
+      case TxTypes.Call:
+        (this.msg as TxMsgCall).write(w);
+        break;
       case TxTypes.TransferFungible:
         (this.msg as TxMsgTransferFungible).write(w);
+        break;
+      case TxTypes.MintNonFungible:
+        (this.msg as TxMsgMintNonFungible).write(w);
         break;
       default:
         throw new Error('Unsupported transaction type');
@@ -41,8 +49,14 @@ export class TxMsg implements ICarbonBlob {
     this.gasFrom = Bytes32.read(r);
     this.payload = SmallString.read(r);
     switch (this.type) {
+      case TxTypes.Call:
+        this.msg = TxMsgCall.read(r);
+        break;
       case TxTypes.TransferFungible:
         this.msg = TxMsgTransferFungible.read(r);
+        break;
+      case TxTypes.MintNonFungible:
+        this.msg = TxMsgMintNonFungible.read(r);
         break;
       default:
         throw new Error('Unsupported transaction type');
