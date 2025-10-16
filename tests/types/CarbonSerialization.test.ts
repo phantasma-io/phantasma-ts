@@ -2,14 +2,13 @@ import fs from 'fs';
 import path from 'path';
 
 import { CarbonBinaryWriter, CarbonBinaryReader } from '../../src/core/types/CarbonSerialization';
-import { CarbonBlob } from '../../src/core/types/Carbon/CarbonBlob';
 
 import { Bytes32 } from '../../src/core/types/Carbon/Bytes32';
-import { Bytes64 } from '../../src/core/types/Carbon/Bytes64';
 import { SmallString } from '../../src/core/types/Carbon/SmallString';
 import { IntX } from '../../src/core/types/Carbon/IntX';
 import { TxTypes } from '../../src/core/types/Carbon/TxTypes';
 
+import { TxMsgSigner } from '../../src/core/types/Carbon/Blockchain/Extensions/TxMsgSigner';
 import { ModuleId } from '../../src/core/types/Carbon/Blockchain/ModuleId';
 import { SignedTxMsg } from '../../src/core/types/Carbon/Blockchain/SignedTxMsg';
 import { TokenFlags } from '../../src/core/types/Carbon/Blockchain/TokenFlags';
@@ -31,8 +30,6 @@ import { VmType } from '../../src/core/types/Carbon/Blockchain/Vm/VmType';
 import { VmVariableSchema } from '../../src/core/types/Carbon/Blockchain/Vm/VmVariableSchema';
 
 import { PhantasmaKeys } from '../../src/core/types/PhantasmaKeys';
-import { Ed25519Signature } from '../../src/core/types/Ed25519Signature';
-import { Witness } from '../../src/core/types/Carbon/Witness';
 import { byteArrayToHex, hexToByteArray } from '../../src/core/utils';
 
 type Kind =
@@ -479,16 +476,9 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
           new TxMsgTransferFungible(to, tokenId, amount)
         );
 
-        const sig = new Bytes64(
-          Ed25519Signature.Generate(txSender, CarbonBlob.Serialize(msg)).Bytes
-        );
+        const signed = TxMsgSigner.sign(msg, txSender);
 
-        const signed = new SignedTxMsg(msg, [new Witness(new Bytes32(txSender.PublicKey), sig)]);
-
-        const w = new CarbonBinaryWriter();
-        signed.write(w);
-
-        expect(byteArrayToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+        expect(byteArrayToHex(signed).toUpperCase()).toBe(c.hex.toUpperCase());
 
         break;
       }
