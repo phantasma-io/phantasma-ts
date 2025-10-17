@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { byteArrayToHex } from '../../src/core';
+import { bytesToHex } from '../../src/core/utils';
 import {
   bigIntToTwosComplementLE_phantasma,
   bigIntFromTwosComplementLE_phantasma,
@@ -50,13 +50,13 @@ describe('Phantasma BigInt serialization', () => {
     const expectedCsharp = decToBytes(csharp);
 
     const encodedPha = bigIntToTwosComplementLE_phantasma(n);
-    expect(byteArrayToHex(encodedPha)).toBe(byteArrayToHex(expectedPha));
+    expect(bytesToHex(encodedPha)).toBe(bytesToHex(expectedPha));
 
     const decodedFromPha = bigIntFromTwosComplementLE_phantasma(encodedPha);
     expect(decodedFromPha).toBe(n);
 
     const encodedCsharp = bigIntToCsharpLE(n);
-    expect(byteArrayToHex(encodedCsharp)).toBe(byteArrayToHex(expectedCsharp));
+    expect(bytesToHex(encodedCsharp)).toBe(bytesToHex(expectedCsharp));
 
     // We don't need dedicated C# decoding method, Phantasma's one should work
     const decodedFromCsharp = bigIntFromTwosComplementLE_phantasma(encodedCsharp);

@@ -3,14 +3,8 @@ import { VMType } from './VMType';
 import { Timestamp } from '../types/Timestamp';
 import { Address, Base16, Describer, PBinaryReader, PBinaryWriter, Serialization } from '../types';
 import { ISerializable } from '../interfaces';
-import {
-  uint8ArrayToBytes,
-  uint8ArrayToHex,
-  uint8ArrayToString,
-  uint8ArrayToStringDefault,
-} from '../utils';
+import { uint8ArrayToBytes, uint8ArrayToStringDefault } from '../utils';
 import { Type } from 'typescript';
-import bigInt from 'big-integer';
 
 export class VMObject implements ISerializable {
   public Type: VMType;

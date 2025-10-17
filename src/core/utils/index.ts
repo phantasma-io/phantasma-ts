@@ -1,43 +1,6 @@
-export function hexToByteArray(hexBytes: string): Uint8Array {
-  if (hexBytes.length % 2 !== 0) {
-    throw new Error('Invalid hex string');
-  }
+import { hexToBytes } from './Hex';
 
-  const result = new Uint8Array(hexBytes.length / 2);
-
-  for (let i = 0; i < hexBytes.length; i += 2) {
-    result[i / 2] = parseInt(hexBytes.slice(i, i + 2), 16);
-  }
-  return result;
-}
-
-export function bufferToHex(buffer: ArrayBuffer | ArrayLike<number> | Uint8Array) {
-  return byteArrayToHex(buffer);
-}
-
-export function hexStringToBytes(hexString: string) {
-  for (var bytes = [], c = 0; c < hexString.length; c += 2)
-    bytes.push(parseInt(hexString.substr(c, 2), 16));
-  return bytes;
-}
-
-export function byteArrayToHex(arr: ArrayBuffer | ArrayLike<number> | Uint8Array): string {
-  if (typeof arr !== 'object') {
-    throw new Error(`ba2hex expects an array.Input was ${arr}`);
-  }
-  let result = '';
-  const intArray = new Uint8Array(arr);
-  for (const i of intArray) {
-    let str = i.toString(16);
-    str = str.length === 0 ? '00' : str.length === 1 ? '0' + str : str;
-    result += str;
-  }
-  return result;
-}
-
-export function BytesToHex(bytes: Uint8Array | ArrayBuffer | ArrayLike<number>) {
-  return byteArrayToHex(bytes);
-}
+export * from './Hex';
 
 export function reverseHex(hex: string): string {
   let out = '';
@@ -48,7 +11,7 @@ export function reverseHex(hex: string): string {
 }
 
 export function getDifficulty(transactionHash: string) {
-  let bytes = hexStringToBytes(transactionHash).reverse();
+  let bytes = hexToBytes(transactionHash).reverse();
   let result = 0;
 
   for (let i = 0; i < bytes.length; i++) {
@@ -133,14 +96,6 @@ export function uint8ArrayToBytes(array: Uint8Array): number[] {
     result.push(array[i]);
   }
   return result;
-}
-
-export function uint8ArrayToHex(arr: Uint8Array): string {
-  let hexString = '';
-  for (let i = 0; i < arr.length; i++) {
-    hexString += arr[i].toString(16).padStart(2, '0');
-  }
-  return hexString;
 }
 
 export function numberToByteArray(num: number, size?: number): Uint8Array {

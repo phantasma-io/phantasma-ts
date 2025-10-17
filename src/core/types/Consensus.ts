@@ -1,14 +1,8 @@
-import { Encoding } from "csharp-binary-stream";
-import { ISerializable } from "../interfaces";
-import {
-  byteArrayToHex,
-  stringToUint8Array,
-  uint8ArrayToBytes,
-  uint8ArrayToHex,
-  uint8ArrayToString,
-} from "../utils";
-import { Base16, PBinaryReader, PBinaryWriter } from "./Extensions";
-import { Timestamp } from "./Timestamp";
+import { Encoding } from 'csharp-binary-stream';
+import { ISerializable } from '../interfaces';
+import { bytesToHex, stringToUint8Array } from '../utils';
+import { Base16, PBinaryReader, PBinaryWriter } from './Extensions';
+import { Timestamp } from './Timestamp';
 
 export enum ConsensusMode {
   Unanimity,
@@ -28,8 +22,7 @@ export class PollChoice implements ISerializable {
   public value: string; // Should be byte[]
 
   public constructor(value: string | number[]) {
-    if (value instanceof Array)
-      this.value = Base16.decode(byteArrayToHex(value));
+    if (value instanceof Array) this.value = Base16.decode(bytesToHex(value));
     else this.value = value;
   }
 
@@ -42,7 +35,7 @@ export class PollChoice implements ISerializable {
   }
 
   static Unserialize(reader: PBinaryReader): PollChoice {
-    let pollChoice = new PollChoice("");
+    let pollChoice = new PollChoice('');
     pollChoice.UnserializeData(reader);
     return pollChoice;
   }
@@ -105,8 +98,8 @@ export class ConsensusPoll implements ISerializable {
   public totalVotes: BigInt;
 
   constructor() {
-    this.subject = "";
-    this.organization = "";
+    this.subject = '';
+    this.organization = '';
     this.mode = ConsensusMode.Unanimity;
     this.state = PollState.Inactive;
     this.entries = [];

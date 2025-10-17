@@ -1,14 +1,9 @@
-import { ISerializable } from "../interfaces";
-import { VMType } from "../vm/VMType";
-import { BinaryReader, BinaryWriter, Encoding } from "csharp-binary-stream";
-import {
-  arrayNumberToUint8Array,
-  stringToUint8Array,
-  uint8ArrayToNumberArray,
-  uint8ArrayToString,
-} from "../utils";
-import { TokenTrigger } from "./DomainSettings";
-import { PBinaryReader, PBinaryWriter } from "./Extensions";
+import { ISerializable } from '../interfaces';
+import { VMType } from '../vm/VMType';
+import { BinaryReader, BinaryWriter, Encoding } from 'csharp-binary-stream';
+import { arrayNumberToUint8Array, uint8ArrayToNumberArray } from '../utils';
+import { TokenTrigger } from './DomainSettings';
+import { PBinaryReader, PBinaryWriter } from './Extensions';
 
 export class ContractParameter {
   name: string;
@@ -21,10 +16,7 @@ export class ContractParameter {
 }
 
 export class ContractInterface implements ISerializable {
-  public static readonly Empty: ContractInterface = new ContractInterface(
-    [],
-    []
-  );
+  public static readonly Empty: ContractInterface = new ContractInterface([], []);
   private _methods = new Map<string, ContractMethod>();
   public Methods = Array.from(this._methods.values());
   public MethodCount = this._methods.size;
@@ -182,12 +174,7 @@ export class ContractMethod implements ISerializable {
     this.parameters = parameters;
   }
 
-  constructor(
-    name: string,
-    returnType: VMType,
-    offset: number,
-    parameters: ContractParameter[]
-  ) {
+  constructor(name: string, returnType: VMType, offset: number, parameters: ContractParameter[]) {
     this.name = name;
     this.offset = offset;
     this.returnType = returnType;
@@ -197,7 +184,7 @@ export class ContractMethod implements ISerializable {
   public isProperty(): boolean {
     if (
       this.name.length >= 4 &&
-      this.name.startsWith("get") &&
+      this.name.startsWith('get') &&
       this.name[3] === this.name[3].toUpperCase()
     ) {
       return true;
@@ -205,7 +192,7 @@ export class ContractMethod implements ISerializable {
 
     if (
       this.name.length >= 3 &&
-      this.name.startsWith("is") &&
+      this.name.startsWith('is') &&
       this.name[2] === this.name[2].toUpperCase()
     ) {
       return true;
@@ -217,7 +204,7 @@ export class ContractMethod implements ISerializable {
   public isTrigger(): boolean {
     if (
       this.name.length >= 3 &&
-      this.name.startsWith("on") &&
+      this.name.startsWith('on') &&
       this.name[2] === this.name[2].toUpperCase()
     ) {
       return true;
@@ -276,12 +263,7 @@ export class ContractEvent implements ISerializable {
   public readonly returnType: VMType;
   public readonly description: Uint8Array;
 
-  constructor(
-    value: number,
-    name: string,
-    returnType: VMType,
-    description: Uint8Array
-  ) {
+  constructor(value: number, name: string, returnType: VMType, description: Uint8Array) {
     this.value = value;
     this.name = name;
     this.returnType = returnType;
@@ -306,12 +288,7 @@ export class ContractEvent implements ISerializable {
     const returnType = reader.readByte() as VMType;
     const description = reader.readBytes(reader.readByte());
 
-    return new ContractEvent(
-      value,
-      name,
-      returnType,
-      arrayNumberToUint8Array(description)
-    );
+    return new ContractEvent(value, name, returnType, arrayNumberToUint8Array(description));
   }
 
   public Serialize(writer: PBinaryWriter): void {

@@ -1,14 +1,9 @@
 import Buffer from 'buffer';
 import { PollChoice } from '../../src';
-import crypto from 'crypto';
 import {
   Address,
   Base16,
   Ed25519Signature,
-  encodeBase16,
-  getAddressFromWif,
-  getWifFromPrivateKey,
-  PBinaryReader,
   PBinaryWriter,
   PhantasmaKeys,
   ScriptBuilder,
@@ -16,9 +11,7 @@ import {
   stringToUint8Array,
   Timestamp,
   Transaction,
-  uint8ArrayToHex,
-  uint8ArrayToString,
-  uint8ArrayToStringDefault,
+  bytesToHex,
   VMObject,
   VMType,
 } from '../../src/core';
@@ -32,7 +25,7 @@ describe('test phantasma_ts', function () {
     let chainName = 'main';
     let script = 'script';
     let expiration = new Date(17898129498);
-    let payload = 'payload';
+    let payload = bytesToHex(new TextEncoder().encode('payload'));
     let signatures = [new Ed25519Signature()];
     writer.writeString(nexusName);
     let tx = new Transaction(nexusName, chainName, script, expiration, payload);
@@ -58,11 +51,11 @@ describe('test phantasma_ts', function () {
     let chainName = 'main';
     let script = 'script';
     let expiration = new Date(17898129498);
-    let payload = 'payload';
+    let payload = bytesToHex(new TextEncoder().encode('payload'));
     let tx = new Transaction(nexusName, chainName, script, expiration, payload);
 
     let wif = keys.toWIF();
-    let pk = uint8ArrayToHex(keys.PrivateKey);
+    let pk = bytesToHex(keys.PrivateKey);
 
     tx.sign(wif);
 
@@ -85,10 +78,10 @@ describe('test phantasma_ts', function () {
     let chainName = 'main';
     let wif = 'L5UEVHBjujaR1721aZM5Zm5ayjDyamMZS9W35RE9Y9giRkdf3dVx';
     let uintArray = Uint8Array.from([0x01, 0x02, 0x03]);
-    let script = uint8ArrayToHex(uintArray);
+    let script = bytesToHex(uintArray);
     let time = new Timestamp(1234567890);
     let date = new Date(time.toString());
-    let payload = 'payload';
+    let payload = bytesToHex(new TextEncoder().encode('payload'));
     let keys = PhantasmaKeys.fromWIF(wif);
     let tx = new Transaction(nexusName, chainName, script, date, payload);
 
@@ -103,7 +96,7 @@ describe('test phantasma_ts', function () {
     expect(fromCsharpTx.chainName).toBe(tx.chainName);
     expect(fromCsharpTx.nexusName).toBe(tx.nexusName);
     expect(fromCsharpTx.script).toBe(tx.script);
-    expect(fromCsharpTx.payload).toBe(Base16.encode(tx.payload));
+    expect(fromCsharpTx.payload).toBe(tx.payload);
     expect(fromCsharpTx.expiration).toStrictEqual(tx.expiration);
     expect(fromCsharpTx.signatures.length).toBe(tx.signatures.length);
     expect(fromCsharpTx.signatures[0].Kind).toBe(tx.signatures[0].Kind);
@@ -148,7 +141,7 @@ describe('test phantasma_ts', function () {
 
     tx.signWithKeys(keys);
 
-    expect(uint8ArrayToHex(tx.ToByteAray(true)).toUpperCase()).toBe(
+    expect(bytesToHex(tx.ToByteAray(true)).toUpperCase()).toBe(
       '07746573746E6574046D61696EFD48010D00040632313030303003000D000405313030303003000D000223220000000000000000000000000000000000000000000000000000000000000000000003000D000223220100AA53BE71FC41BC0889B694F4D6D03F7906A3D9A21705943CAF9632EEAFBB489503000D000408416C6C6F7747617303000D0004036761732D00012E010D0004013003000D00041D73797374656D2E6E657875732E70726F746F636F6C2E76657273696F6E03000D00042F50324B464579466576705166536157384734566A536D6857555A585234517247395951523148624D7054554370434C03000D00040A53696E676C65566F746503000D000409636F6E73656E7375732D00012E010D000223220100AA53BE71FC41BC0889B694F4D6D03F7906A3D9A21705943CAF9632EEAFBB489503000D0004085370656E6447617303000D0004036761732D00012E010BD202964909436F6E73656E737573010140016F0F8D6C38E37F00C9CE9969104F42AF933BEB8C4291CBC9107CD11FDC6CBBDA86ACCD731742EA01642A26D14CA7E56361E73997BB3BEA55BAA3911AB62002'
     );
     done();

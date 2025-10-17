@@ -1,10 +1,10 @@
-import BigInteger from "big-integer";
-import { BinaryWriter, BinaryReader, Encoding } from "csharp-binary-stream";
-import { ISignature, SignatureKind, Signature } from "../../interfaces";
-import { byteArrayToHex, stringToUint8Array } from "../../utils";
-import { VMType } from "../../vm";
-import { Ed25519Signature } from "../Ed25519Signature";
-import { Timestamp } from "../Timestamp";
+import BigInteger from 'big-integer';
+import { BinaryWriter, BinaryReader, Encoding } from 'csharp-binary-stream';
+import { ISignature, SignatureKind, Signature } from '../../interfaces';
+import { bytesToHex, stringToUint8Array } from '../../utils';
+import { VMType } from '../../vm';
+import { Ed25519Signature } from '../Ed25519Signature';
+import { Timestamp } from '../Timestamp';
 
 export class PBinaryReader {
   reader: BinaryReader;
@@ -77,7 +77,7 @@ export class PBinaryReader {
   }
 
   public read(numBytes: number): string {
-    var res = byteArrayToHex(this.readBytes(numBytes)).substr(0, numBytes * 2);
+    var res = bytesToHex(this.readBytes(numBytes)).substr(0, numBytes * 2);
     //this.position += numBytes;
     return res;
   }
@@ -88,7 +88,7 @@ export class PBinaryReader {
   }
 
   public readStringBytes(numBytes: number) {
-    var res = "";
+    var res = '';
     for (var i = 0; i < numBytes; ++i) {
       res += String.fromCharCode(this.readByte());
     }
@@ -136,7 +136,7 @@ export class PBinaryReader {
         signature.Bytes = stringToUint8Array(this.readString());
         break;
       default:
-        throw "read signature: " + kind;
+        throw 'read signature: ' + kind;
     }
 
     return signature;
@@ -160,7 +160,7 @@ export class PBinaryReader {
         signature.Bytes = stringToUint8Array(this.readString());
         break;
       default:
-        throw "read signature: " + kind;
+        throw 'read signature: ' + kind;
     }
 
     return signature;
@@ -213,7 +213,7 @@ export class PBinaryReader {
 
   public readVarString(): string {
     var len = this.readVarInt();
-    if (len == 0) return "";
+    if (len == 0) return '';
     return this.readStringBytes(len);
   }
 
@@ -241,7 +241,7 @@ export class PBinaryReader {
         const numBytes = this.readVarInt();
         return this.read(numBytes);
       default:
-        return "unsupported type " + type;
+        return 'unsupported type ' + type;
     }
   }
 }

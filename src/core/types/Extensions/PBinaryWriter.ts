@@ -1,7 +1,7 @@
 //import { BinaryWriter, BinaryReader, Encoding } from "csharp-binary-stream";
 import bigInt from 'big-integer';
 import { BinaryWriter, Encoding } from 'csharp-binary-stream';
-import { hexStringToBytes } from '../..';
+import { hexToBytes } from '../..';
 import { ISignature, Signature, SignatureKind } from '../../interfaces';
 import { Timestamp } from '../Timestamp';
 
@@ -86,23 +86,21 @@ export class PBinaryWriter {
     return this;
   }
 
-  public appendBytes(bytes: byte[]) {
+  public appendBytes(bytes: Uint8Array): void {
     for (let i = 0; i < bytes.length; i++) {
-      if (!Number.isNaN(bytes[i])) {
-        this.appendByte(bytes[i]);
-      }
+      this.appendByte(bytes[i]);
     }
   }
 
   public writeEnum(value: number): this {
-    //this.writeUnsignedInt(value);
-    let bytes = [0, 0, 0, 0];
+    const bytes = new Uint8Array(4);
 
     for (let i = 0; i < bytes.length; i++) {
-      var byte = value & 0xff;
+      const byte = value & 0xff;
       bytes[i] = byte;
       value = (value - byte) / 256;
     }
+
     this.appendBytes(bytes);
     return this;
   }
@@ -161,7 +159,7 @@ export class PBinaryWriter {
     let c = (num & 0x0000ff00) >> 8;
     let d = num & 0x000000ff;
 
-    let bytes = [d, c, b, a];
+    let bytes = Uint8Array.from([d, c, b, a]);
     this.appendBytes(bytes);
     return this;
   }
@@ -174,7 +172,7 @@ export class PBinaryWriter {
     let c = (num & 0x0000ff00) >> 8;
     let d = num & 0x000000ff;
 
-    let bytes = [d, c, b, a];
+    let bytes = Uint8Array.from([d, c, b, a]);
     this.appendBytes(bytes);
     return this;
   }
@@ -258,16 +256,10 @@ export class PBinaryWriter {
     return this;
   }
 
-  public AppendHexEncoded(bytes: string): this {
-    let localEncoded = hexStringToBytes(bytes);
-    this.writeVarInt(localEncoded.length);
-    /*for (let i = 0; i < localEncoded.length; i++) {
-      if (!Number.isNaN(localEncoded[i])) {
-        this.appendByte(localEncoded[i]);
-      }
-    }*/
-
-    this.appendBytes(localEncoded);
+  public AppendHexEncoded(bytesHex: string): this {
+    let bytes = hexToBytes(bytesHex);
+    this.writeVarInt(bytes.length);
+    this.appendBytes(bytes);
     return this;
   }
 }

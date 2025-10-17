@@ -30,7 +30,7 @@ import { VmType } from '../../src/core/types/Carbon/Blockchain/Vm/VmType';
 import { VmVariableSchema } from '../../src/core/types/Carbon/Blockchain/Vm/VmVariableSchema';
 
 import { PhantasmaKeys } from '../../src/core/types/PhantasmaKeys';
-import { byteArrayToHex, hexToByteArray } from '../../src/core/utils';
+import { bytesToHex, hexToBytes } from '../../src/core/utils';
 
 type Kind =
   | 'U8'
@@ -108,7 +108,7 @@ const parseArrBytes2D = (s: string): Uint8Array[] => {
   return parts.map((seg) => {
     const hexParts = seg.split(',').map((x) => x.trim());
     const flat = hexParts.join('');
-    return hexToByteArray(flat);
+    return hexToBytes(flat);
   });
 };
 
@@ -205,9 +205,9 @@ const encoders: Partial<Record<Kind, Enc>> = {
   I64: (c, w) => w.write8(parseBI(c.value)),
   U64: (c, w) => w.write8u(parseBI(c.value)),
 
-  FIX16: (c, w) => w.write16(hexToByteArray(c.value)),
-  FIX32: (c, w) => w.write32(hexToByteArray(c.value)),
-  FIX64: (c, w) => w.write64(hexToByteArray(c.value)),
+  FIX16: (c, w) => w.write16(hexToBytes(c.value)),
+  FIX32: (c, w) => w.write32(hexToBytes(c.value)),
+  FIX64: (c, w) => w.write64(hexToBytes(c.value)),
 
   SZ: (c, w) => w.writeSz(c.value),
   ARRSZ: (c, w) => w.writeArraySz(parseCsv(c.value)),
@@ -218,7 +218,7 @@ const encoders: Partial<Record<Kind, Enc>> = {
   ARR64: (c, w) => w.writeArray64(parseCsv(c.value).map((x) => BigInt(x))),
   ARRU64: (c, w) => w.writeArray64(parseCsv(c.value).map((x) => BigInt(x))),
 
-  'ARRBYTES-1D': (c, w) => w.writeArray(hexToByteArray(c.value)),
+  'ARRBYTES-1D': (c, w) => w.writeArray(hexToBytes(c.value)),
   'ARRBYTES-2D': (c, w) => w.writeArrayOfArrays(parseArrBytes2D(c.value)),
 
   BI: (c, w) => w.writeBigInt(parseBI(c.value)),
@@ -298,14 +298,14 @@ describe('CarbonSerialization.ts ↔ C# fixtures (encode)', () => {
     expect(enc).toBeDefined();
     const w = new CarbonBinaryWriter();
     enc!(c as any, w);
-    const got = byteArrayToHex(w.toUint8Array());
+    const got = bytesToHex(w.toUint8Array());
     expect(got.toUpperCase()).toBe(c.hex.toUpperCase());
   });
 });
 
 describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
   test.each(rows.map((r, i) => [i, r]))('decode line #%d: %s', (_i, c) => {
-    const r = new CarbonBinaryReader(hexToByteArray(c.hex));
+    const r = new CarbonBinaryReader(hexToBytes(c.hex));
     const dec = decoders[c.kind];
     expect(dec).toBeDefined();
     const v = dec!(c as any, r);
@@ -337,7 +337,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
       case 'FIX32':
       case 'FIX64': {
         const expected = (c as any).value.toUpperCase();
-        const actual = byteArrayToHex(v as Uint8Array);
+        const actual = bytesToHex(v as Uint8Array);
         expect(actual.toUpperCase()).toBe(expected.toUpperCase());
         break;
       }
@@ -380,13 +380,13 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
       }
       case 'ARRBYTES-1D': {
         const exp = (c as any).value.toUpperCase();
-        const got = byteArrayToHex(v as Uint8Array);
+        const got = bytesToHex(v as Uint8Array);
         expect(got.toUpperCase()).toBe(exp.toUpperCase());
         break;
       }
       case 'ARRBYTES-2D': {
-        const exp = parseArrBytes2D((c as any).value).map(byteArrayToHex);
-        const got = (v as Uint8Array[]).map(byteArrayToHex);
+        const exp = parseArrBytes2D((c as any).value).map(bytesToHex);
+        const got = (v as Uint8Array[]).map(bytesToHex);
         expect(got).toStrictEqual(exp);
         break;
       }
@@ -402,7 +402,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const schemaBuf = new CarbonBinaryWriter();
         tokenSchemas.write(schemaBuf);
 
-        expect(byteArrayToHex(schemaBuf.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+        expect(bytesToHex(schemaBuf.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
 
         break;
       }
@@ -422,7 +422,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         // No fixed schema for metadata; write as dynamic struct
         metaStruct.write(metadataBufW);
 
-        expect(byteArrayToHex(metadataBufW.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+        expect(bytesToHex(metadataBufW.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
 
         break;
       }
@@ -447,7 +447,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const w = new CarbonBinaryWriter();
         msg.write(w);
 
-        expect(byteArrayToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+        expect(bytesToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
 
         break;
       }
@@ -478,7 +478,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
 
         const signed = TxMsgSigner.sign(msg, txSender);
 
-        expect(byteArrayToHex(signed).toUpperCase()).toBe(c.hex.toUpperCase());
+        expect(bytesToHex(signed).toUpperCase()).toBe(c.hex.toUpperCase());
 
         break;
       }
@@ -561,7 +561,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const w = new CarbonBinaryWriter();
         msg.write(w);
 
-        expect(byteArrayToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+        expect(bytesToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
         break;
       }
       case 'TX-CREATE-TOKEN-SERIES': {
@@ -629,7 +629,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const w = new CarbonBinaryWriter();
         msg.write(w);
 
-        expect(byteArrayToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+        expect(bytesToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
         break;
       }
       case 'TX-MINT-NON-FUNGIBLE': {
@@ -688,7 +688,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const w = new CarbonBinaryWriter();
         msg.write(w);
 
-        expect(byteArrayToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+        expect(bytesToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
         break;
       }
     }

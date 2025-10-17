@@ -1,15 +1,7 @@
 import pkg from 'elliptic';
 const { eddsa } = pkg;
 import { Decoder, ScriptBuilder } from '../vm';
-import {
-  hexStringToBytes,
-  byteArrayToHex,
-  getDifficulty,
-  stringToUint8Array,
-  uint8ArrayToHex,
-  uint8ArrayToString,
-  uint8ArrayToStringDefault
-} from '../utils';
+import { bytesToHex, hexToBytes, getDifficulty, uint8ArrayToStringDefault } from '../utils';
 import hexEncoding from 'crypto-js/enc-hex';
 import SHA256 from 'crypto-js/sha256';
 import { ISerializable, ISignature, Signature } from '../interfaces';
@@ -164,12 +156,12 @@ export class Transaction implements ISerializable {
         if (sig.Kind == 1) {
           sb.AppendByte(1); // Signature Type
           sb.EmitVarInt(sig.Bytes.length / 2);
-          sb.AppendHexEncoded(uint8ArrayToHex(sig.Bytes));
+          sb.AppendHexEncoded(bytesToHex(sig.Bytes));
         } else if (sig.Kind == 2) {
           sb.AppendByte(2); // ECDSA Signature
           sb.AppendByte(1); // Curve type secp256k1
           sb.EmitVarInt(sig.Bytes.length / 2);
-          sb.AppendHexEncoded(uint8ArrayToHex(sig.Bytes));
+          sb.AppendHexEncoded(bytesToHex(sig.Bytes));
         }
       });
     }
@@ -182,7 +174,7 @@ export class Transaction implements ISerializable {
 
   public getHash() {
     let generatedHash = SHA256(hexEncoding.parse(this.toString(false)));
-    this.hash = byteArrayToHex(hexStringToBytes(generatedHash.toString(hexEncoding)).reverse());
+    this.hash = bytesToHex(hexToBytes(generatedHash.toString(hexEncoding)).reverse());
     return this.hash;
   }
 
@@ -216,7 +208,7 @@ export class Transaction implements ISerializable {
       payload[2] = (nonce >> 16) & 0xff;
       payload[3] = (nonce >> 24) & 0xff;
 
-      deepCopy.payload = byteArrayToHex(payload);
+      deepCopy.payload = bytesToHex(payload);
     }
   }
 

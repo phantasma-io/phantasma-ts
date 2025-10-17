@@ -1,13 +1,7 @@
 import base58 from 'bs58';
 import { ISerializable } from '../interfaces';
 import { Address, PBinaryWriter, Serialization, Timestamp } from '../types';
-import {
-  bigIntToByteArray,
-  numberToByteArray,
-  stringToUint8Array,
-  uint8ArrayToBytes,
-  uint8ArrayToHex,
-} from '../utils';
+import { numberToByteArray, stringToUint8Array, bytesToHex } from '../utils';
 import { Opcode } from './Opcode';
 import { VMObject } from './VMObject';
 import { VMType } from './VMType';
@@ -43,12 +37,12 @@ export class ScriptBuilder {
   }
 
   public GetScript(): string {
-    return uint8ArrayToHex(this.writer.toUint8Array());
+    return bytesToHex(this.writer.toUint8Array());
   }
 
   public EndScript(): string {
     this.Emit(Opcode.RET);
-    return uint8ArrayToHex(this.writer.toUint8Array()).toUpperCase();
+    return bytesToHex(this.writer.toUint8Array()).toUpperCase();
   }
 
   public Emit(opcode: Opcode, bytes?: number[]): this {
