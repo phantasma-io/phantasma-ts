@@ -20,6 +20,7 @@ import {
 } from '../../src/core/types/Carbon/Blockchain';
 import {
   NftRomBuilder,
+  SeriesInfoBuilder,
   TokenSchemasBuilder,
 } from '../../src/core/types/Carbon/Blockchain/Modules/Builders';
 import {
@@ -517,31 +518,15 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const txSender = PhantasmaKeys.fromWIF(wif);
         const senderPubKey = new Bytes32(txSender.PublicKey);
 
-        // --- Build tokenSchemas ---
-        let sharedRom = new Uint8Array(0);
-
-        const tokenSchemas = TokenSchemasBuilder.PrepareStandardTokenSchemas();
-
-        const metadataBufW = new CarbonBinaryWriter();
-
         const newPhantasmaSeriesId = (1n << 256n) - 1n;
 
-        let vmDynamicStruct = new VmDynamicStruct();
-        vmDynamicStruct.fields = [
-          VmNamedDynamicVariable.from(StandardMeta.id, VmType.Int256, newPhantasmaSeriesId),
-          VmNamedDynamicVariable.from('mode', VmType.Int8, sharedRom.length == 0 ? 0 : 1),
-          VmNamedDynamicVariable.from('rom', VmType.Bytes, sharedRom),
-        ];
-        vmDynamicStruct.writeWithSchema(tokenSchemas.seriesMetadata, metadataBufW);
-
-        // --- Build SeriesInfo ---
-        const info = new SeriesInfo();
-        info.maxMint = 0;
-        info.maxSupply = 0;
-        info.owner = senderPubKey;
-        info.metadata = metadataBufW.toUint8Array(); // Uint8Array
-        info.rom = new VmStructSchema();
-        info.ram = new VmStructSchema();
+        const info = SeriesInfoBuilder.Build(
+          newPhantasmaSeriesId,
+          0,
+          0,
+          senderPubKey,
+          new Uint8Array()
+        );
 
         const argsW = new CarbonBinaryWriter();
         argsW.write8(tokenId);
