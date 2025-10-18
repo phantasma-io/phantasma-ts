@@ -9,26 +9,35 @@ import { IntX } from '../../src/core/types/Carbon/IntX';
 import { TxTypes } from '../../src/core/types/Carbon/TxTypes';
 
 import { TxMsgSigner } from '../../src/core/types/Carbon/Blockchain/Extensions/TxMsgSigner';
-import { ModuleId } from '../../src/core/types/Carbon/Blockchain/ModuleId';
-import { SignedTxMsg } from '../../src/core/types/Carbon/Blockchain/SignedTxMsg';
-import { TokenFlags } from '../../src/core/types/Carbon/Blockchain/TokenFlags';
-import { TxMsg } from '../../src/core/types/Carbon/Blockchain/TxMsg';
-import { TxMsgCall } from '../../src/core/types/Carbon/Blockchain/TxMsgCall';
-import { TxMsgTransferFungible } from '../../src/core/types/Carbon/Blockchain/TxMsgTransferFungible';
-import { TxMsgMintNonFungible } from '../../src/core/types/Carbon/Blockchain/TxMsgMintNonFungible';
-import { StandardMeta } from '../../src/core/types/Carbon/Blockchain/Modules/StandardMeta';
-import { SeriesInfo } from '../../src/core/types/Carbon/Blockchain/Modules/SeriesInfo';
-import { TokenContract_Methods } from '../../src/core/types/Carbon/Blockchain/Modules/TokenContract_Methods';
-import { TokenInfo } from '../../src/core/types/Carbon/Blockchain/Modules/TokenInfo';
-import { TokenSchemas } from '../../src/core/types/Carbon/Blockchain/Modules/TokenSchemas';
-import { VmDynamicStruct } from '../../src/core/types/Carbon/Blockchain/Vm/VmDynamicStruct';
-import { VmDynamicVariable } from '../../src/core/types/Carbon/Blockchain/Vm/VmDynamicVariable';
-import { VmNamedDynamicVariable } from '../../src/core/types/Carbon/Blockchain/Vm/VmNamedDynamicVariable';
-import { VmNamedVariableSchema } from '../../src/core/types/Carbon/Blockchain/Vm/VmNamedVariableSchema';
-import { VmStructSchema } from '../../src/core/types/Carbon/Blockchain/Vm/VmStructSchema';
-import { VmType } from '../../src/core/types/Carbon/Blockchain/Vm/VmType';
-import { VmVariableSchema } from '../../src/core/types/Carbon/Blockchain/Vm/VmVariableSchema';
-
+import {
+  ModuleId,
+  SignedTxMsg,
+  TxMsg,
+  TxMsgCall,
+  TxMsgTransferFungible,
+  TxMsgMintNonFungible,
+  CarbonTokenFlags,
+} from '../../src/core/types/Carbon/Blockchain';
+import {
+  NftRomBuilder,
+  TokenSchemasBuilder,
+} from '../../src/core/types/Carbon/Blockchain/Modules/Builders';
+import {
+  SeriesInfo,
+  StandardMeta,
+  TokenContract_Methods,
+  TokenInfo,
+  TokenSchemas,
+} from '../../src/core/types/Carbon/Blockchain/Modules';
+import {
+  VmDynamicStruct,
+  VmDynamicVariable,
+  VmNamedDynamicVariable,
+  VmNamedVariableSchema,
+  VmStructSchema,
+  VmType,
+  VmVariableSchema,
+} from '../../src/core/types/Carbon/Blockchain/Vm';
 import { PhantasmaKeys } from '../../src/core/types/PhantasmaKeys';
 import { bytesToHex, hexToBytes } from '../../src/core/utils';
 
@@ -111,62 +120,6 @@ const parseArrBytes2D = (s: string): Uint8Array[] => {
     return hexToBytes(flat);
   });
 };
-
-function prepareTokenSchemas(): TokenSchemas {
-  // seriesMetadata schema
-  const seriesSchema = new VmStructSchema();
-  seriesSchema.fields = [];
-  {
-    const f1 = new VmNamedVariableSchema();
-    f1.name = StandardMeta.id; // SmallString instance from your codebase
-    f1.schema = new VmVariableSchema();
-    f1.schema.type = VmType.Int256;
-    seriesSchema.fields.push(f1);
-
-    const f2 = new VmNamedVariableSchema();
-    f2.name = new SmallString('mode');
-    f2.schema = new VmVariableSchema();
-    f2.schema.type = VmType.Int8;
-    seriesSchema.fields.push(f2);
-
-    const f3 = new VmNamedVariableSchema();
-    f3.name = new SmallString('rom');
-    f3.schema = new VmVariableSchema();
-    f3.schema.type = VmType.Bytes;
-    seriesSchema.fields.push(f3);
-  }
-  seriesSchema.flags = VmStructSchema.Flags.None;
-
-  // rom schema
-  const romSchema = new VmStructSchema();
-  romSchema.fields = [];
-  {
-    const f1 = new VmNamedVariableSchema();
-    f1.name = StandardMeta.id;
-    f1.schema = new VmVariableSchema();
-    f1.schema.type = VmType.Int256;
-    romSchema.fields.push(f1);
-
-    const f2 = new VmNamedVariableSchema();
-    f2.name = new SmallString('rom');
-    f2.schema = new VmVariableSchema();
-    f2.schema.type = VmType.Bytes;
-    romSchema.fields.push(f2);
-  }
-  romSchema.flags = VmStructSchema.Flags.None;
-
-  // ram schema (dynamic extras)
-  const ramSchema = new VmStructSchema();
-  ramSchema.fields = [];
-  ramSchema.flags = VmStructSchema.Flags.DynamicExtras;
-
-  const tokenSchemas = new TokenSchemas();
-  tokenSchemas.seriesMetadata = seriesSchema;
-  tokenSchemas.rom = romSchema;
-  tokenSchemas.ram = ramSchema;
-
-  return tokenSchemas;
-}
 
 // ---------- TSV parser ----------
 
@@ -397,13 +350,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         break;
       }
       case 'VMSTRUCT01': {
-        const tokenSchemas = prepareTokenSchemas();
-
-        const schemaBuf = new CarbonBinaryWriter();
-        tokenSchemas.write(schemaBuf);
-
-        expect(bytesToHex(schemaBuf.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
-
+        expect(TokenSchemasBuilder.BuildAndSerializeHex().toUpperCase()).toBe(c.hex.toUpperCase());
         break;
       }
       case 'VMSTRUCT02': {
@@ -497,13 +444,6 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const txSender = PhantasmaKeys.fromWIF(wif);
         const senderPubKey = new Bytes32(txSender.PublicKey);
 
-        // --- Build tokenSchemas exactly like PrepareTokenSchemas() ---
-
-        const tokenSchemas = prepareTokenSchemas();
-
-        const schemaBuf = new CarbonBinaryWriter();
-        tokenSchemas.write(schemaBuf);
-
         // --- Build metadata struct from fieldsJson ---
         const fields: Record<string, string> = JSON.parse(fieldsJson);
 
@@ -527,12 +467,12 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         // --- Build TokenInfo ---
         const info = new TokenInfo();
         info.maxSupply = IntX.fromI64(0n);
-        info.flags = TokenFlags.NonFungible;
+        info.flags = CarbonTokenFlags.NonFungible;
         info.decimals = 0;
         info.owner = senderPubKey;
         info.symbol = new SmallString(symbol);
         info.metadata = metadataBufW.toUint8Array(); // Uint8Array
-        info.tokenSchemas = schemaBuf.toUint8Array(); // Uint8Array
+        info.tokenSchemas = TokenSchemasBuilder.BuildAndSerialize();
 
         const argsW = new CarbonBinaryWriter();
         info.write(argsW);
@@ -580,7 +520,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         // --- Build tokenSchemas ---
         let sharedRom = new Uint8Array(0);
 
-        const tokenSchemas = prepareTokenSchemas();
+        const tokenSchemas = TokenSchemasBuilder.PrepareStandardTokenSchemas();
 
         const metadataBufW = new CarbonBinaryWriter();
 
@@ -641,27 +581,21 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const maxData = 100000000n;
         const gasFeeBase = 10000n;
 
-        // Sender keys (your project should already have this)
         const txSender = PhantasmaKeys.fromWIF(wif);
         const senderPubKey = new Bytes32(txSender.PublicKey);
 
-        // --- Build tokenSchemas exactly like PrepareTokenSchemas() ---
-
-        let sharedRom = new Uint8Array(0);
-
-        const tokenSchemas = prepareTokenSchemas();
-
-        const wRom = new CarbonBinaryWriter();
-
-        const phantasmaId = (1n << 256n) - 1n;
+        const phantasmaNftId = (1n << 256n) - 1n;
         const phantasmaRomData = new Uint8Array([0x01, 0x42]);
 
-        let vmDynamicStruct = new VmDynamicStruct();
-        vmDynamicStruct.fields = [
-          VmNamedDynamicVariable.from(StandardMeta.id, VmType.Int256, phantasmaId),
-          VmNamedDynamicVariable.from('rom', VmType.Bytes, phantasmaRomData),
-        ];
-        vmDynamicStruct.writeWithSchema(tokenSchemas.rom, wRom);
+        var rom = NftRomBuilder.BuildAndSerialize(
+          phantasmaNftId,
+          'My NFT #1',
+          'This is my first NFT!',
+          'images-assets.nasa.gov/image/PIA13227/PIA13227~orig.jpg',
+          'https://images.nasa.gov/details/PIA13227',
+          10000000,
+          phantasmaRomData
+        );
 
         // --- Gas calculation (copy of C# logic) ---
         const maxGas = gasFeeBase * 1000n;
@@ -679,7 +613,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         mint.tokenId = carbonTokenId;
         mint.seriesId = carbonSeriesId;
         mint.to = new Bytes32(txSender.PublicKey);
-        mint.rom = wRom.toUint8Array();
+        mint.rom = rom;
         mint.ram = new Uint8Array(0);
 
         msg.msg = mint;

@@ -3,11 +3,11 @@ import type { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSeri
 import { IntX } from '../../IntX';
 import { Bytes32 } from '../../Bytes32';
 import { SmallString } from '../../SmallString';
-import { TokenFlags } from '../TokenFlags';
+import { CarbonTokenFlags } from '../CarbonTokenFlags';
 
 export class TokenInfo implements ICarbonBlob {
   maxSupply: IntX;
-  flags: TokenFlags;
+  flags: CarbonTokenFlags;
   decimals: number; // uint8
   owner: Bytes32;
   symbol: SmallString;
@@ -16,7 +16,7 @@ export class TokenInfo implements ICarbonBlob {
 
   constructor(init?: Partial<TokenInfo>) {
     this.maxSupply = new IntX();
-    this.flags = TokenFlags.None;
+    this.flags = CarbonTokenFlags.None;
     this.decimals = 0;
     this.owner = new Bytes32();
     this.symbol = new SmallString();
@@ -32,19 +32,19 @@ export class TokenInfo implements ICarbonBlob {
     this.owner.write(w);
     this.symbol.write(w);
     w.writeArray(this.metadata);
-    if ((this.flags & TokenFlags.NonFungible) !== 0) {
+    if ((this.flags & CarbonTokenFlags.NonFungible) !== 0) {
       w.writeArray(this.tokenSchemas ?? new Uint8Array());
     }
   }
 
   read(r: CarbonBinaryReader): void {
     this.maxSupply = r.readBlob(IntX);
-    this.flags = r.read1() as TokenFlags;
+    this.flags = r.read1() as CarbonTokenFlags;
     this.decimals = r.read1();
     this.owner = Bytes32.read(r);
     this.symbol = r.readBlob(SmallString);
     this.metadata = r.readArray();
-    if ((this.flags & TokenFlags.NonFungible) !== 0) {
+    if ((this.flags & CarbonTokenFlags.NonFungible) !== 0) {
       this.tokenSchemas = r.readArray();
     } else {
       this.tokenSchemas = undefined;

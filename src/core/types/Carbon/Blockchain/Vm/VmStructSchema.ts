@@ -12,6 +12,15 @@ export class VmStructSchema implements ICarbonBlob {
   fields: VmNamedVariableSchema[] = [];
   flags: number = VmStructSchema.Flags.None;
 
+  constructor(fields?: VmNamedVariableSchema[], flags?: number) {
+    if (fields) {
+      this.fields = fields;
+    }
+    if (flags) {
+      this.flags = flags;
+    }
+  }
+
   write(w: CarbonBinaryWriter): void {
     w.writeArrayBlob(this.fields);
     w.write1(this.flags & 0xff);
