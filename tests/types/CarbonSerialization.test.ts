@@ -31,6 +31,10 @@ import {
   TokenSchemas,
 } from '../../src/core/types/Carbon/Blockchain/Modules';
 import {
+  CreateSeriesFeeOptions,
+  CreateTokenSeriesTxHelper,
+} from '../../src/core/types/Carbon/Blockchain/TxHelpers';
+import {
   VmDynamicStruct,
   VmDynamicVariable,
   VmNamedDynamicVariable,
@@ -513,6 +517,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const maxData = 100000000n;
         const gasFeeBase = 10000n;
         const gasFeeCreateTokenSeries = 2500000000n;
+        const feeMultiplier = 10000n;
 
         // Sender keys
         const txSender = PhantasmaKeys.fromWIF(wif);
@@ -528,31 +533,23 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
           new Uint8Array()
         );
 
-        const argsW = new CarbonBinaryWriter();
-        argsW.write8(tokenId);
-        info.write(argsW);
+        var feeOptions = new CreateSeriesFeeOptions(
+          gasFeeBase,
+          gasFeeCreateTokenSeries,
+          feeMultiplier
+        );
 
-        // --- Gas calculation (copy of C# logic) ---
-        const maxGas = (gasFeeBase + gasFeeCreateTokenSeries) * 10000n;
+        var tx = CreateTokenSeriesTxHelper.buildTx(
+          tokenId,
+          info,
+          senderPubKey,
+          feeOptions,
+          maxData,
+          1759711416000n
+        );
 
-        // --- Tx message: Call(Token.CreateTokenSeries, args) ---
-        const msg = new TxMsg();
-        msg.type = TxTypes.Call;
-        msg.expiry = 1759711416000n;
-        msg.maxGas = maxGas;
-        msg.maxData = maxData;
-        msg.gasFrom = senderPubKey;
-        msg.payload = SmallString.empty;
-
-        const call = new TxMsgCall();
-        call.moduleId = ModuleId.Token;
-        call.methodId = TokenContract_Methods.CreateTokenSeries;
-        call.args = argsW.toUint8Array();
-        msg.msg = call;
-
-        // --- Serialize and compare ---
         const w = new CarbonBinaryWriter();
-        msg.write(w);
+        tx.write(w);
 
         expect(bytesToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
         break;
