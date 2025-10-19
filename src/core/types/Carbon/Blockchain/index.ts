@@ -1,3 +1,7 @@
+export * from "./Extensions";
+export * from "./Modules";
+export * from "./TxHelpers";
+export * from "./Vm";
 export * from "./CarbonTokenFlags";
 export * from "./ModuleId";
 export * from "./SignedTxMsg";
