@@ -21,6 +21,7 @@ import {
 import {
   NftRomBuilder,
   SeriesInfoBuilder,
+  TokenInfoBuilder,
   TokenSchemasBuilder,
 } from '../../src/core/types/Carbon/Blockchain/Modules/Builders';
 import {
@@ -32,7 +33,9 @@ import {
 } from '../../src/core/types/Carbon/Blockchain/Modules';
 import {
   CreateSeriesFeeOptions,
+  CreateTokenFeeOptions,
   CreateTokenSeriesTxHelper,
+  CreateTokenTxHelper,
   MintNftFeeOptions,
   MintNonFungibleTxHelper,
 } from '../../src/core/types/Carbon/Blockchain/TxHelpers';
@@ -446,6 +449,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const gasFeeBase = 10000n;
         const gasFeeCreateTokenBase = 10000000000n;
         const gasFeeCreateTokenSymbol = 10000000000n;
+        const feeMultiplier = 10000n;
 
         // Sender keys (your project should already have this)
         const txSender = PhantasmaKeys.fromWIF(wif);
@@ -471,42 +475,33 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         // No fixed schema for metadata; write as dynamic struct
         metaStruct.write(metadataBufW);
 
-        // --- Build TokenInfo ---
-        const info = new TokenInfo();
-        info.maxSupply = IntX.fromI64(0n);
-        info.flags = CarbonTokenFlags.NonFungible;
-        info.decimals = 0;
-        info.owner = senderPubKey;
-        info.symbol = new SmallString(symbol);
-        info.metadata = metadataBufW.toUint8Array(); // Uint8Array
-        info.tokenSchemas = TokenSchemasBuilder.BuildAndSerialize();
+        const info = TokenInfoBuilder.build(
+          symbol,
+          IntX.fromI64(0n),
+          true,
+          0,
+          senderPubKey,
+          metadataBufW.toUint8Array()
+        );
 
-        const argsW = new CarbonBinaryWriter();
-        info.write(argsW);
+        const feeOptions = new CreateTokenFeeOptions(
+          gasFeeBase,
+          gasFeeCreateTokenBase,
+          gasFeeCreateTokenSymbol,
+          feeMultiplier
+        );
 
-        // --- Gas calculation (copy of C# logic) ---
-        const shift = BigInt(symbol.length - 1);
-        const maxGas =
-          (gasFeeBase + gasFeeCreateTokenBase + (gasFeeCreateTokenSymbol >> shift)) * 10000n;
-
-        // --- Tx message: Call(Token.CreateToken, args) ---
-        const msg = new TxMsg();
-        msg.type = TxTypes.Call;
-        msg.expiry = 1759711416000n;
-        msg.maxGas = maxGas;
-        msg.maxData = maxData;
-        msg.gasFrom = senderPubKey;
-        msg.payload = SmallString.empty;
-
-        const call = new TxMsgCall();
-        call.moduleId = ModuleId.Token;
-        call.methodId = TokenContract_Methods.CreateToken;
-        call.args = argsW.toUint8Array();
-        msg.msg = call;
+        const tx = CreateTokenTxHelper.buildTx(
+          info,
+          senderPubKey,
+          feeOptions,
+          maxData,
+          1759711416000n
+        );
 
         // --- Serialize and compare ---
         const w = new CarbonBinaryWriter();
-        msg.write(w);
+        tx.write(w);
 
         expect(bytesToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
         break;
