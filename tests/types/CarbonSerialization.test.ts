@@ -33,6 +33,8 @@ import {
 import {
   CreateSeriesFeeOptions,
   CreateTokenSeriesTxHelper,
+  MintNftFeeOptions,
+  MintNonFungibleTxHelper,
 } from '../../src/core/types/Carbon/Blockchain/TxHelpers';
 import {
   VmDynamicStruct,
@@ -404,10 +406,10 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         break;
       }
       case 'TX2': {
-        var txSender = PhantasmaKeys.fromWIF(
+        const txSender = PhantasmaKeys.fromWIF(
           'KwPpBSByydVKqStGHAnZzQofCqhDmD2bfRgc9BmZqM3ZmsdWJw4d'
         );
-        var txReceiver = PhantasmaKeys.fromWIF(
+        const txReceiver = PhantasmaKeys.fromWIF(
           'KwVG94yjfVg1YKFyRxAGtug93wdRbmLnqqrFV6Yd2CiA9KZDAp4H'
         );
 
@@ -533,13 +535,13 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
           new Uint8Array()
         );
 
-        var feeOptions = new CreateSeriesFeeOptions(
+        const feeOptions = new CreateSeriesFeeOptions(
           gasFeeBase,
           gasFeeCreateTokenSeries,
           feeMultiplier
         );
 
-        var tx = CreateTokenSeriesTxHelper.buildTx(
+        const tx = CreateTokenSeriesTxHelper.buildTx(
           tokenId,
           info,
           senderPubKey,
@@ -562,6 +564,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
 
         const maxData = 100000000n;
         const gasFeeBase = 10000n;
+        const feeMultiplier = 1000n;
 
         const txSender = PhantasmaKeys.fromWIF(wif);
         const senderPubKey = new Bytes32(txSender.PublicKey);
@@ -569,7 +572,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const phantasmaNftId = (1n << 256n) - 1n;
         const phantasmaRomData = new Uint8Array([0x01, 0x42]);
 
-        var rom = NftRomBuilder.BuildAndSerialize(
+        const rom = NftRomBuilder.BuildAndSerialize(
           phantasmaNftId,
           'My NFT #1',
           'This is my first NFT!',
@@ -579,30 +582,23 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
           phantasmaRomData
         );
 
-        // --- Gas calculation (copy of C# logic) ---
-        const maxGas = gasFeeBase * 1000n;
+        const feeOptions = new MintNftFeeOptions(gasFeeBase, feeMultiplier);
 
-        // --- Tx message ---
-        const msg = new TxMsg();
-        msg.type = TxTypes.MintNonFungible;
-        msg.expiry = 1759711416000n;
-        msg.maxGas = maxGas;
-        msg.maxData = maxData;
-        msg.gasFrom = senderPubKey;
-        msg.payload = SmallString.empty;
-
-        let mint = new TxMsgMintNonFungible();
-        mint.tokenId = carbonTokenId;
-        mint.seriesId = carbonSeriesId;
-        mint.to = new Bytes32(txSender.PublicKey);
-        mint.rom = rom;
-        mint.ram = new Uint8Array(0);
-
-        msg.msg = mint;
+        const tx = MintNonFungibleTxHelper.buildTx(
+          carbonTokenId,
+          carbonSeriesId,
+          senderPubKey,
+          senderPubKey,
+          rom,
+          new Uint8Array(),
+          feeOptions,
+          maxData,
+          1759711416000n
+        );
 
         // --- Serialize and compare ---
         const w = new CarbonBinaryWriter();
-        msg.write(w);
+        tx.write(w);
 
         expect(bytesToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
         break;
