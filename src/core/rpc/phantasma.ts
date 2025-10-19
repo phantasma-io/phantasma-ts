@@ -62,13 +62,13 @@ export class PhantasmaAPI {
     });
   }
 
-  constructor(defHost: string, peersUrlJson: string, nexus: string) {
+  constructor(defHost: string, peersUrlJson: string | undefined | null, nexus: string) {
     this.rpcName = 'Auto';
     this.nexus = nexus;
     this.host = defHost;
     this.availableHosts = [];
 
-    if (peersUrlJson != undefined) {
+    if (peersUrlJson != undefined && peersUrlJson != null) {
       fetch(peersUrlJson + '?_=' + new Date().getTime()).then(async (res) => {
         const data = await res.json();
         for (var i = 0; i < data.length; i++) {
