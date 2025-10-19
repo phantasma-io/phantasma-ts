@@ -64,10 +64,10 @@ export class SignedTxMsg implements ICarbonBlob {
     }
   }
 
-  read(r: CarbonBinaryReader): SignedTxMsg {
-    const msg = TxMsg.read(r);
-    let witnesses: Witness[] = [];
-    switch (msg.type) {
+  read(r: CarbonBinaryReader) {
+    this.msg = TxMsg.read(r);
+    this.witnesses = [];
+    switch (this.msg.type) {
       case TxTypes.TransferFungible:
       case TxTypes.TransferNonFungible_Single:
       case TxTypes.TransferNonFungible_Multi:
@@ -76,7 +76,7 @@ export class SignedTxMsg implements ICarbonBlob {
       case TxTypes.MintNonFungible:
       case TxTypes.BurnNonFungible: {
         const sig = Bytes64.read(r);
-        witnesses = [new Witness(msg.gasFrom, sig)];
+        this.witnesses = [new Witness(this.msg.gasFrom, sig)];
         break;
       }
 
@@ -88,7 +88,7 @@ export class SignedTxMsg implements ICarbonBlob {
         const sig0 = Bytes64.read(r);
         const sig1 = Bytes64.read(r);
         // "from" resolution depends on concrete message type; omitted here
-        witnesses = [new Witness(msg.gasFrom, sig0), new Witness(Bytes32.Empty, sig1)];
+        this.witnesses = [new Witness(this.msg.gasFrom, sig0), new Witness(Bytes32.Empty, sig1)];
         throw new Error('Unsupported transaction type');
         break;
       }
@@ -97,18 +97,17 @@ export class SignedTxMsg implements ICarbonBlob {
       case TxTypes.Call_Multi:
       case TxTypes.Trade:
       case TxTypes.Phantasma: {
-        witnesses = r.readArrayBlob(Witness);
+        this.witnesses = r.readArrayBlob(Witness);
         break;
       }
 
       case TxTypes.Phantasma_Raw:
-        witnesses = [];
+        this.witnesses = [];
         break;
 
       default:
         throw new Error('Unsupported transaction type');
     }
-    return new SignedTxMsg(msg, witnesses);
   }
 
   static read(r: CarbonBinaryReader): SignedTxMsg {
