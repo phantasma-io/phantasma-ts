@@ -23,6 +23,10 @@ update-dev:
 update-prod:
     npx npm-check-updates -u --dep prod --target minor
 
+[group('manage')]
+check:
+    npx eslint . --ext .ts
+
 [group('build')]
 clean:
     rm -rf dist
