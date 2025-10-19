@@ -14,6 +14,7 @@ import {
   NftRomBuilder,
   SeriesInfoBuilder,
   TokenInfoBuilder,
+  TokenMetadataBuilder,
   TokenSchemasBuilder,
 } from '../../src/core/types/Carbon/Blockchain/Modules/Builders';
 import { TokenSchemas } from '../../src/core/types/Carbon/Blockchain/Modules';
@@ -442,23 +443,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
 
         // --- Build metadata struct from fieldsJson ---
         const fields: Record<string, string> = JSON.parse(fieldsJson);
-
-        const metaStruct = new VmDynamicStruct();
-        metaStruct.fields = [];
-        for (const [k, v] of Object.entries(fields)) {
-          const nv = new VmNamedDynamicVariable();
-          nv.name = new SmallString(k);
-
-          const dyn = VmDynamicVariable.fromType(VmType.String);
-          dyn.data = v;
-
-          nv.value = dyn;
-          metaStruct.fields.push(nv);
-        }
-
-        const metadataBufW = new CarbonBinaryWriter();
-        // No fixed schema for metadata; write as dynamic struct
-        metaStruct.write(metadataBufW);
+        const metadata = TokenMetadataBuilder.buildAndSerialize(fields);
 
         const info = TokenInfoBuilder.build(
           symbol,
@@ -466,7 +451,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
           true,
           0,
           senderPubKey,
-          metadataBufW.toUint8Array()
+          metadata
         );
 
         const feeOptions = new CreateTokenFeeOptions(

@@ -4,7 +4,6 @@ import { SmallString } from '../../SmallString';
 import { VmNamedDynamicVariable } from './VmNamedDynamicVariable';
 import { VmDynamicVariable } from './VmDynamicVariable';
 import { VmStructSchema } from './VmStructSchema';
-import { VmNamedVariableSchema } from './VmNamedVariableSchema';
 
 export class VmDynamicStruct implements ICarbonBlob {
   // NOTE: fields must be sorted by name
