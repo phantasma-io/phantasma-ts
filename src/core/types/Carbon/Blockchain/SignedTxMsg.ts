@@ -50,13 +50,7 @@ export class SignedTxMsg implements ICarbonBlob {
       case TxTypes.Call_Multi:
       case TxTypes.Trade:
       case TxTypes.Phantasma: {
-        w.writeArrayOfArrays(
-          this.witnesses.map((x) => {
-            const buf = new CarbonBinaryWriter();
-            x.write(buf);
-            return buf.toUint8Array();
-          })
-        );
+        w.writeArrayBlob(this.witnesses);
         break;
       }
 
@@ -103,11 +97,7 @@ export class SignedTxMsg implements ICarbonBlob {
       case TxTypes.Call_Multi:
       case TxTypes.Trade:
       case TxTypes.Phantasma: {
-        const arr = r.readArrayOfArrays();
-        witnesses = arr.map((bytes) => {
-          const rd = new CarbonBinaryReader(bytes);
-          return Witness.read(rd);
-        });
+        witnesses = r.readArrayBlob(Witness);
         break;
       }
 
