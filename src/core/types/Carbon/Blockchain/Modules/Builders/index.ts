@@ -1,3 +1,4 @@
+export * from './IdHelper';
 export * from './NftRomBuilder';
 export * from './SeriesInfoBuilder';
 export * from './TokenInfoBuilder';
