@@ -1,5 +1,6 @@
 import { ICarbonBlob } from '../../interfaces/Carbon/ICarbonBlob';
 import { CarbonBinaryReader, CarbonBinaryWriter } from '../CarbonSerialization';
+import { bytesToHex } from '../../utils/Hex';
 
 export class Bytes32 implements ICarbonBlob {
   static readonly Empty = new Bytes32(new Uint8Array(32));
@@ -24,5 +25,15 @@ export class Bytes32 implements ICarbonBlob {
     if (a.length !== b.length) return false;
     for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
     return true;
+  }
+
+  ToHex(): string {
+    return bytesToHex(this.bytes);
+  }
+
+  // Used by console.log / util.inspect
+  [Symbol.for('nodejs.util.inspect.custom')]() {
+    // Return a pretty, concise representation
+    return `Bytes32(${this.ToHex()})`;
   }
 }
