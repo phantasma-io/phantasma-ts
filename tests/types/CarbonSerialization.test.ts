@@ -28,7 +28,6 @@ import {
 } from '../../src/core/types/Carbon/Blockchain/TxHelpers';
 import {
   VmDynamicStruct,
-  VmDynamicVariable,
   VmNamedDynamicVariable,
   VmType,
 } from '../../src/core/types/Carbon/Blockchain/Vm';
@@ -419,7 +418,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
           new TxMsgTransferFungible(to, tokenId, amount)
         );
 
-        const signed = TxMsgSigner.sign(msg, txSender);
+        const signed = TxMsgSigner.signAndSerialize(msg, txSender);
 
         expect(bytesToHex(signed).toUpperCase()).toBe(c.hex.toUpperCase());
 

@@ -63,7 +63,7 @@ export class CreateTokenSeriesTxHelper {
       maxData,
       expiry
     );
-    return TxMsgSigner.sign(tx, signer);
+    return TxMsgSigner.signAndSerialize(tx, signer);
   }
 
   /** Build, sign and return hex string. */

@@ -50,7 +50,7 @@ export class CreateTokenTxHelper {
     expiry?: bigint
   ): Uint8Array {
     const tx = this.buildTx(tokenInfo, new Bytes32(signer.PublicKey), feeOptions, maxData, expiry);
-    return TxMsgSigner.sign(tx, signer);
+    return TxMsgSigner.signAndSerialize(tx, signer);
   }
 
   static buildTxAndSignHex(
