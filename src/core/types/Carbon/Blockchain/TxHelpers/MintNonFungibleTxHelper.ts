@@ -75,10 +75,10 @@ export class MintNonFungibleTxHelper {
   static buildTxAndSignHex(
     tokenId: bigint,
     seriesId: number,
-    to: Bytes32,
+    signer: PhantasmaKeys,
+    receiverPublicKey: Bytes32,
     rom: Uint8Array,
     ram: Uint8Array | null | undefined,
-    signer: PhantasmaKeys,
     feeOptions?: MintNftFeeOptions,
     maxData?: bigint,
     expiry?: bigint
@@ -87,7 +87,7 @@ export class MintNonFungibleTxHelper {
       tokenId,
       seriesId,
       signer,
-      to,
+      receiverPublicKey,
       rom,
       ram,
       feeOptions,
