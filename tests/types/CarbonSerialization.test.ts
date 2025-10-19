@@ -9,28 +9,14 @@ import { IntX } from '../../src/core/types/Carbon/IntX';
 import { TxTypes } from '../../src/core/types/Carbon/TxTypes';
 
 import { TxMsgSigner } from '../../src/core/types/Carbon/Blockchain/Extensions/TxMsgSigner';
-import {
-  ModuleId,
-  SignedTxMsg,
-  TxMsg,
-  TxMsgCall,
-  TxMsgTransferFungible,
-  TxMsgMintNonFungible,
-  CarbonTokenFlags,
-} from '../../src/core/types/Carbon/Blockchain';
+import { SignedTxMsg, TxMsg, TxMsgTransferFungible } from '../../src/core/types/Carbon/Blockchain';
 import {
   NftRomBuilder,
   SeriesInfoBuilder,
   TokenInfoBuilder,
   TokenSchemasBuilder,
 } from '../../src/core/types/Carbon/Blockchain/Modules/Builders';
-import {
-  SeriesInfo,
-  StandardMeta,
-  TokenContract_Methods,
-  TokenInfo,
-  TokenSchemas,
-} from '../../src/core/types/Carbon/Blockchain/Modules';
+import { TokenSchemas } from '../../src/core/types/Carbon/Blockchain/Modules';
 import {
   CreateSeriesFeeOptions,
   CreateTokenFeeOptions,
@@ -43,10 +29,7 @@ import {
   VmDynamicStruct,
   VmDynamicVariable,
   VmNamedDynamicVariable,
-  VmNamedVariableSchema,
-  VmStructSchema,
   VmType,
-  VmVariableSchema,
 } from '../../src/core/types/Carbon/Blockchain/Vm';
 import { PhantasmaKeys } from '../../src/core/types/PhantasmaKeys';
 import { bytesToHex, hexToBytes } from '../../src/core/utils';
@@ -193,6 +176,7 @@ const encoders: Partial<Record<Kind, Enc>> = {
     w.writeArrayBigInt(items);
   },
 
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   VMSTRUCT01: (_c, w) => {},
   VMSTRUCT02: (_c, w) => {},
   TX1: (_c, w) => {},
@@ -200,6 +184,7 @@ const encoders: Partial<Record<Kind, Enc>> = {
   'TX-CREATE-TOKEN': (_c, w) => {},
   'TX-CREATE-TOKEN-SERIES': (_c, w) => {},
   'TX-MINT-NON-FUNGIBLE': (_c, w) => {},
+  /* eslint-enable @typescript-eslint/no-unused-vars */
 };
 
 const decoders: Partial<Record<Kind, Dec>> = {
@@ -260,7 +245,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (encode)', () => {
     const enc = encoders[c.kind];
     expect(enc).toBeDefined();
     const w = new CarbonBinaryWriter();
-    enc!(c as any, w);
+    enc!(c as Row, w);
     const got = bytesToHex(w.toUint8Array());
     expect(got.toUpperCase()).toBe(c.hex.toUpperCase());
   });
@@ -271,90 +256,90 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
     const r = new CarbonBinaryReader(hexToBytes(c.hex));
     const dec = decoders[c.kind];
     expect(dec).toBeDefined();
-    const v = dec!(c as any, r);
+    const v = dec!(c as Row, r);
 
     switch (c.kind) {
       case 'U8':
       case 'I16':
       case 'I32':
       case 'U32':
-        expect(String(v)).toBe(String(parseNum((c as any).value)));
+        expect(String(v)).toBe(String(parseNum((c as Row).value)));
         break;
       case 'I64':
       case 'U64':
       case 'BI':
-        if ((c as any).decBack) {
-          expect(String(v)).toBe(parseBI((c as any).decBack).toString());
+        if ('decBack' in c && c.decBack) {
+          expect(String(v)).toBe(parseBI(c.decBack).toString());
         } else {
-          expect(String(v)).toBe(parseBI((c as any).value).toString());
+          expect(String(v)).toBe(parseBI((c as Row).value).toString());
         }
         break;
       case 'INTX':
-        if ((c as any).decBack) {
-          expect(String(v)).toBe(parseIntX((c as any).decBack).toString());
+        if ('decBack' in c && c.decBack) {
+          expect(String(v)).toBe(parseIntX(c.decBack).toString());
         } else {
-          expect(String(v)).toBe(parseIntX((c as any).value).toString());
+          expect(String(v)).toBe(parseIntX((c as Row).value).toString());
         }
         break;
       case 'FIX16':
       case 'FIX32':
       case 'FIX64': {
-        const expected = (c as any).value.toUpperCase();
+        const expected = (c as Row).value.toUpperCase();
         const actual = bytesToHex(v as Uint8Array);
         expect(actual.toUpperCase()).toBe(expected.toUpperCase());
         break;
       }
       case 'SZ':
-        expect(v).toBe((c as any).value);
+        expect(v).toBe((c as Row).value);
         break;
       case 'ARRSZ': {
-        const exp = parseCsv((c as any).value);
+        const exp = parseCsv((c as Row).value);
         expect(v).toStrictEqual(exp);
         break;
       }
       case 'ARR8': {
-        const exp = parseCsv((c as any).value)
+        const exp = parseCsv((c as Row).value)
           .map(parseNum)
           .map((x) => (x << 24) >> 24); // to sbyte
         expect(Array.from(v as Int8Array | number[])).toStrictEqual(exp);
         break;
       }
       case 'ARR16': {
-        const exp = parseCsv((c as any).value).map(parseNum);
+        const exp = parseCsv((c as Row).value).map(parseNum);
         expect(Array.from(v as Int16Array | number[])).toStrictEqual(exp);
         break;
       }
       case 'ARR32': {
-        const exp = parseCsv((c as any).value).map(parseNum);
+        const exp = parseCsv((c as Row).value).map(parseNum);
         expect(Array.from(v as Int32Array | number[])).toStrictEqual(exp);
         break;
       }
       case 'ARR64': {
-        const exp = parseCsv((c as any).value).map((x) => BigInt(x).toString());
+        const exp = parseCsv((c as Row).value).map((x) => BigInt(x).toString());
         const got = (v as bigint[]).map((x) => x.toString());
         expect(got).toStrictEqual(exp);
         break;
       }
       case 'ARRU64': {
-        const exp = parseCsv((c as any).value).map((x) => BigInt(x).toString());
+        const exp = parseCsv((c as Row).value).map((x) => BigInt(x).toString());
         const got = (v as bigint[]).map((x) => x.toString());
         expect(got).toStrictEqual(exp);
         break;
       }
       case 'ARRBYTES-1D': {
-        const exp = (c as any).value.toUpperCase();
+        const exp = (c as Row).value.toUpperCase();
         const got = bytesToHex(v as Uint8Array);
         expect(got.toUpperCase()).toBe(exp.toUpperCase());
         break;
       }
       case 'ARRBYTES-2D': {
-        const exp = parseArrBytes2D((c as any).value).map(bytesToHex);
+        const exp = parseArrBytes2D((c as Row).value).map(bytesToHex);
         const got = (v as Uint8Array[]).map(bytesToHex);
         expect(got).toStrictEqual(exp);
         break;
       }
       case 'ARRBI': {
-        const exp = parseCsv((c as any).value).map((x) => parseBI(x).toString());
+        const exp = parseCsv((c as Row).value).map((x) => parseBI(x).toString());
         const got = (v as bigint[]).map((x) => x.toString());
         expect(got).toStrictEqual(exp);
         break;
