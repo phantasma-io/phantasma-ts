@@ -5,12 +5,12 @@ import { TokenSchemas } from '../TokenSchemas';
 import { TokenSchemasBuilder } from './TokenSchemasBuilder';
 
 export class TokenSeriesMetadataBuilder {
-  static BuildAndSerialize(
+  static buildAndSerialize(
     newPhantasmaSeriesId: bigint,
     sharedRom: Uint8Array,
     tokenSchemas?: TokenSchemas
   ): Uint8Array {
-    tokenSchemas = tokenSchemas || TokenSchemasBuilder.PrepareStandardTokenSchemas();
+    tokenSchemas = tokenSchemas || TokenSchemasBuilder.prepareStandardTokenSchemas();
 
     const wMetadata = new CarbonBinaryWriter();
 

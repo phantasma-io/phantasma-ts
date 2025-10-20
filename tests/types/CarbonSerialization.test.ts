@@ -345,7 +345,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         break;
       }
       case 'VMSTRUCT01': {
-        expect(TokenSchemasBuilder.BuildAndSerializeHex().toUpperCase()).toBe(c.hex.toUpperCase());
+        expect(TokenSchemasBuilder.buildAndSerializeHex().toUpperCase()).toBe(c.hex.toUpperCase());
         break;
       }
       case 'VMSTRUCT02': {
@@ -491,7 +491,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
 
         const newPhantasmaSeriesId = (1n << 256n) - 1n;
 
-        const info = SeriesInfoBuilder.Build(
+        const info = SeriesInfoBuilder.build(
           newPhantasmaSeriesId,
           0,
           0,

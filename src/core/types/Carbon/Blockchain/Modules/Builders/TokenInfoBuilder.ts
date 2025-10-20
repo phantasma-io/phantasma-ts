@@ -22,7 +22,7 @@ export class TokenInfoBuilder {
     tokenInfo.owner = creatorPublicKey;
     tokenInfo.symbol = new SmallString(symbol);
     tokenInfo.metadata = metadata;
-    tokenInfo.tokenSchemas = tokenSchemas || TokenSchemasBuilder.BuildAndSerialize();
+    tokenInfo.tokenSchemas = tokenSchemas || TokenSchemasBuilder.buildAndSerialize();
 
     return tokenInfo;
   }

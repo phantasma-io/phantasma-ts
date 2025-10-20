@@ -4,7 +4,7 @@ import { SeriesInfo } from '../SeriesInfo';
 import { TokenSeriesMetadataBuilder } from './TokenSeriesMetadataBuilder';
 
 export class SeriesInfoBuilder {
-  static Build(
+  static build(
     phantasmaSeriesId: bigint,
     maxMint: number,
     maxSupply: number,
@@ -13,7 +13,7 @@ export class SeriesInfoBuilder {
     metadata?: Uint8Array
   ): SeriesInfo {
     metadata =
-      metadata || TokenSeriesMetadataBuilder.BuildAndSerialize(phantasmaSeriesId, sharedRom, null);
+      metadata || TokenSeriesMetadataBuilder.buildAndSerialize(phantasmaSeriesId, sharedRom, null);
 
     return new SeriesInfo({
       maxMint: maxMint, // limit on minting, or 0=no limit

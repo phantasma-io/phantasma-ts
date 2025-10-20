@@ -7,7 +7,7 @@ import { StandardMeta } from '../StandardMeta';
 import { TokenSchemas } from '../TokenSchemas';
 
 export class TokenSchemasBuilder {
-  static PrepareStandardTokenSchemas(): TokenSchemas {
+  static prepareStandardTokenSchemas(): TokenSchemas {
     // Serie metadata schema
     const seriesSchema = new VmStructSchema();
     seriesSchema.fields = [];
@@ -41,8 +41,8 @@ export class TokenSchemasBuilder {
     return tokenSchemas;
   }
 
-  static BuildAndSerialize(tokenSchemas?: TokenSchemas): Uint8Array {
-    tokenSchemas = tokenSchemas || this.PrepareStandardTokenSchemas();
+  static buildAndSerialize(tokenSchemas?: TokenSchemas): Uint8Array {
+    tokenSchemas = tokenSchemas || this.prepareStandardTokenSchemas();
 
     const schemaBuf = new CarbonBinaryWriter();
     tokenSchemas.write(schemaBuf);
@@ -50,9 +50,9 @@ export class TokenSchemasBuilder {
     return schemaBuf.toUint8Array();
   }
 
-  static BuildAndSerializeHex(tokenSchemas?: TokenSchemas): string {
-    tokenSchemas = tokenSchemas || this.PrepareStandardTokenSchemas();
+  static buildAndSerializeHex(tokenSchemas?: TokenSchemas): string {
+    tokenSchemas = tokenSchemas || this.prepareStandardTokenSchemas();
 
-    return bytesToHex(this.BuildAndSerialize(tokenSchemas));
+    return bytesToHex(this.buildAndSerialize(tokenSchemas));
   }
 }

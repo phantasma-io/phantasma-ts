@@ -15,7 +15,7 @@ export class NftRomBuilder {
     rom: Uint8Array,
     tokenSchemas?: TokenSchemas
   ): Uint8Array {
-    tokenSchemas = tokenSchemas || TokenSchemasBuilder.PrepareStandardTokenSchemas();
+    tokenSchemas = tokenSchemas || TokenSchemasBuilder.prepareStandardTokenSchemas();
 
     const wRom = new CarbonBinaryWriter();
 
