@@ -536,7 +536,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const phantasmaNftId = (1n << 256n) - 1n;
         const phantasmaRomData = new Uint8Array([0x01, 0x42]);
 
-        const rom = NftRomBuilder.BuildAndSerialize(
+        const rom = NftRomBuilder.buildAndSerialize(
           phantasmaNftId,
           'My NFT #1',
           'This is my first NFT!',

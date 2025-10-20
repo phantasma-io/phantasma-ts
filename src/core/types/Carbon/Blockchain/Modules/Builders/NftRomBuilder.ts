@@ -5,7 +5,7 @@ import { TokenSchemas } from '../TokenSchemas';
 import { TokenSchemasBuilder } from './TokenSchemasBuilder';
 
 export class NftRomBuilder {
-  static BuildAndSerialize(
+  static buildAndSerialize(
     phantasmaNftId: bigint,
     name: string,
     description: string,
@@ -19,7 +19,7 @@ export class NftRomBuilder {
 
     const wRom = new CarbonBinaryWriter();
 
-    let vmDynamicStruct = new VmDynamicStruct();
+    const vmDynamicStruct = new VmDynamicStruct();
     vmDynamicStruct.fields = [
       VmNamedDynamicVariable.from(StandardMeta.id, VmType.Int256, phantasmaNftId),
       VmNamedDynamicVariable.from('name', VmType.String, name),

@@ -32,7 +32,7 @@ export class MintNonFungibleTxHelper {
     msg.gasFrom = senderPublicKey;
     msg.payload = SmallString.empty;
 
-    let mint = new TxMsgMintNonFungible();
+    const mint = new TxMsgMintNonFungible();
     mint.tokenId = carbonTokenId;
     mint.seriesId = carbonSeriesId;
     mint.to = receiverPublicKey;
