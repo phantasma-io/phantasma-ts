@@ -1,9 +1,11 @@
-import { bytesToHex } from '../../../../utils';
+import { bytesToHex, hexToBytes } from '../../../../utils';
+import { CarbonBinaryReader } from '../../../CarbonSerialization';
 import { PhantasmaKeys } from '../../../PhantasmaKeys';
 import { Bytes32 } from '../../Bytes32';
 import { SmallString } from '../../SmallString';
 import { TxTypes } from '../../TxTypes';
 import { TxMsgSigner } from '../Extensions/TxMsgSigner';
+import { TokenHelper } from '../Modules/TokenHelper';
 import { TxMsg } from '../TxMsg';
 import { TxMsgMintNonFungible } from '../TxMsgMintNonFungible';
 import { MintNftFeeOptions } from './FeeOptions';
@@ -95,5 +97,21 @@ export class MintNonFungibleTxHelper {
       expiry
     );
     return bytesToHex(bytes);
+  }
+
+  static parseResult(carbonTokenId: bigint, resultHex: string): Bytes32[] {
+    const result: Bytes32[] = [];
+
+    const r = new CarbonBinaryReader(hexToBytes(resultHex));
+    const count = r.read4u();
+
+    for (let i = 0; i < count; i++) {
+      const instanceId = r.read8u();
+
+      const carbonNftId = TokenHelper.getNftAddress(carbonTokenId, instanceId);
+      result.push(carbonNftId);
+    }
+
+    return result;
   }
 }
