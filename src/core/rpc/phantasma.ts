@@ -333,8 +333,11 @@ export class PhantasmaAPI {
   }
 
   //Returns an array of tokens deployed in Phantasma.
-  async getTokens(extended: boolean = true): Promise<Token[]> {
-    let params: Array<any> = [extended];
+  async getTokens(
+    ownerAddress: string | undefined | null,
+    extended: boolean = true
+  ): Promise<Token[]> {
+    let params: Array<any> = [ownerAddress, extended];
     return (await this.JSONRPC('getTokens', params)) as Token[];
   }
 
