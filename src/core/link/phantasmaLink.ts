@@ -3,6 +3,9 @@ import { Stake } from '../rpc/interfaces/Stake';
 import { ScriptBuilder } from '../vm';
 import { ProofOfWork } from './interfaces/ProofOfWork';
 import { IAccount } from './interfaces/IAccount';
+import { TxMsg } from '../types/Carbon/Blockchain';
+import { CarbonBlob } from '../types/Carbon/CarbonBlob';
+import { bytesToHex } from '../utils/Hex';
 
 export class PhantasmaLink {
   //Declarations
@@ -25,7 +28,7 @@ export class PhantasmaLink {
 
   //Construct The Link
   constructor(dappID: any, logging: boolean = true) {
-    this.version = 2;
+    this.version = 4;
     this.nexus = 'testnet';
     this.chain = 'main';
     this.platform = 'poltergeist';
@@ -57,7 +60,7 @@ export class PhantasmaLink {
   login(
     onLoginCallback: (success: boolean) => void,
     onErrorCallback: (message: string) => void,
-    version: number = 2,
+    version: number = 4,
     platform: string = 'phantasma',
     providerHint: string = 'poltergeist'
   ) {
@@ -178,6 +181,60 @@ export class PhantasmaLink {
   }
 
   // Wallet Transaction Signing
+  signCarbonTxAndBroadcast(
+    txMsg: TxMsg,
+    callback: (result: any) => void = () => {},
+    onErrorCallback: (message?: string) => void = () => {}
+  ) {
+    if (!txMsg) {
+      const message = 'Error: Invalid Carbon transaction message';
+      this.onMessage(message);
+      onErrorCallback(message);
+      return;
+    }
+
+    if (this.version < 4) {
+      const message =
+        'Carbon transactions require a wallet that supports Phantasma Link v4 or higher. Please reconnect with version 4+.';
+      this.onMessage(message);
+      if (onErrorCallback) {
+        onErrorCallback(message);
+      }
+      return;
+    }
+
+    let txHex: string;
+    try {
+      txHex = this.serializeCarbonTx(txMsg);
+    } catch (err: any) {
+      const message = 'Error: Unable to serialize Carbon transaction';
+      this.onMessage(message + (err?.message ? ` (${err.message})` : ''));
+      onErrorCallback(message);
+      return;
+    }
+
+    if (txHex.length >= 65536) {
+      const message = 'Error: Carbon transaction message is too big!';
+      this.onMessage(message);
+      onErrorCallback(message);
+      return;
+    }
+
+    this.onError = onErrorCallback;
+    const request = 'signCarbonTxAndBroadcast/' + txHex;
+
+    this.sendLinkRequest(request, (result) => {
+      if (result.success) {
+        this.onMessage('Carbon transaction signed');
+        callback(result);
+      } else {
+        if (onErrorCallback) {
+          onErrorCallback(result.error || 'Carbon transaction signing failed');
+        }
+      }
+    });
+  }
+
   signTxSignature(
     tx: string,
     callback: (result: string) => void,
@@ -558,4 +615,10 @@ export class PhantasmaLink {
     this.onMessage('Disconnecting Phantasma Link: ' + triggered);
     if (this.socket) this.socket.close();
   }
+
+  private serializeCarbonTx(txMsg: TxMsg): string {
+    const serialized = CarbonBlob.Serialize(txMsg);
+    return bytesToHex(serialized);
+  }
+
 }

@@ -654,6 +654,10 @@ link.signTx(nexus, script, payload, callback, onErrorCallback); //Signs a Transa
 ```
 
 ```javascript
+link.signCarbonTxAndBroadcast(txMsg, onSuccess, onErrorCallback); //Signs & broadcasts a Carbon TxMsg via wallets that support Phantasma Link v4+
+```
+
+```javascript
 link.signTxPow(nexus, script, payload, proofOfWork, callback, onErrorCallback);  //Signs a Transaction via Wallet with ProofOfWork Attached (Used for Contract Deployment)
 
 //ProofOfWork Enum
@@ -722,6 +726,37 @@ link.login(
 ); //Swap out ecto for 'poltergeist' if wanting to connect to Poltergeist Wallet
 ```
 
+### Carbon Transactions (Link v4+)
+
+Wallets that expose Phantasma Link v4 (or higher) can sign and broadcast Carbon `TxMsg` payloads directly. Make sure you log in with `version = 4` when calling `link.login`, then forward the message via `signCarbonTxAndBroadcast`. The wallet will return a serialized `SignedTxMsg` blob that can be re-used locally if needed.
+
+```javascript
+import {
+  TxMsg,
+  TxTypes,
+  SmallString,
+  TxMsgTransferFungible,
+  Bytes32,
+  PhantasmaAPI,
+} from 'phantasma-sdk-ts';
+
+const api = new PhantasmaAPI('https://pharpc1.phantasma.info/rpc', null, 'mainnet');
+
+const txMsg = new TxMsg(
+  TxTypes.TransferFungible,
+  BigInt(Math.floor(Date.now() / 1000) + 300), // expiry (UTC seconds)
+  100000n, // max gas
+  0n,
+  new Bytes32(senderPublicKeyBytes), // sender address as 32-byte buffer
+  SmallString.empty,
+  new TxMsgTransferFungible(new Bytes32(receiverPublicKeyBytes), 1n, 10_00000000n)
+);
+
+link.signCarbonTxAndBroadcast(txMsg, async ({ signedTx }) => {
+  await api.sendCarbonTransaction(signedTx);
+});
+```
+
 ## EasyConnect
 
 EasyConnect is a plug and play wrapper for PhantasmaLink that makes creating a DApp simple and easy.
@@ -745,6 +780,10 @@ link.disconnect(_message: string); //Allows you to disconnect from the wallet wi
 
 ```javascript
 link.signTransaction(script: string, payload: string, onSuccess, onFail); //Used to send a transaction to Wallet
+```
+
+```javascript
+link.signCarbonTransaction(txMsg, onSuccess, onFail); //Sends a Carbon TxMsg to the connected wallet (Link v4+)
 ```
 
 ```javascript
@@ -791,6 +830,8 @@ export enum ProofOfWork {
     Extreme = 30
 }
 ```
+
+> **Note:** Carbon helpers require a Phantasma Link v4 (or newer) session. When instantiating EasyConnect pass `[4, 'phantasma', providerHint]` (or change `requiredVersion`) before calling `connect`, otherwise wallets will reject Carbon signing requests.
 
 ### Query Function
 
