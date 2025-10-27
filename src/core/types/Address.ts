@@ -275,6 +275,14 @@ export class Address implements ISerializable {
     return this._text;
   }
 
+  public GetPublicKey(): Uint8Array {
+    if (!this._bytes || this._bytes.length !== Address.LengthInBytes) {
+      throw new Error('invalid address byte length');
+    }
+
+    return this._bytes.slice(2, 34);
+  }
+
   public ToByteArray(): Uint8Array {
     return this._bytes;
   }
