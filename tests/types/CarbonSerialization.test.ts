@@ -349,7 +349,13 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         break;
       }
       case 'VMSTRUCT02': {
-        const fieldsJson = '{"name": "My test token!", "url": "http://example.com"}';
+        const fieldsJson = JSON.stringify({
+          name: 'My test token!',
+          icon:
+            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23F44336' d='M7 4h5a5 5 0 010 10H9v6H7zM9 6v6h3a3 3 0 000-6z'/%3E%3C/svg%3E",
+          url: 'http://example.com',
+          description: 'My test token description',
+        });
 
         // --- Build metadata struct from fieldsJson ---
         const fields: Record<string, string> = JSON.parse(fieldsJson);
@@ -428,7 +434,13 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         // Input copied from TxCreateToken.cs
         const wif = 'KwPpBSByydVKqStGHAnZzQofCqhDmD2bfRgc9BmZqM3ZmsdWJw4d';
         const symbol = 'MYNFT';
-        const fieldsJson = '{"name": "My test token!", "url": "http://example.com"}';
+        const fieldsJson = JSON.stringify({
+          name: 'My test token!',
+          icon:
+            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23F44336' d='M7 4h5a5 5 0 010 10H9v6H7zM9 6v6h3a3 3 0 000-6z'/%3E%3C/svg%3E",
+          url: 'http://example.com',
+          description: 'My test token description',
+        });
 
         const maxData = 100000000n;
         const gasFeeBase = 10000n;
