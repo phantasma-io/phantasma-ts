@@ -17,7 +17,19 @@ export class TokenInfoBuilder {
   ): TokenInfo {
     const tokenInfo = new TokenInfo();
     tokenInfo.maxSupply = maxSupply;
-    tokenInfo.flags = isNFT ? CarbonTokenFlags.NonFungible : CarbonTokenFlags.BigFungible;
+
+    tokenInfo.flags = 0; // Small fungible
+    if(isNFT) {
+      if(!maxSupply.is8ByteSafe()){
+        throw Error("NFT maximum supply must fit into Int64");
+      }
+      tokenInfo.flags = CarbonTokenFlags.NonFungible;
+    } else {
+      if(!maxSupply.is8ByteSafe()){
+        tokenInfo.flags = CarbonTokenFlags.BigFungible;
+      }
+    }
+
     tokenInfo.decimals = decimals;
     tokenInfo.owner = creatorPublicKey;
     tokenInfo.symbol = new SmallString(symbol);
