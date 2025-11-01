@@ -33,6 +33,14 @@ export class IntX implements ICarbonBlob {
     return this.toBigInt().toString();
   }
 
+  // Returns true when the current value fits into a signed 64-bit integer without overflow.
+  is8ByteSafe(): boolean {
+    const value = this.toBigInt();
+    const minI64 = -(1n << 63n);
+    const maxI64 = (1n << 63n) - 1n;
+    return value >= minI64 && value <= maxI64;
+  }
+
   // Serialization (must match C# IntX.Write)
   write(w: CarbonBinaryWriter): void {
     if (this.isBig) {
