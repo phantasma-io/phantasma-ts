@@ -69,6 +69,8 @@ type Row =
   | { kind: 'BI' | 'INTX'; value: string; hex: string; decOrig: string; decBack: string };
 
 const FIXTURE = path.join(__dirname, '..', 'fixtures', 'carbon_vectors.tsv');
+const SAMPLE_SVG_ICON_DATA_URI =
+  'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PHBhdGggZmlsbD0nI0Y0NDMzNicgZD0nTTcgNGg1YTUgNSAwIDAxMCAxMEg5djZIN3pNOSA2djZoM2EzIDMgMCAwMDAtNnonLz48L3N2Zz4=';
 
 // ---------- helpers ----------
 
@@ -230,6 +232,81 @@ const rows: Row[] = parseFixture(fs.readFileSync(FIXTURE, 'utf8'));
 
 // ---------- tests ----------
 
+describe('TokenMetadataBuilder icon validation', () => {
+  const baseFields = Object.freeze({
+    name: 'My test token!',
+    icon: SAMPLE_SVG_ICON_DATA_URI,
+    url: 'http://example.com',
+    description: 'My test token description',
+  });
+
+  const buildFields = (overrides: Partial<Record<string, string>> = {}) => ({
+    ...baseFields,
+    ...overrides,
+  });
+
+  it('accepts data URIs with base64-encoded SVG payloads', () => {
+    expect(() => TokenMetadataBuilder.buildAndSerialize(buildFields())).not.toThrow();
+  });
+
+  it('accepts PNG data URIs with base64 payloads', () => {
+    const pngPayload = Buffer.from([0x89, 0x50, 0x4e, 0x47]).toString('base64');
+    const pngIcon = `data:image/png;base64,${pngPayload}`;
+    expect(() =>
+      TokenMetadataBuilder.buildAndSerialize(
+        buildFields({
+          icon: pngIcon,
+        })
+      )
+    ).not.toThrow();
+  });
+
+  it('rejects icons missing the base64 flag', () => {
+    const legacySvgUri =
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23F44336' d='M7 4h5a5 5 0 010 10H9v6H7zM9 6v6h3a3 3 0 000-6z'/%3E%3C/svg%3E";
+    expect(() =>
+      TokenMetadataBuilder.buildAndSerialize(
+        buildFields({
+          icon: legacySvgUri,
+        })
+      )
+    ).toThrow('Token metadata icon must be a base64-encoded data URI (PNG, JPEG, or SVG)');
+  });
+
+  it('rejects icons with unsupported mime types', () => {
+    const gifIcon = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAAAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
+    expect(() =>
+      TokenMetadataBuilder.buildAndSerialize(
+        buildFields({
+          icon: gifIcon,
+        })
+      )
+    ).toThrow('Token metadata icon must be a base64-encoded data URI (PNG, JPEG, or SVG)');
+  });
+
+  it('rejects icons with empty base64 payload', () => {
+    const emptyPayload = 'data:image/png;base64,';
+    expect(() =>
+      TokenMetadataBuilder.buildAndSerialize(
+        buildFields({
+          icon: emptyPayload,
+        })
+      )
+    ).toThrow('Token metadata icon must include a non-empty base64 payload');
+  });
+
+  it('rejects icons with invalid base64 payload', () => {
+    const invalidPayload = 'data:image/jpeg;base64,@@@';
+    expect(() =>
+      TokenMetadataBuilder.buildAndSerialize(
+        buildFields({
+          icon: invalidPayload,
+        })
+      )
+    ).toThrow('Token metadata icon payload is not valid base64');
+  });
+});
+
 describe('CarbonSerialization.ts ↔ C# fixtures (encode)', () => {
   test.each(rows.map((r, i) => [i, r]))('encode line #%d: %s', (_i, c) => {
     if (
@@ -349,10 +426,10 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         break;
       }
       case 'VMSTRUCT02': {
+        const sampleIcon = SAMPLE_SVG_ICON_DATA_URI;
         const fieldsJson = JSON.stringify({
           name: 'My test token!',
-          icon:
-            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23F44336' d='M7 4h5a5 5 0 010 10H9v6H7zM9 6v6h3a3 3 0 000-6z'/%3E%3C/svg%3E",
+          icon: sampleIcon,
           url: 'http://example.com',
           description: 'My test token description',
         });
@@ -434,10 +511,10 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         // Input copied from TxCreateToken.cs
         const wif = 'KwPpBSByydVKqStGHAnZzQofCqhDmD2bfRgc9BmZqM3ZmsdWJw4d';
         const symbol = 'MYNFT';
+        const sampleIcon = SAMPLE_SVG_ICON_DATA_URI;
         const fieldsJson = JSON.stringify({
           name: 'My test token!',
-          icon:
-            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23F44336' d='M7 4h5a5 5 0 010 10H9v6H7zM9 6v6h3a3 3 0 000-6z'/%3E%3C/svg%3E",
+          icon: sampleIcon,
           url: 'http://example.com',
           description: 'My test token description',
         });
