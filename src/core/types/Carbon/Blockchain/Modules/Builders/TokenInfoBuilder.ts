@@ -3,6 +3,7 @@ import { IntX } from '../../../IntX';
 import { SmallString } from '../../../SmallString';
 import { CarbonTokenFlags } from '../../CarbonTokenFlags';
 import { TokenInfo } from '../TokenInfo';
+import { TokenSchemas } from '../TokenSchemas';
 import { TokenSchemasBuilder } from './TokenSchemasBuilder';
 
 export class TokenInfoBuilder {
@@ -12,11 +13,11 @@ export class TokenInfoBuilder {
     isNFT: boolean,
     decimals: number,
     creatorPublicKey: Bytes32,
-    metadata?: Uint8Array,
-    tokenSchemas?: Uint8Array
+    metadata?: Uint8Array | null | undefined,
+    tokenSchemas?: TokenSchemas | null | undefined
   ): TokenInfo {
-    const {ok, error} = this.checkIsValidSymbol(symbol);
-    if(!ok){
+    const { ok, error } = this.checkIsValidSymbol(symbol);
+    if (!ok) {
       throw Error(error ?? "Unknown error");
     }
 
@@ -38,8 +39,18 @@ export class TokenInfoBuilder {
     tokenInfo.decimals = decimals;
     tokenInfo.owner = creatorPublicKey;
     tokenInfo.symbol = new SmallString(symbol);
-    tokenInfo.metadata = metadata;
-    tokenInfo.tokenSchemas = tokenSchemas || TokenSchemasBuilder.buildAndSerialize();
+
+    if (isNFT) {
+      if (!metadata) {
+        throw new Error('metadata is required for NFTs')
+      }
+      tokenInfo.metadata = metadata;
+
+      if (!tokenSchemas) {
+        throw new Error('tokenSchemas is required for NFTs')
+      }
+      tokenInfo.tokenSchemas = TokenSchemasBuilder.serialize(tokenSchemas);
+    }
 
     return tokenInfo;
   }
@@ -49,22 +60,22 @@ export class TokenInfoBuilder {
   * Mirrors carbon::CheckIsValidSymbol from contracts/token.cpp.
   * Returns true when valid, or false when the symbol must be rejected.
   */
-  static checkIsValidSymbol(symbol: string): {ok: boolean, error: string | null} {
+  static checkIsValidSymbol(symbol: string): { ok: boolean, error: string | null } {
     if (!symbol || symbol.length === 0) {
-      return {ok: false, error: "Symbol validation error: Empty string is invalid"};
+      return { ok: false, error: "Symbol validation error: Empty string is invalid" };
     }
     if (symbol.length > this.maxSymbolLength) {
-      return {ok: false, error: "Symbol validation error: Too long"};
+      return { ok: false, error: "Symbol validation error: Too long" };
     }
 
     for (let i = 0; i < symbol.length; i++) {
       const code = symbol.charCodeAt(i);
       const isUppercaseAsciiLetter = code >= 0x41 && code <= 0x5a; // 'A'..'Z'
       if (!isUppercaseAsciiLetter) {
-        return {ok: false, error: "Symbol validation error: Anything outside A–Z is forbidden (digits, accents, etc.)"};
+        return { ok: false, error: "Symbol validation error: Anything outside A–Z is forbidden (digits, accents, etc.)" };
       }
     }
 
-    return {ok: true, error: null};
+    return { ok: true, error: null };
   }
 }

@@ -422,7 +422,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         break;
       }
       case 'VMSTRUCT01': {
-        expect(TokenSchemasBuilder.buildAndSerializeHex().toUpperCase()).toBe(c.hex.toUpperCase());
+        expect(TokenSchemasBuilder.serializeHex(TokenSchemasBuilder.prepareStandard(false)).toUpperCase()).toBe(c.hex.toUpperCase());
         break;
       }
       case 'VMSTRUCT02': {
@@ -539,7 +539,8 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
           true,
           0,
           senderPubKey,
-          metadata
+          metadata,
+          TokenSchemasBuilder.prepareStandard(false)
         );
 
         const feeOptions = new CreateTokenFeeOptions(
@@ -581,10 +582,16 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const newPhantasmaSeriesId = (1n << 256n) - 1n;
 
         const info = SeriesInfoBuilder.build(
+          TokenSchemasBuilder.prepareStandard(false).seriesMetadata,
           newPhantasmaSeriesId,
           0,
           0,
           senderPubKey,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
           new Uint8Array()
         );
 
@@ -626,6 +633,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const phantasmaRomData = new Uint8Array([0x01, 0x42]);
 
         const rom = NftRomBuilder.buildAndSerialize(
+          TokenSchemasBuilder.prepareStandard(false).rom,
           phantasmaNftId,
           'My NFT #1',
           'This is my first NFT!',

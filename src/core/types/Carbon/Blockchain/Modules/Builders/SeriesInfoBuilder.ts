@@ -5,15 +5,28 @@ import { TokenSeriesMetadataBuilder } from './TokenSeriesMetadataBuilder';
 
 export class SeriesInfoBuilder {
   static build(
+    seriesSchema: VmStructSchema,
     phantasmaSeriesId: bigint,
     maxMint: number,
     maxSupply: number,
     ownerPublicKey: Bytes32,
-    sharedRom: Uint8Array,
-    metadata?: Uint8Array
+    sharedName?: string,
+    sharedDescription?: string,
+    sharedImageURL?: string,
+    sharedInfoURL?: string,
+    sharedRoyalties?: number,
+    sharedRom?: Uint8Array
   ): SeriesInfo {
-    metadata =
-      metadata || TokenSeriesMetadataBuilder.buildAndSerialize(phantasmaSeriesId, sharedRom, null);
+    const metadata = TokenSeriesMetadataBuilder.buildAndSerialize(
+      seriesSchema,
+      phantasmaSeriesId,
+      sharedName,
+      sharedDescription,
+      sharedImageURL,
+      sharedInfoURL,
+      sharedRoyalties,
+      sharedRom
+    );
 
     return new SeriesInfo({
       maxMint: maxMint, // limit on minting, or 0=no limit

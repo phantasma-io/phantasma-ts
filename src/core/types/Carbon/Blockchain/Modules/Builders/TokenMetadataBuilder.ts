@@ -6,22 +6,26 @@ export class TokenMetadataBuilder {
     /^data:image\/(png|jpeg|svg\+xml);base64,/i;
   private static readonly base64PayloadPattern = /^[A-Za-z0-9+/]+={0,2}$/;
 
-  static buildAndSerialize(fields?: Record<string, string>): Uint8Array {
+  static buildAndSerialize(fields?: Record<string, unknown>): Uint8Array {
     const requiredFields = ['name', 'icon', 'url', 'description'] as const;
-    
+
     if (!fields || Object.keys(fields).length < requiredFields.length) {
       throw new Error('Token metadata is mandatory');
     }
 
+    if (Object.values(fields).some(v => typeof v !== 'string')) {
+      throw new Error('All metadata fields must be strings')
+    }
+
     const missing = requiredFields.filter(
-      field => typeof fields[field] !== 'string' || fields[field].trim() === '',
+      field => typeof fields[field] !== 'string' || (fields[field] as string).trim() === '',
     );
 
     if (missing.length > 0) {
       throw new Error(`Token metadata is missing required fields: ${missing.join(', ')}`);
     }
 
-    this.validateIcon(fields['icon']);
+    this.validateIcon(fields['icon'] as string);
 
     const metadataFields: VmNamedDynamicVariable[] = [];
     for (const [key, value] of Object.entries(fields)) {
