@@ -587,12 +587,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
           0,
           0,
           senderPubKey,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          new Uint8Array()
+          []
         );
 
         const feeOptions = new CreateSeriesFeeOptions(
@@ -635,12 +630,14 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const rom = NftRomBuilder.buildAndSerialize(
           TokenSchemasBuilder.prepareStandard(false).rom,
           phantasmaNftId,
-          'My NFT #1',
-          'This is my first NFT!',
-          'images-assets.nasa.gov/image/PIA13227/PIA13227~orig.jpg',
-          'https://images.nasa.gov/details/PIA13227',
-          10000000,
-          phantasmaRomData
+          [
+            {name: 'name', value: 'My NFT #1'},
+            {name: 'description', value: 'This is my first NFT!'},
+            {name: 'imageURL', value: 'images-assets.nasa.gov/image/PIA13227/PIA13227~orig.jpg'},
+            {name: 'infoURL', value: 'https://images.nasa.gov/details/PIA13227'},
+            {name: 'royalties', value: 10000000},
+            {name: 'rom', value: phantasmaRomData}
+          ]
         );
 
         const feeOptions = new MintNftFeeOptions(gasFeeBase, feeMultiplier);

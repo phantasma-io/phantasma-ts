@@ -1,21 +1,24 @@
 import { CarbonBinaryWriter } from '../../../../CarbonSerialization';
 import { VmDynamicStruct, VmNamedDynamicVariable, VmStructSchema, VmType } from '../../Vm';
 import { StandardMeta } from '../StandardMeta';
-import { pushStandardMetadataField } from './StandardMetadataHelper';
-import { TokenSchemasBuilder } from './TokenSchemasBuilder';
+import { findMetadataField, MetadataField, nftDefaultMetadataFields, pushMetadataField } from './MetadataHelper';
 
 export class NftRomBuilder {
   static buildAndSerialize(
     nftRomSchema: VmStructSchema,
     phantasmaNftId: bigint,
-    name?: string,
-    description?: string,
-    imageURL?: string,
-    infoURL?: string,
-    royalties?: number,
-    rom?: Uint8Array
+    metadata: MetadataField[]
   ): Uint8Array {
     const wRom = new CarbonBinaryWriter();
+
+    const romField = findMetadataField(metadata, 'rom');
+    let rom: Uint8Array;
+    if(romField) {
+      if(!(romField.value instanceof Uint8Array)) {
+        throw Error("'rom' must be a byte array");
+      }
+      rom = romField.value;
+    }
 
     const nftRom = new VmDynamicStruct();
     nftRom.fields = [
@@ -23,11 +26,13 @@ export class NftRomBuilder {
       VmNamedDynamicVariable.from('rom', VmType.Bytes, rom ? rom : [])
     ];
 
-    pushStandardMetadataField(nftRom, nftRomSchema, 'name', VmType.String, name);
-    pushStandardMetadataField(nftRom, nftRomSchema, 'description', VmType.String, description);
-    pushStandardMetadataField(nftRom, nftRomSchema, 'imageURL', VmType.String, imageURL);
-    pushStandardMetadataField(nftRom, nftRomSchema, 'infoURL', VmType.String, infoURL);
-    pushStandardMetadataField(nftRom, nftRomSchema, 'royalties', VmType.Int32, royalties);
+    nftRomSchema.fields.forEach(s => {
+      // We don't verify default fields here, they are treated differently
+      // in the code above.
+      if(!nftDefaultMetadataFields.some(df => df.name === s.name.data)) {
+        pushMetadataField(s, nftRom, metadata);
+      }
+    });
 
     nftRom.writeWithSchema(
       nftRomSchema,

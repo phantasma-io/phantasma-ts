@@ -1,34 +1,39 @@
 import { CarbonBinaryWriter } from '../../../../CarbonSerialization';
 import { VmDynamicStruct, VmNamedDynamicVariable, VmStructSchema, VmType } from '../../Vm';
 import { StandardMeta } from '../StandardMeta';
-import { pushStandardMetadataField } from './StandardMetadataHelper';
-import { TokenSchemasBuilder } from './TokenSchemasBuilder';
+import { findMetadataField, MetadataField, pushMetadataField, seriesDefaultMetadataFields } from './MetadataHelper';
 
 export class TokenSeriesMetadataBuilder {
   static buildAndSerialize(
     seriesMetadataSchema: VmStructSchema,
     newPhantasmaSeriesId: bigint,
-    sharedName?: string,
-    sharedDescription?: string,
-    sharedImageURL?: string,
-    sharedInfoURL?: string,
-    sharedRoyalties?: number,
-    sharedRom?: Uint8Array
+    metadata: MetadataField[]
   ): Uint8Array {
     const wMetadata = new CarbonBinaryWriter();
+
+    const sharedRomField = findMetadataField(metadata, 'rom');
+    let rom: Uint8Array;
+    if(sharedRomField) {
+      if(!(sharedRomField.value instanceof Uint8Array)) {
+        throw Error("'rom' must be a byte array");
+      }
+      rom = sharedRomField.value;
+    }
 
     let seriesMetadata = new VmDynamicStruct();
     seriesMetadata.fields = [
       VmNamedDynamicVariable.from(StandardMeta.id, VmType.Int256, newPhantasmaSeriesId),
-      VmNamedDynamicVariable.from('mode', VmType.Int8, sharedRom == null || sharedRom.length == 0 ? 0 : 1),
-      VmNamedDynamicVariable.from('rom', VmType.Bytes, sharedRom ? sharedRom : [])
+      VmNamedDynamicVariable.from('mode', VmType.Int8, rom == null || rom.length == 0 ? 0 : 1),
+      VmNamedDynamicVariable.from('rom', VmType.Bytes, rom ? rom : [])
     ];
 
-    pushStandardMetadataField(seriesMetadata, seriesMetadataSchema, 'name', VmType.String, sharedName);
-    pushStandardMetadataField(seriesMetadata, seriesMetadataSchema, 'description', VmType.String, sharedDescription);
-    pushStandardMetadataField(seriesMetadata, seriesMetadataSchema, 'imageURL', VmType.String, sharedImageURL);
-    pushStandardMetadataField(seriesMetadata, seriesMetadataSchema, 'infoURL', VmType.String, sharedInfoURL);
-    pushStandardMetadataField(seriesMetadata, seriesMetadataSchema, 'royalties', VmType.Int32, sharedRoyalties);
+    seriesMetadataSchema.fields.forEach(s => {
+      // We don't verify default fields here, they are treated differently
+      // in the code above.
+      if(!seriesDefaultMetadataFields.some(df => df.name === s.name.data)) {
+        pushMetadataField(s, seriesMetadata, metadata);
+      }
+    });
 
     seriesMetadata.writeWithSchema(
       seriesMetadataSchema,
