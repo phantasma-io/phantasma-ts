@@ -1,4 +1,4 @@
-export const enum VmType {
+export enum VmType {
   Dynamic = 0,
   Array = 1,
   Bytes = 1 << 1,
