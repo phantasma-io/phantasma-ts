@@ -1,4 +1,4 @@
-import { VmDynamicStruct, VmNamedDynamicVariable, VmNamedVariableSchema, VmStructSchema, VmType } from "../../Vm";
+import { VmDynamicStruct, VmNamedDynamicVariable, VmNamedVariableSchema, VmType } from "../../Vm";
 import { StandardMeta } from "../StandardMeta";
 
 export class MetadataField {

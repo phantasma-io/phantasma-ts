@@ -5,3 +5,4 @@ export * from './TokenInfoBuilder';
 export * from './TokenMetadataBuilder';
 export * from './TokenSchemasBuilder';
 export * from './TokenSeriesMetadataBuilder';
+export * from './MetadataHelper';
