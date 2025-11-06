@@ -3,7 +3,7 @@ import { StandardMeta } from "../StandardMeta";
 
 export class MetadataField {
   name: string;
-  value: string | number | Uint8Array;
+  value: string | number | Uint8Array | bigint;
 }
 
 export class FieldType {
