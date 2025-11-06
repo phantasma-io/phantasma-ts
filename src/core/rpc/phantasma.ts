@@ -25,6 +25,7 @@ import { Peer } from './interfaces/Peer';
 import { Validator } from './interfaces/Validator';
 import { Swap } from './interfaces/Swap';
 import { NFT } from './interfaces/NFT';
+import { CursorPaginatedResult, TokenSeriesResult } from './interfaces';
 
 export class PhantasmaAPI {
   host: string;
@@ -337,13 +338,13 @@ export class PhantasmaAPI {
     ownerAddress: string | undefined | null,
     extended: boolean = true
   ): Promise<Token[]> {
-    let params: Array<any> = [ownerAddress, extended];
+    let params: Array<any> = [extended, ownerAddress];
     return (await this.JSONRPC('getTokens', params)) as Token[];
   }
 
   //Returns info about a specific token deployed in Phantasma.
-  async getToken(symbol: string, extended: boolean = true): Promise<Token> {
-    let params: Array<any> = [symbol, extended];
+  async getToken(symbol: string, extended: boolean = true, carbonTokenId: bigint = 0n): Promise<Token> {
+    let params: Array<any> = [symbol, extended, carbonTokenId.toString()];
     return (await this.JSONRPC('getToken', params)) as Token;
   }
 
@@ -357,10 +358,22 @@ export class PhantasmaAPI {
   async getTokenBalance(
     account: string,
     tokenSymbol: string,
-    chainInput: string
+    chainInput: string,
+    checkAddressResevedByte: boolean = true
   ): Promise<Balance> {
-    let params: Array<any> = [account, tokenSymbol, chainInput];
+    let params: Array<any> = [account, tokenSymbol, chainInput, checkAddressResevedByte];
     return (await this.JSONRPC('getTokenBalance', params)) as Balance;
+  }
+
+  //Returns series for specified token.
+  async getTokenSeries(
+    symbol: string,
+    carbonTokenId: bigint,
+    pageSize: number = 10,
+    cursor: string = ""
+  ): Promise<CursorPaginatedResult<TokenSeriesResult>> {
+    let params: Array<any> = [symbol, carbonTokenId.toString(), pageSize, cursor];
+    return (await this.JSONRPC('getTokenSeries', params)) as CursorPaginatedResult<TokenSeriesResult>;
   }
 
   //Returns the number of active auctions.

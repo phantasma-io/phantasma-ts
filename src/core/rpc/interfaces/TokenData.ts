@@ -1,3 +1,5 @@
+import type { TokenPropertyResult } from './TokenPropertyResult';
+
 export interface TokenData {
   ID: string; //ID of token
   series: string;
@@ -8,5 +10,6 @@ export interface TokenData {
   ram: string; //Writable data of token, hex encoded
   rom: string; //Read-only data of token, hex encoded
   status: string;
-  forSale: boolean; //True if is being sold in market
+  infusion: TokenPropertyResult[];
+  properties: TokenPropertyResult[];
 }
