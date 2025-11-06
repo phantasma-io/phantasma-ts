@@ -12,10 +12,10 @@ export class TokenSeriesMetadataBuilder {
     const wMetadata = new CarbonBinaryWriter();
 
     const sharedRomField = findMetadataField(metadata, 'rom');
-    let rom: Uint8Array;
+    let rom: Uint8Array | string;
     if(sharedRomField) {
-      if(!(sharedRomField.value instanceof Uint8Array)) {
-        throw Error("'rom' must be a byte array");
+      if(!(sharedRomField.value instanceof Uint8Array || typeof sharedRomField.value === "string")) {
+        throw Error("'rom' must be a byte array or hex string");
       }
       rom = sharedRomField.value;
     }

@@ -12,10 +12,10 @@ export class NftRomBuilder {
     const wRom = new CarbonBinaryWriter();
 
     const romField = findMetadataField(metadata, 'rom');
-    let rom: Uint8Array;
+    let rom: Uint8Array | string;
     if(romField) {
-      if(!(romField.value instanceof Uint8Array)) {
-        throw Error("'rom' must be a byte array");
+      if(!(romField.value instanceof Uint8Array || typeof romField.value === "string")) {
+        throw Error("'rom' must be a byte array or hex string");
       }
       rom = romField.value;
     }

@@ -1,4 +1,5 @@
 import { ICarbonBlob } from '../../../../interfaces/Carbon/ICarbonBlob';
+import { hexToBytes } from '../../../../utils';
 import { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSerialization';
 import { SmallString } from '../../SmallString';
 import { VmDynamicVariable } from './VmDynamicVariable';
@@ -13,7 +14,12 @@ export class VmNamedDynamicVariable implements ICarbonBlob {
     nv.name = name instanceof SmallString ? name : new SmallString(name);
 
     const dyn = VmDynamicVariable.fromType(type);
-    dyn.data = value;
+
+    if(type === VmType.Bytes && typeof value === "string") {
+      dyn.data = hexToBytes(value);
+    } else {
+      dyn.data = value;
+    }
 
     nv.value = dyn;
 
