@@ -366,14 +366,117 @@ export class PhantasmaAPI {
   }
 
   //Returns series for specified token.
+  // Returns NFT series for a specific token using cursor-based pagination.
   async getTokenSeries(
     symbol: string,
     carbonTokenId: bigint,
     pageSize: number = 10,
-    cursor: string = ""
-  ): Promise<CursorPaginatedResult<TokenSeriesResult>> {
+    cursor: string = ''
+  ): Promise<CursorPaginatedResult<TokenSeriesResult[]>> {
     let params: Array<any> = [symbol, carbonTokenId.toString(), pageSize, cursor];
-    return (await this.JSONRPC('getTokenSeries', params)) as CursorPaginatedResult<TokenSeriesResult>;
+    return (await this.JSONRPC('getTokenSeries', params)) as CursorPaginatedResult<TokenSeriesResult[]>;
+  }
+
+  // Returns NFTs for a token (optionally restricted to a series) with cursor pagination.
+  async getTokenNFTs(
+    carbonTokenId: bigint,
+    carbonSeriesId: number = 0,
+    pageSize: number = 10,
+    cursor: string = '',
+    extended: boolean = false
+  ): Promise<CursorPaginatedResult<NFT[]>> {
+    let params: Array<any> = [
+      carbonTokenId.toString(),
+      carbonSeriesId,
+      pageSize,
+      cursor,
+      extended,
+    ];
+    return (await this.JSONRPC('getTokenNFTs', params)) as CursorPaginatedResult<NFT[]>;
+  }
+
+  // Returns fungible token balances owned by an address, optionally filtered to one token.
+  async getAccountFungibleTokens(
+    account: string,
+    tokenSymbol: string = '',
+    carbonTokenId: bigint = 0n,
+    pageSize: number = 10,
+    cursor: string = '',
+    checkAddressReservedByte: boolean = true
+  ): Promise<CursorPaginatedResult<Balance[]>> {
+    let params: Array<any> = [
+      account,
+      tokenSymbol,
+      carbonTokenId.toString(),
+      pageSize,
+      cursor,
+      checkAddressReservedByte,
+    ];
+    return (await this.JSONRPC('getAccountFungibleTokens', params)) as CursorPaginatedResult<Balance[]>;
+  }
+
+  // Returns NFTs owned by an address, with optional token/series filters and extended properties.
+  async getAccountNFTs(
+    account: string,
+    tokenSymbol: string = '',
+    carbonTokenId: bigint = 0n,
+    carbonSeriesId: number = 0,
+    pageSize: number = 10,
+    cursor: string = '',
+    extended: boolean = false,
+    checkAddressReservedByte: boolean = true
+  ): Promise<CursorPaginatedResult<NFT[]>> {
+    let params: Array<any> = [
+      account,
+      tokenSymbol,
+      carbonTokenId.toString(),
+      carbonSeriesId,
+      pageSize,
+      cursor,
+      extended,
+      checkAddressReservedByte,
+    ];
+    return (await this.JSONRPC('getAccountNFTs', params)) as CursorPaginatedResult<NFT[]>;
+  }
+
+  // Returns NFT tokens for which the address owns at least one NFT instance.
+  async getAccountOwnedTokens(
+    account: string,
+    tokenSymbol: string = '',
+    carbonTokenId: bigint = 0n,
+    pageSize: number = 10,
+    cursor: string = '',
+    checkAddressReservedByte: boolean = true
+  ): Promise<CursorPaginatedResult<Token[]>> {
+    let params: Array<any> = [
+      account,
+      tokenSymbol,
+      carbonTokenId.toString(),
+      pageSize,
+      cursor,
+      checkAddressReservedByte,
+    ];
+    return (await this.JSONRPC('getAccountOwnedTokens', params)) as CursorPaginatedResult<Token[]>;
+  }
+
+  // Returns NFT series for which the address owns at least one NFT instance.
+  async getAccountOwnedTokenSeries(
+    account: string,
+    tokenSymbol: string = '',
+    carbonTokenId: bigint = 0n,
+    pageSize: number = 10,
+    cursor: string = '',
+    checkAddressReservedByte: boolean = true
+  ): Promise<CursorPaginatedResult<TokenSeriesResult[]>> {
+    let params: Array<any> = [
+      account,
+      tokenSymbol,
+      carbonTokenId.toString(),
+      pageSize,
+      cursor,
+      checkAddressReservedByte,
+    ];
+    return (await this.JSONRPC('getAccountOwnedTokenSeries', params)) as CursorPaginatedResult<TokenSeriesResult[]>;
   }
 
   //Returns the number of active auctions.
