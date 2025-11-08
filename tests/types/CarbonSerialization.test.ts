@@ -68,7 +68,7 @@ type Row =
   | { kind: Exclude<Kind, 'BI' | 'INTX'>; value: string; hex: string }
   | { kind: 'BI' | 'INTX'; value: string; hex: string; decOrig: string; decBack: string };
 
-const FIXTURE = path.join(__dirname, '..', 'fixtures', 'carbon_vectors.tsv');
+const FIXTURE = path.join(process.cwd(), 'tests', 'fixtures', 'carbon_vectors.tsv');
 const SAMPLE_SVG_ICON_DATA_URI =
   'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PHBhdGggZmlsbD0nI0Y0NDMzNicgZD0nTTcgNGg1YTUgNSAwIDAxMCAxMEg5djZIN3pNOSA2djZoM2EzIDMgMCAwMDAtNnonLz48L3N2Zz4=';
 

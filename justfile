@@ -6,6 +6,7 @@ just:
 test:
     npm run test
 
+# Reinstall all modules. Don't forget 'nvm use 20'!
 [group('manage')]
 reinstall:
     rm -rf node_modules package-lock.json

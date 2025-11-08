@@ -41,7 +41,7 @@ function parseFixture(file: string): Row[] {
 }
 
 describe('Phantasma BigInt serialization', () => {
-  const file = path.join(__dirname, '../fixtures/phantasma_bigint_vectors.tsv');
+  const file = path.join(process.cwd(), 'tests', 'fixtures', 'phantasma_bigint_vectors.tsv');
   const rows = parseFixture(file);
 
   test.each(rows)('roundtrip for %s', ({ number, pha, csharp }) => {

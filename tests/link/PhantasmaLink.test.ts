@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals';
+
 import { PhantasmaLink } from '../../src/core/link/phantasmaLink';
 import { TxMsg } from '../../src/core/types/Carbon/Blockchain/TxMsg';
 import { TxMsgTransferFungible } from '../../src/core/types/Carbon/Blockchain/TxMsgTransferFungible';
