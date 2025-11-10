@@ -1,9 +1,28 @@
-import { VmDynamicStruct, VmNamedDynamicVariable, VmNamedVariableSchema, VmType } from "../../Vm";
+import { hexToBytes } from "../../../../../utils";
+import { Bytes16 } from "../../../Bytes16";
+import { Bytes32 } from "../../../Bytes32";
+import { Bytes64 } from "../../../Bytes64";
+import {
+  VmDynamicStruct,
+  VmNamedDynamicVariable,
+  VmNamedVariableSchema,
+  VmStructArray,
+  VmStructSchema,
+  VmType,
+  VmVariableSchema,
+} from "../../Vm";
 import { StandardMeta } from "../StandardMeta";
+
+const INT64_MIN = -(1n << 63n);
+const INT64_MAX = (1n << 63n) - 1n;
+const UINT64_MAX = (1n << 64n) - 1n;
+const INT256_MIN = -(1n << 255n);
+const INT256_MAX = (1n << 255n) - 1n;
+const UINT256_MAX = (1n << 256n) - 1n;
 
 export class MetadataField {
   name: string;
-  value: string | number | Uint8Array | bigint;
+  value: MetadataValueInput;
 }
 
 export class FieldType {
@@ -43,15 +62,276 @@ export function pushMetadataField(fieldSchema: VmNamedVariableSchema, metadata: 
     }
     throw Error(`Metadata field '${fieldSchema.name.data}' is mandatory`);
   }
-  
-  if (fieldSchema.schema.type === VmType.String && typeof found.value === "string") {
-    if (found.value && found.value.trim().length != 0) {
-      metadata.fields.push(VmNamedDynamicVariable.from(fieldSchema.name, fieldSchema.schema.type, found.value));
-    } else {
-      throw Error(`Metadata field '${fieldSchema.name.data}' is mandatory`);
+
+  const normalizedValue = normalizeMetadataValue(
+    fieldSchema.schema,
+    fieldSchema.name.data,
+    found.value
+  );
+
+  metadata.fields.push(VmNamedDynamicVariable.from(fieldSchema.name, fieldSchema.schema.type, normalizedValue));
+}
+
+type MetadataPlainValue = string | number | bigint | Uint8Array;
+interface MetadataStructRecord {
+  [key: string]: MetadataValueInput;
+}
+interface MetadataValueArray extends Array<MetadataValueInput> {}
+type MetadataStructInput = MetadataField[] | MetadataStructRecord;
+export type MetadataValueInput = MetadataPlainValue | MetadataStructInput | MetadataValueArray;
+
+function normalizeMetadataValue(schema: VmVariableSchema, fieldName: string, value: MetadataValueInput): any {
+  if (value === null || value === undefined) {
+    throw Error(`Metadata field '${fieldName}' is mandatory`);
+  }
+
+  const isArray = (schema.type & VmType.Array) === VmType.Array;
+  const baseType = (isArray ? (schema.type & ~VmType.Array) : schema.type) as VmType;
+
+  if (isArray) {
+    if (!Array.isArray(value)) {
+      throw Error(`Metadata field '${fieldName}' must be provided as an array`);
     }
-  } else {
-    metadata.fields.push(VmNamedDynamicVariable.from(fieldSchema.name, fieldSchema.schema.type, found.value));
+    return normalizeArrayValue(baseType, fieldName, value as MetadataValueInput[], schema.structure);
+  }
+
+  return normalizeScalarValue(baseType, fieldName, value, schema.structure);
+}
+
+function normalizeScalarValue(type: VmType, fieldName: string, value: MetadataValueInput, structSchema?: VmStructSchema): any {
+  switch (type) {
+    case VmType.String:
+      return ensureNonEmptyString(fieldName, value);
+    case VmType.Int8:
+      return ensureIntegerInRange(fieldName, value, -0x80, 0x7f, 0xff);
+    case VmType.Int16:
+      return ensureIntegerInRange(fieldName, value, -0x8000, 0x7fff, 0xffff);
+    case VmType.Int32:
+      return ensureIntegerInRange(fieldName, value, -0x80000000, 0x7fffffff, 0xffffffff);
+    case VmType.Int64:
+      return ensureBigInt(fieldName, value, INT64_MIN, INT64_MAX, 'Int64', UINT64_MAX);
+    case VmType.Int256:
+      return ensureBigInt(fieldName, value, INT256_MIN, INT256_MAX, 'Int256', UINT256_MAX);
+    case VmType.Bytes:
+      return ensureBytes(fieldName, value);
+    case VmType.Bytes16:
+      return ensureBytes16(fieldName, value);
+    case VmType.Bytes32:
+      return ensureBytes32(fieldName, value);
+    case VmType.Bytes64:
+      return ensureBytes64(fieldName, value);
+    case VmType.Struct:
+      return normalizeStructValue(fieldName, structSchema, value as MetadataStructInput);
+    default:
+      throw Error(`Metadata field '${fieldName}' has unsupported type '${VmType[type] ?? type}'`);
   }
 }
 
+function normalizeArrayValue(type: VmType, fieldName: string, values: MetadataValueInput[], structSchema?: VmStructSchema): any {
+  const elementPath = (index: number) => `${fieldName}[${index}]`;
+
+  switch (type) {
+    case VmType.String:
+      return values.map((val, idx) => ensureNonEmptyString(elementPath(idx), val));
+    case VmType.Int8:
+      return Uint8Array.from(
+        values.map((val, idx) => ensureIntegerInRange(elementPath(idx), val, -0x80, 0x7f, 0xff) & 0xff)
+      );
+    case VmType.Int16:
+      return values.map((val, idx) => ensureIntegerInRange(elementPath(idx), val, -0x8000, 0x7fff, 0xffff));
+    case VmType.Int32:
+      return values.map((val, idx) => ensureIntegerInRange(elementPath(idx), val, -0x80000000, 0x7fffffff, 0xffffffff));
+    case VmType.Int64:
+      return values.map((val, idx) => ensureBigInt(elementPath(idx), val, INT64_MIN, INT64_MAX, 'Int64', UINT64_MAX));
+    case VmType.Int256:
+      return values.map((val, idx) => ensureBigInt(elementPath(idx), val, INT256_MIN, INT256_MAX, 'Int256', UINT256_MAX));
+    case VmType.Bytes:
+      return values.map((val, idx) => ensureBytes(elementPath(idx), val));
+    case VmType.Bytes16:
+      return values.map((val, idx) => ensureBytes16(elementPath(idx), val));
+    case VmType.Bytes32:
+      return values.map((val, idx) => ensureBytes32(elementPath(idx), val));
+    case VmType.Bytes64:
+      return values.map((val, idx) => ensureBytes64(elementPath(idx), val));
+    case VmType.Struct: {
+      if (!structSchema) {
+        throw Error(`Metadata field '${fieldName}' is missing schema for struct elements`);
+      }
+      const sa = new VmStructArray();
+      sa.schema = structSchema;
+      sa.structs = values.map((val, idx) => normalizeStructValue(elementPath(idx), structSchema, val as MetadataStructInput));
+      return sa;
+    }
+    default:
+      throw Error(`Metadata field '${fieldName}' with type '${VmType[type] ?? type}' does not support array values`);
+  }
+}
+
+function normalizeStructValue(fieldName: string, structSchema: VmStructSchema | undefined, value: MetadataStructInput): VmDynamicStruct {
+  if (!structSchema) {
+    throw Error(`Metadata field '${fieldName}' is missing struct schema`);
+  }
+
+  const struct = new VmDynamicStruct();
+  struct.fields = [];
+
+  const providedFields = metadataStructInputToFields(fieldName, value);
+
+  structSchema.fields.forEach(childSchema => {
+    let childValue = providedFields.find(f => f.name === childSchema.name.data);
+    if (!childValue) {
+      childValue = providedFields.find(f => f.name.toLowerCase() === childSchema.name.data.toLowerCase());
+      if (childValue) {
+        throw Error(
+          `Metadata field '${childSchema.name.data}' provided in incorrect case inside '${fieldName}': '${childValue.name}'`
+        );
+      }
+      throw Error(`Metadata field '${fieldName}.${childSchema.name.data}' is mandatory`);
+    }
+
+    const normalized = normalizeMetadataValue(
+      childSchema.schema,
+      `${fieldName}.${childSchema.name.data}`,
+      childValue.value
+    );
+
+    struct.fields.push(
+      VmNamedDynamicVariable.from(childSchema.name, childSchema.schema.type, normalized)
+    );
+  });
+
+  const allowedNames = new Set(structSchema.fields.map(f => f.name.data.toLowerCase()));
+  for (const provided of providedFields) {
+    if (!allowedNames.has(provided.name.toLowerCase())) {
+      throw Error(`Metadata field '${fieldName}' received unknown property '${provided.name}'`);
+    }
+  }
+
+  return struct;
+}
+
+function metadataStructInputToFields(fieldName: string, value: MetadataStructInput): MetadataField[] {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (value instanceof Uint8Array || typeof value !== "object") {
+    throw Error(`Metadata field '${fieldName}' must be provided as an object or array of fields`);
+  }
+
+  return Object.entries(value).map(([name, val]) => ({
+    name,
+    value: val as MetadataValueInput
+  }));
+}
+
+function ensureNonEmptyString(fieldName: string, value: MetadataValueInput): string {
+  if (typeof value !== "string") {
+    throw Error(`Metadata field '${fieldName}' must be a string`);
+  }
+  if (value.trim().length === 0) {
+    throw Error(`Metadata field '${fieldName}' is mandatory`);
+  }
+  return value;
+}
+
+function ensureIntegerInRange(
+  fieldName: string,
+  value: MetadataValueInput,
+  min: number,
+  max: number,
+  unsignedMax?: number
+): number {
+  if (typeof value !== "number" || !Number.isInteger(value)) {
+    const rangeText =
+      unsignedMax !== undefined
+        ? `an integer between ${min} and ${max} or between 0 and ${unsignedMax}`
+        : `an integer between ${min} and ${max}`;
+    throw Error(`Metadata field '${fieldName}' must be ${rangeText}`);
+  }
+  const fitsSigned = value >= min && value <= max;
+  const fitsUnsigned = unsignedMax !== undefined && value >= 0 && value <= unsignedMax;
+  if (!fitsSigned && !fitsUnsigned) {
+    const rangeText =
+      unsignedMax !== undefined
+        ? `between ${min} and ${max} or between 0 and ${unsignedMax}`
+        : `between ${min} and ${max}`;
+    throw Error(`Metadata field '${fieldName}' must be ${rangeText}`);
+  }
+  return value;
+}
+
+function ensureBigInt(
+  fieldName: string,
+  value: MetadataValueInput,
+  min?: bigint,
+  max?: bigint,
+  label?: string,
+  unsignedMax?: bigint
+): bigint {
+  let bigintValue: bigint;
+  if (typeof value === "bigint") {
+    bigintValue = value;
+  } else if (typeof value === "number" && Number.isInteger(value)) {
+    if (!Number.isSafeInteger(value)) {
+      throw Error(`Metadata field '${fieldName}' must be provided as a bigint when it exceeds safe integer range`);
+    }
+    bigintValue = BigInt(value);
+  } else {
+    throw Error(`Metadata field '${fieldName}' must be a bigint or a safe integer number`);
+  }
+
+  const hasSignedRange = min !== undefined && max !== undefined;
+  const fitsSigned = hasSignedRange ? bigintValue >= min! && bigintValue <= max! : false;
+  const hasUnsignedRange = unsignedMax !== undefined;
+  const fitsUnsigned = hasUnsignedRange ? bigintValue >= 0 && bigintValue <= unsignedMax! : false;
+
+  if (!fitsSigned && !fitsUnsigned) {
+    const signedPart =
+      hasSignedRange ? `between ${min!.toString()} and ${max!.toString()}` : null;
+    const unsignedPart = hasUnsignedRange ? `between 0 and ${unsignedMax!.toString()}` : null;
+    const rangeText = [signedPart, unsignedPart].filter(Boolean).join(' or ');
+    const labelSuffix = label ? ` (${label})` : '';
+    throw Error(`Metadata field '${fieldName}' must be ${rangeText}${labelSuffix}`);
+  }
+
+  return bigintValue;
+}
+
+function ensureBytes(fieldName: string, value: MetadataValueInput): Uint8Array {
+  if (value instanceof Uint8Array) {
+    return value;
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (trimmed.length === 0) {
+      throw Error(`Metadata field '${fieldName}' must be a byte array or hex string`);
+    }
+    try {
+      return hexToBytes(trimmed);
+    } catch {
+      throw Error(`Metadata field '${fieldName}' must be a byte array or hex string`);
+    }
+  }
+  throw Error(`Metadata field '${fieldName}' must be a byte array or hex string`);
+}
+
+function ensureFixedBytes(fieldName: string, value: MetadataValueInput, expectedLength: number): Uint8Array {
+  const bytes = ensureBytes(fieldName, value);
+  if (bytes.length !== expectedLength) {
+    throw Error(`Metadata field '${fieldName}' must be exactly ${expectedLength} bytes`);
+  }
+  return bytes;
+}
+
+function ensureBytes16(fieldName: string, value: MetadataValueInput): Bytes16 {
+  return new Bytes16(ensureFixedBytes(fieldName, value, 16));
+}
+
+function ensureBytes32(fieldName: string, value: MetadataValueInput): Bytes32 {
+  return new Bytes32(ensureFixedBytes(fieldName, value, 32));
+}
+
+function ensureBytes64(fieldName: string, value: MetadataValueInput): Bytes64 {
+  return new Bytes64(ensureFixedBytes(fieldName, value, 64));
+}
