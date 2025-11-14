@@ -130,3 +130,56 @@ describe('EasyConnect.signCarbonTransaction', () => {
     expect(onFail).toHaveBeenCalledWith('Wallet is not connected');
   });
 });
+
+describe('PhantasmaLink socket error handling', () => {
+  it('propagates socket failures to the pending request callback', () => {
+    const link = new PhantasmaLink('test', false);
+    const callback = jest.fn();
+    (link as any).requestCallback = callback;
+
+    (link as any).handleSocketFailure('Connection lost');
+
+    expect(callback).toHaveBeenCalledWith({ success: false, error: 'Connection lost' });
+  });
+
+  it('invokes onError when there is no pending request', () => {
+    const link = new PhantasmaLink('test', false);
+    const errorSpy = jest.fn();
+    link.onError = errorSpy;
+
+    (link as any).handleSocketFailure('');
+
+    expect(errorSpy).toHaveBeenCalledWith('Connection lost with Phantasma Link wallet');
+  });
+});
+
+describe('PhantasmaLink.sendLinkRequest safeguards', () => {
+  it('fails fast when socket is missing or closed', () => {
+    const link = new PhantasmaLink('test', false);
+    (link as any).socket = { readyState: 3, send: jest.fn() };
+    const callback = jest.fn();
+
+    (link as any).sendLinkRequest('signTx/foo', callback);
+
+    expect(callback).toHaveBeenCalledWith({
+      success: false,
+      error: expect.stringContaining('Wallet connection is closed'),
+    });
+    expect((link as any).socket.send).not.toHaveBeenCalled();
+  });
+
+  it('propagates send errors as callback failures', () => {
+    const link = new PhantasmaLink('test', false);
+    (link as any).socket = {
+      readyState: 1,
+      send: jest.fn(() => {
+        throw new Error('boom');
+      }),
+    };
+    const callback = jest.fn();
+
+    (link as any).sendLinkRequest('signTx/foo', callback);
+
+    expect(callback).toHaveBeenCalledWith({ success: false, error: 'boom' });
+  });
+});

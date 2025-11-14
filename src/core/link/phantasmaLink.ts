@@ -16,6 +16,7 @@ export class PhantasmaLink {
   onError: (message: any) => void;
   socket: any;
   requestCallback: any;
+  private lastSocketErrorMessage: string | null = null;
   token: any;
   requestID: number = 0;
   account: IAccount;
@@ -213,8 +214,9 @@ export class PhantasmaLink {
       return;
     }
 
-    if (txHex.length >= 65536) {
-      const message = 'Error: Carbon transaction message is too big!';
+    const txLengthLimit = 65536;
+    if (txHex.length >= txLengthLimit) {
+      const message = `Error: Carbon transaction message is too big (${txHex.length} > ${txLengthLimit})!`;
       this.onMessage(message);
       onErrorCallback(message);
       return;
@@ -455,6 +457,7 @@ export class PhantasmaLink {
         : new WebSocket(path);
 
     this.requestCallback = null;
+    this.lastSocketErrorMessage = null;
     this.token = null;
     this.account = null;
     this.requestID = 0;
@@ -551,19 +554,27 @@ export class PhantasmaLink {
 
     //Cleanup After Socket Closes
     this.socket.onclose = function (event) {
-      if (!event.wasClean) {
-        if (that.onLogin) {
-          that.onError('Connection terminated...');
-        }
-        that.onLogin = null;
+      const reason =
+        event.reason && event.reason.length > 0
+          ? event.reason
+          : that.lastSocketErrorMessage || (event.wasClean ? 'Wallet connection closed' : 'Connection terminated unexpectedly');
+      that.lastSocketErrorMessage = null;
+
+      if (that.requestCallback) {
+        that.handleSocketFailure(reason);
+      } else if (!event.wasClean) {
+        that.handleSocketFailure(reason);
       }
     };
 
     //Error Callback When Socket Has Error
-    this.socket.onerror = function (error) {
-      if (error.message !== undefined) {
-        that.onMessage('Error: ' + error.message);
-      }
+    this.socket.onerror = function (error: any) {
+      const errMsg =
+        error && typeof error.message === 'string' && error.message.length > 0
+          ? error.message
+          : 'WebSocket error';
+      that.lastSocketErrorMessage = errMsg;
+      that.onMessage('Error: ' + errMsg);
     };
   }
 
@@ -599,15 +610,48 @@ export class PhantasmaLink {
   sendLinkRequest(request: string, callback: (T: any) => void) {
     this.onMessage('Sending Phantasma Link request: ' + request);
 
+    this.requestCallback = callback;
+
+    const socket = this.socket;
+    const openState =
+      typeof WebSocket !== 'undefined' && typeof WebSocket.OPEN === 'number' ? WebSocket.OPEN : 1;
+    const isSocketOpen = socket && socket.readyState === openState;
+
+    if (!socket || !isSocketOpen) {
+      this.handleSocketFailure('Wallet connection is closed. Please reconnect to your wallet.');
+      return;
+    }
+
     if (this.token != null) {
       request = request + '/' + this.dapp + '/' + this.token;
     }
 
     this.requestID++; //Object Nonce Increase?
     request = this.requestID + ',' + request;
-    this.requestCallback = callback;
 
-    this.socket.send(request);
+    try {
+      socket.send(request);
+    } catch (err: any) {
+      const errMessage =
+        err && typeof err.message === 'string' && err.message.length > 0
+          ? err.message
+          : 'Failed to send request to wallet';
+      this.handleSocketFailure(errMessage);
+    }
+  }
+
+  private handleSocketFailure(message: string) {
+    const callback = this.requestCallback;
+    this.requestCallback = null;
+    const errorMessage = message || 'Connection lost with Phantasma Link wallet';
+    if (callback) {
+      callback({ success: false, error: errorMessage });
+      return;
+    }
+
+    if (this.onError) {
+      this.onError(errorMessage);
+    }
   }
 
   //Disconnect The Wallet Connection Socket
