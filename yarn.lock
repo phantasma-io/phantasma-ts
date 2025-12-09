@@ -3561,6 +3561,25 @@ pbkdf2@^3.0.17, pbkdf2@^3.0.3:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
+phantasma-sdk-ts@^0.2.0-rc.18:
+  version "0.2.0-rc.18"
+  resolved "https://registry.npmjs.org/phantasma-sdk-ts/-/phantasma-sdk-ts-0.2.0-rc.18.tgz"
+  integrity sha512-6AXXkYz1lX71Yof47wbjsgL5UF7p7+qlIyRdlEsPgKOjC7dzh7eju09Ce1GKCF5vZ6z4IbWhAQ3foXMUd4K0YQ==
+  dependencies:
+    "@ledgerhq/hw-transport-node-hid" "^6.29.13"
+    "@ledgerhq/hw-transport-webusb" "^6.29.12"
+    big-integer "^1.6.52"
+    bip32 "^3.1.0"
+    bip39 "^3.1.0"
+    bs58 "^5.0.0"
+    cross-fetch "^3.2.0"
+    crypto-js "^4.2.0"
+    csharp-binary-stream "^1.1.0"
+    elliptic "^6.6.1"
+    ethereumjs-wallet "^1.0.2"
+    tiny-secp256k1 "^2.2.4"
+    wif "^2.0.6"
+
 picocolors@^1.1.1:
   version "1.1.1"
   resolved "https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz"
