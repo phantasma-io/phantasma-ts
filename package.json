@@ -1,6 +1,6 @@
 {
   "name": "phantasma-sdk-ts",
-  "version": "0.2.0-rc.18",
+  "version": "0.2.1",
   "description": "Javascript SDK for interacting with the Phantasma Chain",
   "author": "Phantasma Team",
   "main": "dist/cjs/index.js",
@@ -28,7 +28,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "tag": "rc"
+    "tag": "latest"
   },
   "engines": {
     "node": ">=14"
@@ -74,7 +74,7 @@
     "csharp-binary-stream": "^1.1.0",
     "elliptic": "^6.6.1",
     "ethereumjs-wallet": "^1.0.2",
-    "phantasma-sdk-ts": "^0.2.0-rc.18",
+    "phantasma-sdk-ts": "^0.2.0",
     "tiny-secp256k1": "^2.2.4",
     "wif": "^2.0.6"
   },
