@@ -1,12 +1,4 @@
-import { TokenSeriesMode } from '../../interfaces';
-import { ABIMethod } from './ABIMethod';
+import type { TokenSeriesResult } from './TokenSeriesResult';
 
-export interface TokenSeries {
-  seriesID: number;
-  currentSupply: string;
-  maxSupply: string;
-  burnedSupply: string;
-  mode: TokenSeriesMode;
-  script: string;
-  methods: Array<ABIMethod>;
-}
+export type TokenSeries = TokenSeriesResult;
+

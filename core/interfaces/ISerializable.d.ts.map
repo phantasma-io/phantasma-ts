@@ -1,1 +1,0 @@
-{"version":3,"file":"ISerializable.d.ts","sourceRoot":"","sources":["../../src/core/interfaces/ISerializable.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,aAAa,EAAE,MAAM,qBAAqB,CAAC;AAEnE,8BAAsB,aAAa;IACjC,QAAQ,CAAC,aAAa,CAAC,MAAM,EAAE,aAAa;IAC5C,QAAQ,CAAC,eAAe,CAAC,MAAM,EAAE,aAAa;CAC/C"}

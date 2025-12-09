@@ -1,6 +1,7 @@
 import { PhantasmaLink } from './phantasmaLink';
 import { ProofOfWork } from './interfaces/ProofOfWork';
 import { EasyScript, Nexus } from './easyScript';
+import { TxMsg } from '../types/Carbon/Blockchain';
 
 export class EasyConnect {
   requiredVersion: number;
@@ -17,7 +18,7 @@ export class EasyConnect {
     this.script = new EasyScript();
     this.link = new PhantasmaLink('easyConnect', false);
     this.connected = false;
-    this.requiredVersion = 2;
+    this.requiredVersion = 4;
 
     //Make This Auto In Future
     this.nexus = Nexus.Mainnet;
@@ -37,7 +38,7 @@ export class EasyConnect {
   }
 
   setConfig(_provider: string) {
-    this.requiredVersion = 2;
+    this.requiredVersion = 4;
     this.platform = 'phantasma';
 
     switch (_provider) {
@@ -194,6 +195,22 @@ export class EasyConnect {
     }
   ) {
     this.link.signData(data, onSuccess, onFail);
+  }
+
+  signCarbonTransaction(
+    txMsg: TxMsg,
+    onSuccess: any = (data) => {},
+    onFail: any = (data) => {
+      console.log('%cError: ' + data, 'color:red');
+    }
+  ) {
+    if (this.connected == true) {
+    this.link.signCarbonTxAndBroadcast(txMsg, onSuccess, onFail);
+    } else {
+      const message = 'Wallet is not connected';
+      console.log('%c' + message, 'color:red');
+      onFail(message);
+    }
   }
 
   invokeScript(script: string, _callback: any) {

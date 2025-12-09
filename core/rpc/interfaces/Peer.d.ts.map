@@ -1,1 +1,0 @@
-{"version":3,"file":"Peer.d.ts","sourceRoot":"","sources":["../../../src/core/rpc/interfaces/Peer.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,IAAI;IACnB,GAAG,EAAE,MAAM,CAAC;IACZ,OAAO,EAAE,MAAM,CAAC;IAChB,KAAK,EAAE,MAAM,CAAC;IACd,GAAG,EAAE,MAAM,CAAC;IACZ,GAAG,EAAE,MAAM,CAAC;CACb"}

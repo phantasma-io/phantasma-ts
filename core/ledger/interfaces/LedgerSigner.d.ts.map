@@ -1,1 +1,0 @@
-{"version":3,"file":"LedgerSigner.d.ts","sourceRoot":"","sources":["../../../src/core/ledger/interfaces/LedgerSigner.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,MAAM,aAAa,CAAC;AAEtC,MAAM,WAAW,YAAY;IAC3B,YAAY,EAAE,MAAM,MAAM,CAAC;IAC3B,UAAU,EAAE,MAAM,OAAO,CAAC;CAC3B"}

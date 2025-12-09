@@ -1,17 +1,13 @@
-import { IKeyPair } from "../interfaces/IKeyPair";
-import { Signature, SignatureKind } from "../interfaces/Signature";
-import { Address } from "./Address";
+import { IKeyPair } from '../interfaces/IKeyPair';
+import { Signature, SignatureKind } from '../interfaces/Signature';
+import { Address } from './Address';
 import pkg from 'elliptic';
 
-import {
-  stringToUint8Array,
-  uint8ArrayToHex,
-  uint8ArrayToString,
-} from "../utils";
-import { BinaryReader, BinaryWriter, Encoding } from "csharp-binary-stream";
-import { PBinaryWriter, PBinaryReader } from "./Extensions";
+import { stringToUint8Array, bytesToHex, uint8ArrayToString } from '../utils';
+import { BinaryReader, BinaryWriter, Encoding } from 'csharp-binary-stream';
+import { PBinaryWriter, PBinaryReader } from './Extensions';
 const { eddsa } = pkg;
-const ed25519 = new eddsa("ed25519");
+const ed25519 = new eddsa('ed25519');
 
 export class Ed25519Signature implements Signature {
   public Bytes: Uint8Array;
@@ -60,16 +56,10 @@ export class Ed25519Signature implements Signature {
     return new Uint8Array(stream);
   }
 
-  public static Generate(
-    keypair: IKeyPair,
-    message: Uint8Array
-  ): Ed25519Signature {
-    const msgHashHex = Buffer.from(uint8ArrayToHex(message), "hex");
+  public static Generate(keypair: IKeyPair, message: Uint8Array): Ed25519Signature {
+    const msgHashHex = Buffer.from(bytesToHex(message), 'hex');
     //const msgHashHex = uint8ArrayToString(message);
-    const privateKeyBuffer = Buffer.from(
-      uint8ArrayToHex(keypair.PrivateKey),
-      "hex"
-    );
+    const privateKeyBuffer = Buffer.from(bytesToHex(keypair.PrivateKey), 'hex');
     //const privateKeyBuffer = uint8ArrayToString(keypair.PrivateKey);
 
     const sign = ed25519.sign(msgHashHex, privateKeyBuffer);

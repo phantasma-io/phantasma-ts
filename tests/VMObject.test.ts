@@ -1,5 +1,5 @@
-import { BinaryReader, BinaryWriter } from "csharp-binary-stream";
-import { Type } from "typescript";
+import { BinaryReader, BinaryWriter } from 'csharp-binary-stream';
+import { Type } from 'typescript';
 import {
   Base16,
   PBinaryWriter,
@@ -9,34 +9,34 @@ import {
   Transaction,
   VMObject,
   VMType,
-} from "../core";
+} from '../src/core';
 
-describe("VM index file", () => {
-  test("empty string should result in zero", () => {
+describe('VM index file', () => {
+  test('empty string should result in zero', () => {
     let vm = new VMObject();
 
     expect(vm).toBeInstanceOf(VMObject);
     expect(vm.Type).toBe(VMType.None);
   });
 
-  test("String VM", () => {
+  test('String VM', () => {
     let vm = new VMObject();
-    let myNewVM = VMObject.FromObject("MyString");
+    let myNewVM = VMObject.FromObject('MyString');
 
     expect(myNewVM).toBeInstanceOf(VMObject);
     expect(myNewVM.Type).toBe(VMType.String);
     let result = myNewVM.AsString();
-    expect(result).toBe("MyString");
+    expect(result).toBe('MyString');
   });
 
-  test("Number VM", () => {
+  test('Number VM', () => {
     let vm = new VMObject();
     let myNewVM = VMObject.FromObject(5);
 
     expect(myNewVM).toBeInstanceOf(VMObject);
     expect(myNewVM.Type).toBe(VMType.Number);
     let result = myNewVM.AsString();
-    expect(result).toBe("5");
+    expect(result).toBe('5');
     expect(myNewVM.AsNumber()).toBe(5);
   });
 
@@ -76,10 +76,10 @@ describe("VM index file", () => {
     expect(myNewVM.Type).toBe(phantasmaJS.VMType.Struct);
   });*/
 
-  test("PollChoices", () => {
+  test('PollChoices', () => {
     let vm = new VMObject();
-    let choice = new PollChoice("myChoice");
-    let choice2 = new PollChoice("myChoice");
+    let choice = new PollChoice('myChoice');
+    let choice2 = new PollChoice('myChoice');
     let choices: PollChoice[] = [choice, choice2];
     let myNewVM = VMObject.FromArray(choices);
 
@@ -89,15 +89,15 @@ describe("VM index file", () => {
     //expect(result).toStrictEqual(choices);
   });
 
-  test("Serialization", () => {
+  test('Serialization', () => {
     let vm = new VMObject();
-    let choice = new PollChoice("myChoice");
-    let choice2 = new PollChoice("myChoice");
+    let choice = new PollChoice('myChoice');
+    let choice2 = new PollChoice('myChoice');
     let time = new Timestamp(10000);
     let choices: PollChoice[] = [choice, choice2];
 
     class myTestClass {
-      name: string = "test";
+      name: string = 'test';
       choices: PollChoice[] = choices;
       time: Timestamp = time;
       constructor() {}
@@ -128,15 +128,15 @@ describe("VM index file", () => {
     expect(writer.toArray()).toStrictEqual(choices);*/
   });
 
-  test("Serialization2", () => {
-    let choice = new PollChoice("myChoice");
-    let choice2 = new PollChoice("myChoice");
+  test('Serialization2', () => {
+    let choice = new PollChoice('myChoice');
+    let choice2 = new PollChoice('myChoice');
     let choices: PollChoice[] = [choice, choice2];
     let choicesSerialized = Serialization.Serialize(choices);
   });
 
-  test("DecodeBool", () => {
-    let vmCode = "0601";
+  test('DecodeBool', () => {
+    let vmCode = '0601';
     let bytes = Base16.decodeUint8Array(vmCode);
     let vm = VMObject.FromBytes(bytes);
 

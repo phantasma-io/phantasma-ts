@@ -1,1 +1,0 @@
-{"version":3,"file":"Storage.d.ts","sourceRoot":"","sources":["../../../src/core/rpc/interfaces/Storage.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,MAAM,WAAW,CAAC;AAEpC,MAAM,WAAW,OAAO;IACtB,SAAS,EAAE,MAAM,CAAC;IAClB,IAAI,EAAE,MAAM,CAAC;IACb,MAAM,EAAE,MAAM,CAAC;IACf,QAAQ,EAAE,KAAK,CAAC,OAAO,CAAC,CAAC;CAC1B"}

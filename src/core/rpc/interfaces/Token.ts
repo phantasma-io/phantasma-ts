@@ -1,6 +1,7 @@
 import { TokenExternal } from './TokenExternal';
 import { TokenPrice } from './TokenPrice';
 import { TokenSeries } from './TokenSeries';
+import type { TokenSchemasResult } from './TokenSchemasResult';
 
 export interface Token {
   symbol: string; //Ticker symbol for the token
@@ -14,6 +15,8 @@ export interface Token {
   flags: string;
   script: string;
   series: Array<TokenSeries>;
+  carbonId: string;
+  tokenSchemas?: TokenSchemasResult;
   external?: Array<TokenExternal>;
   price?: Array<TokenPrice>;
 }

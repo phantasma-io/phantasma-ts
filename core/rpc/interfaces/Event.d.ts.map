@@ -1,1 +1,0 @@
-{"version":3,"file":"Event.d.ts","sourceRoot":"","sources":["../../../src/core/rpc/interfaces/Event.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,KAAK;IACpB,OAAO,EAAE,MAAM,CAAC;IAChB,QAAQ,EAAE,MAAM,CAAC;IACjB,IAAI,EAAE,MAAM,CAAC;IACb,IAAI,EAAE,MAAM,CAAC;CACd"}

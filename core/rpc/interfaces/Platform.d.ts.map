@@ -1,1 +1,0 @@
-{"version":3,"file":"Platform.d.ts","sourceRoot":"","sources":["../../../src/core/rpc/interfaces/Platform.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,MAAM,WAAW,CAAC;AAEpC,MAAM,WAAW,QAAQ;IACvB,QAAQ,EAAE,MAAM,CAAC;IACjB,KAAK,EAAE,MAAM,CAAC;IACd,IAAI,EAAE,MAAM,CAAC;IACb,MAAM,EAAE,KAAK,CAAC,MAAM,CAAC,CAAC;IACtB,OAAO,EAAE,KAAK,CAAC,OAAO,CAAC,CAAC;CACzB"}

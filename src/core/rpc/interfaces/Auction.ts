@@ -7,6 +7,11 @@ export interface Auction {
   quoteSymbol: string;
   tokenId: string;
   price: string;
+  endPrice: string;
+  extensionPeriod: string;
+  type: string;
   rom: string;
   ram: string;
+  listingFee: string;
+  currentWinner: string;
 }

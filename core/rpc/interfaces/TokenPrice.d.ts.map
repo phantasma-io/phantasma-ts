@@ -1,1 +1,0 @@
-{"version":3,"file":"TokenPrice.d.ts","sourceRoot":"","sources":["../../../src/core/rpc/interfaces/TokenPrice.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,UAAU;IACzB,SAAS,EAAE,MAAM,CAAC;IAClB,IAAI,EAAE,MAAM,CAAC;IACb,IAAI,EAAE,MAAM,CAAC;IACb,GAAG,EAAE,MAAM,CAAC;IACZ,KAAK,EAAE,MAAM,CAAC;CACf"}

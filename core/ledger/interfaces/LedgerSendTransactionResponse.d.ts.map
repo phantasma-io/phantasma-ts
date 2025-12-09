@@ -1,1 +1,0 @@
-{"version":3,"file":"LedgerSendTransactionResponse.d.ts","sourceRoot":"","sources":["../../../src/core/ledger/interfaces/LedgerSendTransactionResponse.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,6BAA6B;IAC5C,OAAO,EAAE,OAAO,CAAC;IACjB,OAAO,EAAE,MAAM,CAAC;CACjB"}

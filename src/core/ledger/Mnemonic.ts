@@ -1,6 +1,6 @@
 // coin used by ledger nano s.
 
-import { bufferToHex, hexToBuffer } from '../utils';
+import { bytesToHex, hexToBytes } from '../utils';
 import { LedgerConfig } from './interfaces/LedgerConfig';
 
 // 60   | 0x80000273 | SOUL   | [Phantasma](https://phantasma.info/)
@@ -21,7 +21,7 @@ export const GetPrivateKeyFromMnemonic = (
 ): string => {
   const bip39 = config.Bip39;
   const seedBytes = bip39.mnemonicToSeedSync(mnemonic);
-  const seed = bufferToHex(seedBytes);
+  const seed = bytesToHex(seedBytes);
   return GetPrivateKeyFromSeed(config, seed, index);
 };
 
@@ -40,7 +40,7 @@ export const GetPrivateKeyFromSeed = (
 ): string => {
   const bip32Factory = config.Bip32Factory;
   const curve = config.Curve;
-  const seedBytes = hexToBuffer(seed);
+  const seedBytes = hexToBytes(seed);
   const bip32 = bip32Factory(curve);
   const bip32node = bip32.fromSeed(seedBytes);
 

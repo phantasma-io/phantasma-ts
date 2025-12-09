@@ -1,7 +1,0 @@
-import { Signature } from "./Signature";
-export interface IKeyPair {
-    PrivateKey: Uint8Array;
-    PublicKey: Uint8Array;
-    Sign(msg: Uint8Array, customSignFunction?: (message: Uint8Array, privateKey: Uint8Array, publicKey: Uint8Array) => Uint8Array): Signature;
-}
-//# sourceMappingURL=IKeyPair.d.ts.map

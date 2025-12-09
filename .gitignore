@@ -1,4 +1,5 @@
-#./core
+# UMD build result
+html/phantasma.js
 
 # Logs
 logs
@@ -105,3 +106,5 @@ dist
 # TernJS port file
 .tern-port
 .DS_Store
+
+USE_ONLY_AS_DOCUMENTATION

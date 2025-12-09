@@ -1,1 +1,0 @@
-{"version":3,"file":"ABIContract.d.ts","sourceRoot":"","sources":["../../../src/core/rpc/interfaces/ABIContract.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,SAAS,EAAE,MAAM,aAAa,CAAC;AAExC,MAAM,WAAW,WAAW;IAC1B,IAAI,EAAE,MAAM,CAAC;IACb,OAAO,EAAE,KAAK,CAAC,SAAS,CAAC,CAAC;CAC3B"}

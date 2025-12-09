@@ -1,1 +1,0 @@
-{"version":3,"file":"Leaderboard.d.ts","sourceRoot":"","sources":["../../../src/core/rpc/interfaces/Leaderboard.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,cAAc,EAAE,MAAM,kBAAkB,CAAC;AAElD,MAAM,WAAW,WAAW;IAC1B,IAAI,EAAE,MAAM,CAAC;IACb,IAAI,EAAE,KAAK,CAAC,cAAc,CAAC,CAAC;CAC7B"}

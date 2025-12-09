@@ -1,1 +1,0 @@
-{"version":3,"file":"Receipt.d.ts","sourceRoot":"","sources":["../../../src/core/rpc/interfaces/Receipt.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,OAAO;IACtB,KAAK,EAAE,MAAM,CAAC;IACd,OAAO,EAAE,MAAM,CAAC;IAChB,KAAK,EAAE,MAAM,CAAC;IACd,SAAS,EAAE,MAAM,CAAC;IAClB,MAAM,EAAE,MAAM,CAAC;IACf,QAAQ,EAAE,MAAM,CAAC;IACjB,MAAM,EAAE,MAAM,CAAC;CAChB"}
