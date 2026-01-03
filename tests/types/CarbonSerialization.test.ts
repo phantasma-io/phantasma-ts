@@ -69,6 +69,8 @@ type Row =
   | { kind: 'BI' | 'INTX'; value: string; hex: string; decOrig: string; decBack: string };
 
 const FIXTURE = path.join(process.cwd(), 'tests', 'fixtures', 'carbon_vectors.tsv');
+const SAMPLE_PNG_ICON_DATA_URI = 'data:image/png;base64,iVBORw==';
+const SAMPLE_WEBP_ICON_DATA_URI = 'data:image/webp;base64,UklGRg==';
 const SAMPLE_SVG_ICON_DATA_URI =
   'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PHBhdGggZmlsbD0nI0Y0NDMzNicgZD0nTTcgNGg1YTUgNSAwIDAxMCAxMEg5djZIN3pNOSA2djZoM2EzIDMgMCAwMDAtNnonLz48L3N2Zz4=';
 
@@ -114,6 +116,20 @@ const parseArrBytes2D = (s: string): Uint8Array[] => {
     const flat = hexParts.join('');
     return hexToBytes(flat);
   });
+};
+
+const buildMetadataBytes = (fields: Record<string, string>): Uint8Array => {
+  // Build dynamic metadata without TokenMetadataBuilder so fixture vectors stay stable.
+  const metaStruct = new VmDynamicStruct();
+  metaStruct.fields = [];
+  for (const [k, v] of Object.entries(fields)) {
+    metaStruct.fields.push(VmNamedDynamicVariable.from(k, VmType.String, v));
+  }
+
+  const metadataBufW = new CarbonBinaryWriter();
+  // No fixed schema for metadata; write as dynamic struct
+  metaStruct.write(metadataBufW);
+  return metadataBufW.toUint8Array();
 };
 
 // ---------- TSV parser ----------
@@ -235,7 +251,7 @@ const rows: Row[] = parseFixture(fs.readFileSync(FIXTURE, 'utf8'));
 describe('TokenMetadataBuilder icon validation', () => {
   const baseFields = Object.freeze({
     name: 'My test token!',
-    icon: SAMPLE_SVG_ICON_DATA_URI,
+    icon: SAMPLE_PNG_ICON_DATA_URI,
     url: 'http://example.com',
     description: 'My test token description',
   });
@@ -245,20 +261,40 @@ describe('TokenMetadataBuilder icon validation', () => {
     ...overrides,
   });
 
-  it('accepts data URIs with base64-encoded SVG payloads', () => {
+  it('accepts data URIs with base64-encoded PNG payloads', () => {
     expect(() => TokenMetadataBuilder.buildAndSerialize(buildFields())).not.toThrow();
   });
 
-  it('accepts PNG data URIs with base64 payloads', () => {
-    const pngPayload = Buffer.from([0x89, 0x50, 0x4e, 0x47]).toString('base64');
-    const pngIcon = `data:image/png;base64,${pngPayload}`;
+  it('accepts JPEG data URIs with base64 payloads', () => {
+    const jpegPayload = Buffer.from([0xff, 0xd8, 0xff]).toString('base64');
+    const jpegIcon = `data:image/jpeg;base64,${jpegPayload}`;
     expect(() =>
       TokenMetadataBuilder.buildAndSerialize(
         buildFields({
-          icon: pngIcon,
+          icon: jpegIcon,
         })
       )
     ).not.toThrow();
+  });
+
+  it('accepts WebP data URIs with base64 payloads', () => {
+    expect(() =>
+      TokenMetadataBuilder.buildAndSerialize(
+        buildFields({
+          icon: SAMPLE_WEBP_ICON_DATA_URI,
+        })
+      )
+    ).not.toThrow();
+  });
+
+  it('rejects data URIs with base64-encoded SVG payloads', () => {
+    expect(() =>
+      TokenMetadataBuilder.buildAndSerialize(
+        buildFields({
+          icon: SAMPLE_SVG_ICON_DATA_URI,
+        })
+      )
+    ).toThrow('Token metadata icon must be a base64-encoded data URI (PNG, JPEG, or WebP)');
   });
 
   it('rejects icons missing the base64 flag', () => {
@@ -270,7 +306,7 @@ describe('TokenMetadataBuilder icon validation', () => {
           icon: legacySvgUri,
         })
       )
-    ).toThrow('Token metadata icon must be a base64-encoded data URI (PNG, JPEG, or SVG)');
+    ).toThrow('Token metadata icon must be a base64-encoded data URI (PNG, JPEG, or WebP)');
   });
 
   it('rejects icons with unsupported mime types', () => {
@@ -281,7 +317,7 @@ describe('TokenMetadataBuilder icon validation', () => {
           icon: gifIcon,
         })
       )
-    ).toThrow('Token metadata icon must be a base64-encoded data URI (PNG, JPEG, or SVG)');
+    ).toThrow('Token metadata icon must be a base64-encoded data URI (PNG, JPEG, or WebP)');
   });
 
   it('rejects icons with empty base64 payload', () => {
@@ -436,18 +472,8 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
 
         // --- Build metadata struct from fieldsJson ---
         const fields: Record<string, string> = JSON.parse(fieldsJson);
-
-        const metaStruct = new VmDynamicStruct();
-        metaStruct.fields = [];
-        for (const [k, v] of Object.entries(fields)) {
-          metaStruct.fields.push(VmNamedDynamicVariable.from(k, VmType.String, v));
-        }
-
-        const metadataBufW = new CarbonBinaryWriter();
-        // No fixed schema for metadata; write as dynamic struct
-        metaStruct.write(metadataBufW);
-
-        expect(bytesToHex(metadataBufW.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+        const metadataBytes = buildMetadataBytes(fields);
+        expect(bytesToHex(metadataBytes).toUpperCase()).toBe(c.hex.toUpperCase());
 
         break;
       }
@@ -531,7 +557,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
 
         // --- Build metadata struct from fieldsJson ---
         const fields: Record<string, string> = JSON.parse(fieldsJson);
-        const metadata = TokenMetadataBuilder.buildAndSerialize(fields);
+        const metadata = buildMetadataBytes(fields);
 
         const info = TokenInfoBuilder.build(
           symbol,

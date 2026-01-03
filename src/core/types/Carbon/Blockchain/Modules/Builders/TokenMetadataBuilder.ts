@@ -3,7 +3,7 @@ import { VmDynamicStruct, VmNamedDynamicVariable, VmType } from '../../Vm';
 
 export class TokenMetadataBuilder {
   private static readonly iconDataUriPrefixPattern =
-    /^data:image\/(png|jpeg|svg\+xml);base64,/i;
+    /^data:image\/(png|jpeg|webp);base64,/i;
   private static readonly base64PayloadPattern = /^[A-Za-z0-9+/]+={0,2}$/;
 
   static buildAndSerialize(fields?: Record<string, unknown>): Uint8Array {
@@ -43,11 +43,11 @@ export class TokenMetadataBuilder {
   private static validateIcon(icon: string): void {
     const candidate = icon?.trim();
     if (!candidate || candidate.length === 0) {
-      throw new Error('Token metadata icon must be a base64-encoded data URI (PNG, JPEG, or SVG)');
+      throw new Error('Token metadata icon must be a base64-encoded data URI (PNG, JPEG, or WebP)');
     }
 
     if (!this.iconDataUriPrefixPattern.test(candidate)) {
-      throw new Error('Token metadata icon must be a base64-encoded data URI (PNG, JPEG, or SVG)');
+      throw new Error('Token metadata icon must be a base64-encoded data URI (PNG, JPEG, or WebP)');
     }
 
     const payload = candidate.slice(candidate.indexOf(',') + 1).trim();
