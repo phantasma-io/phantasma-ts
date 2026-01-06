@@ -48,7 +48,7 @@ export class StakeReward {
 }
 
 export class DomainSettings {
-  public static LatestKnownProtocol = 18;
+  public static LatestKnownProtocol = 19;
 
   public static Phantasma20Protocol = 7;
   public static Phantasma30Protocol = 8;
@@ -125,4 +125,6 @@ export class DomainSettings {
   public static ArgsMax = 64;
   public static AddressMaxSize = 34;
   public static ScriptMaxSize = 32767;
+  public static FieldMaxLength = 80;
+  public static FieldMinLength = 1;
 }

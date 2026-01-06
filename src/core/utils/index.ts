@@ -1,6 +1,7 @@
 import { hexToBytes } from './Hex';
 
 export * from './Hex';
+export * from './ValidationUtils';
 
 export function reverseHex(hex: string): string {
   let out = '';

@@ -2,14 +2,12 @@
 
 import fetch from 'cross-fetch';
 import { Balance } from './interfaces/Balance';
-import { Platform } from './interfaces/Platform';
 import { Organization } from './interfaces/Organization';
 import { Nexus } from './interfaces/Nexus';
 import { Account } from './interfaces/Account';
 import { Leaderboard } from './interfaces/Leaderboard';
 import { Chain } from './interfaces/Chain';
 import { Contract } from './interfaces/Contract';
-import { Event } from './interfaces/Event';
 import { TransactionData } from './interfaces/TransactionData';
 import { AccountTransactions } from './interfaces/AccountTransactions';
 import { Paginated } from './interfaces/Paginated';
@@ -19,11 +17,6 @@ import { TokenData } from './interfaces/TokenData';
 import { Auction } from './interfaces/Auction';
 import { Script } from './interfaces/Script';
 import { Archive } from './interfaces/Archive';
-import { ABIContract } from './interfaces/ABIContract';
-import { Receipt } from './interfaces/Receipt';
-import { Peer } from './interfaces/Peer';
-import { Validator } from './interfaces/Validator';
-import { Swap } from './interfaces/Swap';
 import { NFT } from './interfaces/NFT';
 import { CursorPaginatedResult, TokenSeriesResult } from './interfaces';
 
@@ -161,12 +154,6 @@ export class PhantasmaAPI {
     return (await this.JSONRPC('lookUpName', params)) as string;
   }
 
-  //Returns the address that owns a given name.
-  async getAddressesBySymbol(symbol: string, extended: boolean = false): Promise<Account[]> {
-    let params: Array<any> = [symbol, extended];
-    return (await this.JSONRPC('getAddressesBySymbol', params)) as Account[];
-  }
-
   //Returns the height of a chain.
   async getBlockHeight(chainInput: string): Promise<number> {
     let params: Array<any> = [chainInput];
@@ -185,12 +172,6 @@ export class PhantasmaAPI {
     return (await this.JSONRPC('getBlockByHash', params)) as Block;
   }
 
-  //Returns a serialized string, containing information about a block by hash.
-  async getRawBlockByHash(blockHash: string): Promise<string> {
-    let params: Array<any> = [blockHash];
-    return (await this.JSONRPC('getRawBlockByHash', params)) as string;
-  }
-
   //Returns information about a block by height and chain.
   async getBlockByHeight(chainInput: string, height: number): Promise<Block> {
     let params: Array<any> = [chainInput, height];
@@ -201,18 +182,6 @@ export class PhantasmaAPI {
   async getLatestBlock(chainInput: string): Promise<Block> {
     let params: Array<any> = [chainInput];
     return (await this.JSONRPC('getLatestBlock', params)) as Block;
-  }
-
-  //Returns a serialized string, in hex format, containing information about a block by height and chain.
-  async getRawBlockByHeight(chainInput: string, height: number): Promise<string> {
-    let params: Array<any> = [chainInput, height];
-    return (await this.JSONRPC('getRawBlockByHeight', params)) as string;
-  }
-
-  //Returns a serialized string, in hex format, containing information about a block by height and chain.
-  async getRawLatestBlock(chainInput: string): Promise<string> {
-    let params: Array<any> = [chainInput];
-    return (await this.JSONRPC('getRawLatestBlock', params)) as string;
   }
 
   //Returns the information about a transaction requested by a block hash and transaction index.
@@ -262,12 +231,6 @@ export class PhantasmaAPI {
   async getTransaction(hashText: string): Promise<TransactionData> {
     let params: Array<any> = [hashText];
     return (await this.JSONRPC('getTransaction', params)) as TransactionData;
-  }
-
-  //Removes a pending transaction from the mempool.
-  async cancelTransaction(hashText: string): Promise<string> {
-    let params: Array<any> = [hashText];
-    return (await this.JSONRPC('cancelTransaction', params)) as string;
   }
 
   //Returns an array of all chains deployed in Phantasma.
@@ -512,70 +475,6 @@ export class PhantasmaAPI {
   async writeArchive(hashText: string, blockIndex: number, blockContent: string): Promise<boolean> {
     let params: Array<any> = [hashText, blockIndex, blockContent];
     return (await this.JSONRPC('writeArchive', params)) as boolean;
-  }
-
-  //Returns the ABI interface of specific contract.
-  async getABI(chainAddressOrName: string, contractName: string): Promise<ABIContract> {
-    let params: Array<any> = [chainAddressOrName, contractName];
-    return (await this.JSONRPC('getABI', params)) as ABIContract;
-  }
-
-  //Returns list of known peers.
-  async getPeers(): Promise<Peer> {
-    let params: Array<any> = [];
-    return (await this.JSONRPC('getPeers', params)) as Peer;
-  }
-
-  //Writes a message to the relay network.
-  async relaySend(receiptHex: string): Promise<boolean> {
-    let params: Array<any> = [receiptHex];
-    return (await this.JSONRPC('relaySend', params)) as boolean;
-  }
-
-  //Receives messages from the relay network.
-  async relayReceive(account: string): Promise<Receipt> {
-    let params: Array<any> = [account];
-    return (await this.JSONRPC('relayReceive', params)) as Receipt;
-  }
-
-  //Reads pending messages from the relay network.
-  async getEvents(account: string): Promise<Event> {
-    let params: Array<any> = [account];
-    return (await this.JSONRPC('getEvents', params)) as Event;
-  }
-
-  //Returns an array of available interop platforms.
-  async getPlatforms(): Promise<Platform[]> {
-    let params: Array<any> = [];
-    return (await this.JSONRPC('getPlatforms', params)) as Platform[];
-  }
-
-  //Returns an array of available validators.
-  async getValidators(): Promise<Validator> {
-    let params: Array<any> = [];
-    return (await this.JSONRPC('getValidators', params)) as Validator;
-  }
-
-  //Tries to settle a pending swap for a specific hash.
-  async settleSwap(
-    sourcePlatform: string,
-    destPlatform: string,
-    hashText: string
-  ): Promise<string> {
-    let params: Array<any> = [sourcePlatform, destPlatform, hashText];
-    return (await this.JSONRPC('settleSwap', params)) as string;
-  }
-
-  //Returns platform swaps for a specific address.
-  async getSwapsForAddressOld(account: string): Promise<Swap[]> {
-    let params: Array<any> = [account];
-    return (await this.JSONRPC('getSwapsForAddress', params)) as Swap[];
-  }
-
-  //Returns platform swaps for a specific address.
-  async getSwapsForAddress(account: string, platform: string): Promise<Swap[]> {
-    let params: Array<any> = [account, platform, false];
-    return (await this.JSONRPC('getSwapsForAddress', params)) as Swap[];
   }
 
   //Returns info of a nft.
