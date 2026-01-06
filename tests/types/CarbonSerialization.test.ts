@@ -69,7 +69,8 @@ type Row =
   | { kind: 'BI' | 'INTX'; value: string; hex: string; decOrig: string; decBack: string };
 
 const FIXTURE = path.join(process.cwd(), 'tests', 'fixtures', 'carbon_vectors.tsv');
-const SAMPLE_PNG_ICON_DATA_URI = 'data:image/png;base64,iVBORw==';
+const SAMPLE_PNG_ICON_DATA_URI =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==';
 const SAMPLE_WEBP_ICON_DATA_URI = 'data:image/webp;base64,UklGRg==';
 const SAMPLE_SVG_ICON_DATA_URI =
   'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PHBhdGggZmlsbD0nI0Y0NDMzNicgZD0nTTcgNGg1YTUgNSAwIDAxMCAxMEg5djZIN3pNOSA2djZoM2EzIDMgMCAwMDAtNnonLz48L3N2Zz4=';
@@ -462,7 +463,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         break;
       }
       case 'VMSTRUCT02': {
-        const sampleIcon = SAMPLE_SVG_ICON_DATA_URI;
+        const sampleIcon = SAMPLE_PNG_ICON_DATA_URI;
         const fieldsJson = JSON.stringify({
           name: 'My test token!',
           icon: sampleIcon,
@@ -537,7 +538,7 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         // Input copied from TxCreateToken.cs
         const wif = 'KwPpBSByydVKqStGHAnZzQofCqhDmD2bfRgc9BmZqM3ZmsdWJw4d';
         const symbol = 'MYNFT';
-        const sampleIcon = SAMPLE_SVG_ICON_DATA_URI;
+        const sampleIcon = SAMPLE_PNG_ICON_DATA_URI;
         const fieldsJson = JSON.stringify({
           name: 'My test token!',
           icon: sampleIcon,

@@ -11,7 +11,6 @@ export enum TokenFlags {
   Fiat = 1 << 6,
   Swappable = 1 << 7,
   Burnable = 1 << 8,
-  Mintable = 1 << 9,
 }
 
 export enum TokenSeriesMode {

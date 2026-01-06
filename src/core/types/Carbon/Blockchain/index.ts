@@ -8,6 +8,7 @@ export * from "./SignedTxMsg";
 export * from "./TxMsg";
 export * from "./TxMsgCall";
 export * from "./TxMsgCallMulti";
+export * from "./TxMsgSpecialResolution";
 export * from "./TxMsgTrade";
 export * from "./TxMsgMintFungible";
 export * from "./TxMsgMintNonFungible";
