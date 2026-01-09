@@ -9,7 +9,13 @@ import { IntX } from '../../src/core/types/Carbon/IntX';
 import { TxTypes } from '../../src/core/types/Carbon/TxTypes';
 
 import { TxMsgSigner } from '../../src/core/types/Carbon/Blockchain/Extensions/TxMsgSigner';
-import { SignedTxMsg, TxMsg, TxMsgTransferFungible } from '../../src/core/types/Carbon/Blockchain';
+import {
+  MsgCallArgSections,
+  TxMsgCall,
+  SignedTxMsg,
+  TxMsg,
+  TxMsgTransferFungible,
+} from '../../src/core/types/Carbon/Blockchain';
 import {
   NftRomBuilder,
   SeriesInfoBuilder,
@@ -341,6 +347,38 @@ describe('TokenMetadataBuilder icon validation', () => {
         })
       )
     ).toThrow('Token metadata icon payload is not valid base64');
+  });
+});
+
+describe('TxMsgCall arg-sections', () => {
+  const expectedHex = '0100000002000000FEFFFFFFFFFFFFFF020000000A0B';
+
+  it('encodes arg-sections format', () => {
+    const call = new TxMsgCall(1, 2);
+    call.sections = new MsgCallArgSections([
+      { registerOffset: -1, args: new Uint8Array() },
+      { registerOffset: 0, args: hexToBytes('0A0B') },
+    ]);
+
+    const w = new CarbonBinaryWriter();
+    call.write(w);
+
+    const got = bytesToHex(w.toUint8Array()).toUpperCase();
+    expect(got).toBe(expectedHex);
+  });
+
+  it('decodes arg-sections format', () => {
+    const r = new CarbonBinaryReader(hexToBytes(expectedHex));
+    const decoded = TxMsgCall.read(r);
+
+    expect(decoded.moduleId).toBe(1);
+    expect(decoded.methodId).toBe(2);
+    expect(decoded.sections).not.toBeNull();
+    expect(decoded.sections!.argSections.length).toBe(2);
+    expect(decoded.sections!.argSections[0].registerOffset).toBe(-1);
+    expect(decoded.sections!.argSections[0].args.length).toBe(0);
+    expect(decoded.sections!.argSections[1].registerOffset).toBe(0);
+    expect(bytesToHex(decoded.sections!.argSections[1].args).toUpperCase()).toBe('0A0B');
   });
 });
 

@@ -46,6 +46,17 @@ describe('MetadataHelper.pushMetadataField', () => {
     expect(struct.fields[0].value.data).toEqual(new Uint8Array([0x0a, 0x0b]));
   });
 
+  it('accepts 0x-prefixed hex strings for byte fields', () => {
+    const struct = new VmDynamicStruct();
+    const schema = new VmNamedVariableSchema('payload', VmType.Bytes);
+    const metadata: MetadataField[] = [{ name: 'payload', value: '0x0a0b' }];
+
+    pushMetadataField(schema, struct, metadata);
+
+    expect(struct.fields).toHaveLength(1);
+    expect(struct.fields[0].value.data).toEqual(new Uint8Array([0x0a, 0x0b]));
+  });
+
   it('accepts unsigned range values for Int8', () => {
     const struct = new VmDynamicStruct();
     const schema = new VmNamedVariableSchema('level', VmType.Int8);

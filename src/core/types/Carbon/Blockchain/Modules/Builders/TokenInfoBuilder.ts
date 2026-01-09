@@ -40,12 +40,12 @@ export class TokenInfoBuilder {
     tokenInfo.owner = creatorPublicKey;
     tokenInfo.symbol = new SmallString(symbol);
 
-    if (isNFT) {
-      if (!metadata) {
-        throw new Error('metadata is required for NFTs')
-      }
-      tokenInfo.metadata = metadata;
+    if (!metadata) {
+      throw new Error('metadata is required for all tokens')
+    }
+    tokenInfo.metadata = metadata;
 
+    if (isNFT) {
       if (!tokenSchemas) {
         throw new Error('tokenSchemas is required for NFTs')
       }
