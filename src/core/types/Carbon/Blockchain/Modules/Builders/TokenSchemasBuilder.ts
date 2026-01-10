@@ -2,7 +2,7 @@ import { bytesToHex } from '../../../../../utils';
 import { CarbonBinaryWriter } from '../../../../CarbonSerialization';
 import { VmNamedVariableSchema } from '../../Vm/VmNamedVariableSchema';
 import { VmStructSchema } from '../../Vm/VmStructSchema';
-import { vmTypeFromString } from '../../Vm/VmType';
+import { vmTypeFromString, VmType } from '../../Vm/VmType';
 import { TokenSchemas } from '../TokenSchemas';
 import { FieldType, nftDefaultMetadataFields, seriesDefaultMetadataFields, standardMetadataFields } from './MetadataHelper';
 
@@ -34,27 +34,43 @@ export function parseTokenSchemasJson(json: string): TokenSchemasJson {
 
 export class TokenSchemasBuilder {
   private static assertMetadataField(schemas: VmStructSchema[], fieldTypes: readonly FieldType[]): Readonly<{ ok: boolean, error: string | null }> {
-    fieldTypes.forEach(fieldType => {
-      let fieldIsFound: boolean = false;
-      schemas.forEach(schema => {
+    for (const fieldType of fieldTypes) {
+      let fieldIsFound = false;
+      let caseMismatch: VmNamedVariableSchema | null = null;
+
+      for (const schema of schemas) {
         const found = schema.fields.find(x => x.name.data === fieldType.name);
         if (found != undefined) {
           if (found.schema.type != fieldType.type) {
-            return { ok: false, error: `Type mismatch for ${fieldType.name} field, must be ${found.schema.type} instead of ${fieldType}` };
+            const actualType = VmType[found.schema.type] ?? found.schema.type;
+            const expectedType = VmType[fieldType.type] ?? fieldType.type;
+            return {
+              ok: false,
+              error: `Type mismatch for ${fieldType.name} field, must be ${actualType} instead of ${expectedType}`
+            };
           }
           fieldIsFound = true;
-        } else {
+          break;
+        }
+
+        if (!caseMismatch) {
           const found2 = schema.fields.find(x => x.name.data.toLowerCase() === fieldType.name.toLowerCase())
           if (found2 != undefined) {
-            return { ok: false, error: `Case mismatch for ${fieldType.name} field, must be ${found2.name}` };
+            caseMismatch = found2;
           }
         }
-      });
+      }
 
       if (!fieldIsFound) {
+        if (caseMismatch) {
+          return {
+            ok: false,
+            error: `Case mismatch for ${fieldType.name} field, must be ${caseMismatch.name.data}`
+          };
+        }
         return { ok: false, error: `Mandatory metadata field not found: ${fieldType.name}` };
       }
-    });
+    }
 
     return { ok: true, error: null };
   }

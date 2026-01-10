@@ -27,13 +27,10 @@ export class Ed25519Signature implements Signature {
         continue;
       }
       const pubKey = address.ToByteArray().slice(2);
-      if (
-        ed25519.verify(
-          uint8ArrayToString(this.Bytes),
-          uint8ArrayToString(message),
-          uint8ArrayToString(pubKey)
-        )
-      ) {
+      const msgBytes = Buffer.from(message);
+      const sigHex = bytesToHex(this.Bytes);
+      const pubKeyHex = bytesToHex(pubKey);
+      if (ed25519.verify(msgBytes, sigHex, pubKeyHex)) {
         return true;
       }
     }
