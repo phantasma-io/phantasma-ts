@@ -4,39 +4,41 @@ import path from 'path';
 import { CarbonBinaryWriter, CarbonBinaryReader } from '../../src/core/types/CarbonSerialization';
 
 import { Bytes32 } from '../../src/core/types/Carbon/Bytes32';
-import { SmallString } from '../../src/core/types/Carbon/SmallString';
 import { IntX } from '../../src/core/types/Carbon/IntX';
 import { TxTypes } from '../../src/core/types/Carbon/TxTypes';
 
-import { TxMsgSigner } from '../../src/core/types/Carbon/Blockchain/Extensions/TxMsgSigner';
+import { CarbonTokenFlags } from '../../src/core/types/Carbon/Blockchain/CarbonTokenFlags';
 import {
   MsgCallArgSections,
   TxMsgCall,
   SignedTxMsg,
   TxMsg,
+  TxMsgMintNonFungible,
   TxMsgTransferFungible,
 } from '../../src/core/types/Carbon/Blockchain';
 import {
-  NftRomBuilder,
-  SeriesInfoBuilder,
-  TokenInfoBuilder,
   TokenMetadataBuilder,
   TokenSchemasBuilder,
 } from '../../src/core/types/Carbon/Blockchain/Modules/Builders';
-import { TokenSchemas } from '../../src/core/types/Carbon/Blockchain/Modules';
+import {
+  SeriesInfo,
+  StandardMeta,
+  TokenContract_Methods,
+  TokenInfo,
+  TokenSchemas,
+} from '../../src/core/types/Carbon/Blockchain/Modules';
 import {
   CreateSeriesFeeOptions,
   CreateTokenFeeOptions,
-  CreateTokenSeriesTxHelper,
-  CreateTokenTxHelper,
   MintNftFeeOptions,
-  MintNonFungibleTxHelper,
 } from '../../src/core/types/Carbon/Blockchain/TxHelpers';
 import {
   VmDynamicStruct,
   VmNamedDynamicVariable,
+  VmStructSchema,
   VmType,
 } from '../../src/core/types/Carbon/Blockchain/Vm';
+import { ModuleId } from '../../src/core/types/Carbon/Blockchain/ModuleId';
 import { PhantasmaKeys } from '../../src/core/types/PhantasmaKeys';
 import { bytesToHex, hexToBytes } from '../../src/core/utils';
 
@@ -125,18 +127,83 @@ const parseArrBytes2D = (s: string): Uint8Array[] => {
   });
 };
 
-const buildMetadataBytes = (fields: Record<string, string>): Uint8Array => {
-  // Build dynamic metadata without TokenMetadataBuilder so fixture vectors stay stable.
-  const metaStruct = new VmDynamicStruct();
-  metaStruct.fields = [];
-  for (const [k, v] of Object.entries(fields)) {
-    metaStruct.fields.push(VmNamedDynamicVariable.from(k, VmType.String, v));
-  }
+const encodeBlobHex = (blob: { write: (w: CarbonBinaryWriter) => void }): string => {
+  const w = new CarbonBinaryWriter();
+  blob.write(w);
+  return bytesToHex(w.toUint8Array());
+};
 
-  const metadataBufW = new CarbonBinaryWriter();
-  // No fixed schema for metadata; write as dynamic struct
-  metaStruct.write(metadataBufW);
-  return metadataBufW.toUint8Array();
+const expectReencodedHex = (blob: { write: (w: CarbonBinaryWriter) => void }, expectedHex: string): void => {
+  expect(encodeBlobHex(blob).toUpperCase()).toBe(expectedHex.toUpperCase());
+};
+
+const readDynamicStruct = (bytes: Uint8Array, schema?: VmStructSchema): VmDynamicStruct => {
+  const r = new CarbonBinaryReader(bytes);
+  const s = new VmDynamicStruct();
+  if (schema) {
+    s.readWithSchema(schema, r);
+  } else {
+    s.read(r);
+  }
+  return s;
+};
+
+const getStructField = (struct: VmDynamicStruct, name: string): VmNamedDynamicVariable => {
+  const found = struct.fields.find((f) => f.name.data === name);
+  if (!found) {
+    throw new Error(`Missing struct field '${name}'`);
+  }
+  return found;
+};
+
+const expectStructString = (struct: VmDynamicStruct, name: string, expected: string): void => {
+  const field = getStructField(struct, name);
+  expect(field.value.type).toBe(VmType.String);
+  expect(field.value.data).toBe(expected);
+};
+
+const expectStructBytes = (struct: VmDynamicStruct, name: string, expected: Uint8Array): void => {
+  const field = getStructField(struct, name);
+  expect(field.value.type).toBe(VmType.Bytes);
+  expect(bytesToHex(field.value.data as Uint8Array).toUpperCase()).toBe(bytesToHex(expected).toUpperCase());
+};
+
+const expectStructInt256 = (struct: VmDynamicStruct, name: string, expected: bigint): void => {
+  const field = getStructField(struct, name);
+  expect(field.value.type).toBe(VmType.Int256);
+  expect(field.value.data as bigint).toBe(expected);
+};
+
+const expectStructInt8 = (struct: VmDynamicStruct, name: string, expected: number): void => {
+  const field = getStructField(struct, name);
+  expect(field.value.type).toBe(VmType.Int8);
+  expect(field.value.data as number).toBe(expected);
+};
+
+const expectStructInt32 = (struct: VmDynamicStruct, name: string, expected: number): void => {
+  const field = getStructField(struct, name);
+  expect(field.value.type).toBe(VmType.Int32);
+  expect(field.value.data as number).toBe(expected);
+};
+
+const expectSchemaMatches = (actual: VmStructSchema, expected: VmStructSchema): void => {
+  expect(actual.fields.map((f) => f.name.data)).toStrictEqual(expected.fields.map((f) => f.name.data));
+  expect(actual.fields.map((f) => f.schema.type)).toStrictEqual(expected.fields.map((f) => f.schema.type));
+  expect(actual.flags).toBe(expected.flags);
+};
+
+const expectStandardTokenSchemas = (schemas: TokenSchemas): void => {
+  const expected = TokenSchemasBuilder.prepareStandard(false);
+  expectSchemaMatches(schemas.seriesMetadata, expected.seriesMetadata);
+  expectSchemaMatches(schemas.rom, expected.rom);
+  expectSchemaMatches(schemas.ram, expected.ram);
+};
+
+const toSignedInt256 = (value: bigint): bigint => {
+  const mask = (1n << 256n) - 1n;
+  const signBit = 1n << 255n;
+  const v = value & mask;
+  return (v & signBit) === 0n ? v : v - (1n << 256n);
 };
 
 // ---------- TSV parser ----------
@@ -497,47 +564,37 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         break;
       }
       case 'VMSTRUCT01': {
-        expect(TokenSchemasBuilder.serializeHex(TokenSchemasBuilder.prepareStandard(false)).toUpperCase()).toBe(c.hex.toUpperCase());
+        const decoded = v as TokenSchemas;
+        expectStandardTokenSchemas(decoded);
+        expectReencodedHex(decoded, c.hex);
         break;
       }
       case 'VMSTRUCT02': {
-        const sampleIcon = SAMPLE_PNG_ICON_DATA_URI;
-        const fieldsJson = JSON.stringify({
-          name: 'My test token!',
-          icon: sampleIcon,
-          url: 'http://example.com',
-          description: 'My test token description',
-        });
-
-        // --- Build metadata struct from fieldsJson ---
-        const fields: Record<string, string> = JSON.parse(fieldsJson);
-        const metadataBytes = buildMetadataBytes(fields);
-        expect(bytesToHex(metadataBytes).toUpperCase()).toBe(c.hex.toUpperCase());
+        const decoded = v as VmDynamicStruct;
+        expect(decoded.fields.length).toBe(4);
+        expectStructString(decoded, 'name', 'My test token!');
+        expectStructString(decoded, 'icon', SAMPLE_PNG_ICON_DATA_URI);
+        expectStructString(decoded, 'url', 'http://example.com');
+        expectStructString(decoded, 'description', 'My test token description');
+        expectReencodedHex(decoded, c.hex);
 
         break;
       }
       case 'TX1': {
-        // Data is copied from C#'s TestDataGenerator:
-        const gasFrom = new Bytes32();
-        const to = new Bytes32();
-        const tokenId = 1n;
-        const amount = 100000000n;
-        const payload = new SmallString('test-payload');
+        const decoded = v as TxMsg;
+        expect(decoded.type).toBe(TxTypes.TransferFungible);
+        expect(decoded.expiry).toBe(1759711416000n);
+        expect(decoded.maxGas).toBe(10000000n);
+        expect(decoded.maxData).toBe(1000n);
+        expect(decoded.gasFrom.equals(Bytes32.Empty)).toBe(true);
+        expect(decoded.payload.data).toBe('test-payload');
 
-        const msg = new TxMsg(
-          TxTypes.TransferFungible,
-          1759711416000n, // expiry
-          10000000n, // maxGas
-          1000n, // maxData
-          gasFrom,
-          payload,
-          new TxMsgTransferFungible(to, tokenId, amount)
-        );
+        const msg = decoded.msg as TxMsgTransferFungible;
+        expect(msg.tokenId).toBe(1n);
+        expect(msg.amount).toBe(100000000n);
+        expect(msg.to.equals(Bytes32.Empty)).toBe(true);
 
-        const w = new CarbonBinaryWriter();
-        msg.write(w);
-
-        expect(bytesToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+        expectReencodedHex(decoded, c.hex);
 
         break;
       }
@@ -548,27 +605,29 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const txReceiver = PhantasmaKeys.fromWIF(
           'KwVG94yjfVg1YKFyRxAGtug93wdRbmLnqqrFV6Yd2CiA9KZDAp4H'
         );
+        const senderPub = new Bytes32(txSender.PublicKey);
+        const receiverPub = new Bytes32(txReceiver.PublicKey);
 
-        // Data is copied from C#'s TestDataGenerator:
-        const gasFrom = new Bytes32(txSender.PublicKey);
-        const to = new Bytes32(txReceiver.PublicKey);
-        const tokenId = 1n;
-        const amount = 100000000n;
-        const payload = new SmallString('test-payload');
+        const decoded = v as SignedTxMsg;
+        expect(decoded.msg).toBeDefined();
+        const msg = decoded.msg!;
+        expect(msg.type).toBe(TxTypes.TransferFungible);
+        expect(msg.expiry).toBe(1759711416000n);
+        expect(msg.maxGas).toBe(10000000n);
+        expect(msg.maxData).toBe(1000n);
+        expect(msg.gasFrom.equals(senderPub)).toBe(true);
+        expect(msg.payload.data).toBe('test-payload');
 
-        const msg = new TxMsg(
-          TxTypes.TransferFungible,
-          1759711416000n, // expiry
-          10000000n, // maxGas
-          1000n, // maxData
-          gasFrom,
-          payload,
-          new TxMsgTransferFungible(to, tokenId, amount)
-        );
+        const payload = msg.msg as TxMsgTransferFungible;
+        expect(payload.tokenId).toBe(1n);
+        expect(payload.amount).toBe(100000000n);
+        expect(payload.to.equals(receiverPub)).toBe(true);
 
-        const signed = TxMsgSigner.signAndSerialize(msg, txSender);
+        expect(decoded.witnesses?.length).toBe(1);
+        expect(decoded.witnesses![0].address.equals(senderPub)).toBe(true);
+        expect(decoded.witnesses![0].signature?.bytes.length).toBe(64);
 
-        expect(bytesToHex(signed).toUpperCase()).toBe(c.hex.toUpperCase());
+        expectReencodedHex(decoded, c.hex);
 
         break;
       }
@@ -577,12 +636,6 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const wif = 'KwPpBSByydVKqStGHAnZzQofCqhDmD2bfRgc9BmZqM3ZmsdWJw4d';
         const symbol = 'MYNFT';
         const sampleIcon = SAMPLE_PNG_ICON_DATA_URI;
-        const fieldsJson = JSON.stringify({
-          name: 'My test token!',
-          icon: sampleIcon,
-          url: 'http://example.com',
-          description: 'My test token description',
-        });
 
         const maxData = 100000000n;
         const gasFeeBase = 10000n;
@@ -594,20 +647,6 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const txSender = PhantasmaKeys.fromWIF(wif);
         const senderPubKey = new Bytes32(txSender.PublicKey);
 
-        // --- Build metadata struct from fieldsJson ---
-        const fields: Record<string, string> = JSON.parse(fieldsJson);
-        const metadata = buildMetadataBytes(fields);
-
-        const info = TokenInfoBuilder.build(
-          symbol,
-          IntX.fromI64(0n),
-          true,
-          0,
-          senderPubKey,
-          metadata,
-          TokenSchemasBuilder.prepareStandard(false)
-        );
-
         const feeOptions = new CreateTokenFeeOptions(
           gasFeeBase,
           gasFeeCreateTokenBase,
@@ -615,19 +654,41 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
           feeMultiplier
         );
 
-        const tx = CreateTokenTxHelper.buildTx(
-          info,
-          senderPubKey,
-          feeOptions,
-          maxData,
-          1759711416000n
-        );
+        const decoded = v as TxMsg;
+        expect(decoded.type).toBe(TxTypes.Call);
+        expect(decoded.expiry).toBe(1759711416000n);
+        expect(decoded.maxData).toBe(maxData);
+        expect(decoded.gasFrom.equals(senderPubKey)).toBe(true);
+        expect(decoded.payload.data).toBe('');
 
-        // --- Serialize and compare ---
-        const w = new CarbonBinaryWriter();
-        tx.write(w);
+        const call = decoded.msg as TxMsgCall;
+        expect(call.moduleId).toBe(ModuleId.Token);
+        expect(call.methodId).toBe(TokenContract_Methods.CreateToken);
+        expect(call.args.length).toBeGreaterThan(0);
 
-        expect(bytesToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+        const argsReader = new CarbonBinaryReader(call.args);
+        const tokenInfo = TokenInfo.read(argsReader);
+        expect(tokenInfo.symbol.data).toBe(symbol);
+        expect(tokenInfo.decimals).toBe(0);
+        expect(tokenInfo.flags).toBe(CarbonTokenFlags.NonFungible);
+        expect(tokenInfo.owner.equals(senderPubKey)).toBe(true);
+        expect(tokenInfo.maxSupply.toString()).toBe('0');
+
+        const metadataStruct = readDynamicStruct(tokenInfo.metadata);
+        expect(metadataStruct.fields.length).toBe(4);
+        expectStructString(metadataStruct, 'name', 'My test token!');
+        expectStructString(metadataStruct, 'icon', sampleIcon);
+        expectStructString(metadataStruct, 'url', 'http://example.com');
+        expectStructString(metadataStruct, 'description', 'My test token description');
+
+        expect(tokenInfo.tokenSchemas).toBeDefined();
+        const schemas = TokenSchemas.read(new CarbonBinaryReader(tokenInfo.tokenSchemas!));
+        expectStandardTokenSchemas(schemas);
+
+        const expectedMaxGas = feeOptions.calculateMaxGas(tokenInfo.symbol);
+        expect(decoded.maxGas).toBe(expectedMaxGas);
+
+        expectReencodedHex(decoded, c.hex);
         break;
       }
       case 'TX-CREATE-TOKEN-SERIES': {
@@ -646,34 +707,45 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
 
         const newPhantasmaSeriesId = (1n << 256n) - 1n;
 
-        const info = SeriesInfoBuilder.build(
-          TokenSchemasBuilder.prepareStandard(false).seriesMetadata,
-          newPhantasmaSeriesId,
-          0,
-          0,
-          senderPubKey,
-          []
-        );
-
         const feeOptions = new CreateSeriesFeeOptions(
           gasFeeBase,
           gasFeeCreateTokenSeries,
           feeMultiplier
         );
 
-        const tx = CreateTokenSeriesTxHelper.buildTx(
-          tokenId,
-          info,
-          senderPubKey,
-          feeOptions,
-          maxData,
-          1759711416000n
-        );
+        const decoded = v as TxMsg;
+        expect(decoded.type).toBe(TxTypes.Call);
+        expect(decoded.expiry).toBe(1759711416000n);
+        expect(decoded.maxData).toBe(maxData);
+        expect(decoded.gasFrom.equals(senderPubKey)).toBe(true);
+        expect(decoded.payload.data).toBe('');
 
-        const w = new CarbonBinaryWriter();
-        tx.write(w);
+        const call = decoded.msg as TxMsgCall;
+        expect(call.moduleId).toBe(ModuleId.Token);
+        expect(call.methodId).toBe(TokenContract_Methods.CreateTokenSeries);
 
-        expect(bytesToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+        const argsReader = new CarbonBinaryReader(call.args);
+        const decodedTokenId = argsReader.read8u();
+        expect(decodedTokenId).toBe(tokenId);
+
+        const seriesInfo = SeriesInfo.read(argsReader);
+        expect(seriesInfo.maxMint).toBe(0);
+        expect(seriesInfo.maxSupply).toBe(0);
+        expect(seriesInfo.owner.equals(senderPubKey)).toBe(true);
+        expect(seriesInfo.rom.fields.length).toBe(0);
+        expect(seriesInfo.ram.fields.length).toBe(0);
+
+        const seriesSchema = TokenSchemasBuilder.prepareStandard(false).seriesMetadata;
+        const seriesMeta = readDynamicStruct(seriesInfo.metadata, seriesSchema);
+        expect(seriesMeta.fields.length).toBe(3);
+        expectStructInt256(seriesMeta, StandardMeta.id.data, toSignedInt256(newPhantasmaSeriesId));
+        expectStructInt8(seriesMeta, 'mode', 0);
+        expectStructBytes(seriesMeta, 'rom', new Uint8Array());
+
+        const expectedMaxGas = feeOptions.calculateMaxGas();
+        expect(decoded.maxGas).toBe(expectedMaxGas);
+
+        expectReencodedHex(decoded, c.hex);
         break;
       }
       case 'TX-MINT-NON-FUNGIBLE': {
@@ -692,38 +764,35 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         const phantasmaNftId = (1n << 256n) - 1n;
         const phantasmaRomData = new Uint8Array([0x01, 0x42]);
 
-        const rom = NftRomBuilder.buildAndSerialize(
-          TokenSchemasBuilder.prepareStandard(false).rom,
-          phantasmaNftId,
-          [
-            {name: 'name', value: 'My NFT #1'},
-            {name: 'description', value: 'This is my first NFT!'},
-            {name: 'imageURL', value: 'images-assets.nasa.gov/image/PIA13227/PIA13227~orig.jpg'},
-            {name: 'infoURL', value: 'https://images.nasa.gov/details/PIA13227'},
-            {name: 'royalties', value: 10000000},
-            {name: 'rom', value: phantasmaRomData}
-          ]
-        );
-
         const feeOptions = new MintNftFeeOptions(gasFeeBase, feeMultiplier);
 
-        const tx = MintNonFungibleTxHelper.buildTx(
-          carbonTokenId,
-          carbonSeriesId,
-          senderPubKey,
-          senderPubKey,
-          rom,
-          new Uint8Array(),
-          feeOptions,
-          maxData,
-          1759711416000n
-        );
+        const decoded = v as TxMsg;
+        expect(decoded.type).toBe(TxTypes.MintNonFungible);
+        expect(decoded.expiry).toBe(1759711416000n);
+        expect(decoded.maxData).toBe(maxData);
+        expect(decoded.gasFrom.equals(senderPubKey)).toBe(true);
+        expect(decoded.payload.data).toBe('');
 
-        // --- Serialize and compare ---
-        const w = new CarbonBinaryWriter();
-        tx.write(w);
+        const mint = decoded.msg as TxMsgMintNonFungible;
+        expect(mint.tokenId).toBe(carbonTokenId);
+        expect(mint.seriesId).toBe(carbonSeriesId);
+        expect(mint.to.equals(senderPubKey)).toBe(true);
+        expect(mint.ram.length).toBe(0);
 
-        expect(bytesToHex(w.toUint8Array()).toUpperCase()).toBe(c.hex.toUpperCase());
+        const nftSchema = TokenSchemasBuilder.prepareStandard(false).rom;
+        const romStruct = readDynamicStruct(mint.rom, nftSchema);
+        expectStructInt256(romStruct, StandardMeta.id.data, toSignedInt256(phantasmaNftId));
+        expectStructBytes(romStruct, 'rom', phantasmaRomData);
+        expectStructString(romStruct, 'name', 'My NFT #1');
+        expectStructString(romStruct, 'description', 'This is my first NFT!');
+        expectStructString(romStruct, 'imageURL', 'images-assets.nasa.gov/image/PIA13227/PIA13227~orig.jpg');
+        expectStructString(romStruct, 'infoURL', 'https://images.nasa.gov/details/PIA13227');
+        expectStructInt32(romStruct, 'royalties', 10000000);
+
+        const expectedMaxGas = feeOptions.calculateMaxGas();
+        expect(decoded.maxGas).toBe(expectedMaxGas);
+
+        expectReencodedHex(decoded, c.hex);
         break;
       }
     }

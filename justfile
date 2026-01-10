@@ -6,6 +6,8 @@ just:
 test:
     npm run test
 
+alias t := test
+
 # Reinstall all modules. Don't forget 'nvm use 20'!
 [group('manage')]
 reinstall:
