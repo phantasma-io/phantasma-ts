@@ -187,7 +187,7 @@ const encoders: Partial<Record<Kind, Enc>> = {
   ARR16: (c, w) => w.writeArray16(parseCsv(c.value).map((x) => parseNum(x))),
   ARR32: (c, w) => w.writeArray32(parseCsv(c.value).map((x) => parseNum(x))),
   ARR64: (c, w) => w.writeArray64(parseCsv(c.value).map((x) => BigInt(x))),
-  ARRU64: (c, w) => w.writeArray64(parseCsv(c.value).map((x) => BigInt(x))),
+  ARRU64: (c, w) => w.writeArray64u(parseCsv(c.value).map((x) => BigInt(x))),
 
   'ARRBYTES-1D': (c, w) => w.writeArray(hexToBytes(c.value)),
   'ARRBYTES-2D': (c, w) => w.writeArrayOfArrays(parseArrBytes2D(c.value)),
@@ -231,10 +231,10 @@ const decoders: Partial<Record<Kind, Dec>> = {
   ARR16: (_c, r) => r.readArray16(),
   ARR32: (_c, r) => r.readArray32(),
   ARR64: (_c, r) => r.readArray64(),
-  ARRU64: (_c, r) => r.readArray64u?.() ?? r.readArray64(), // поддержка обеих реализаций
+  ARRU64: (_c, r) => r.readArray64u(),
 
   'ARRBYTES-1D': (_c, r) => r.readArray(),
-  'ARRBYTES-2D': (_c, r) => r.readArrayOfArrays?.(),
+  'ARRBYTES-2D': (_c, r) => r.readArrayOfArrays(),
 
   BI: (_c, r) => r.readBigInt(),
   INTX: (_c, r) => IntX.read(r),
