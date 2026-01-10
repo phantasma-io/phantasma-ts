@@ -13,8 +13,11 @@ import {
   TxMsgCall,
   SignedTxMsg,
   TxMsg,
+  TxMsgBurnFungibleGasPayer,
+  TxMsgMintFungible,
   TxMsgMintNonFungible,
   TxMsgTransferFungible,
+  TxMsgTransferFungibleGasPayer,
 } from '../../src/core/types/Carbon/Blockchain';
 import {
   TokenMetadataBuilder,
@@ -35,6 +38,7 @@ import {
 import {
   VmDynamicStruct,
   VmNamedDynamicVariable,
+  VmNamedVariableSchema,
   VmStructSchema,
   VmType,
 } from '../../src/core/types/Carbon/Blockchain/Vm';
@@ -68,6 +72,9 @@ type Kind =
   | 'VMSTRUCT02'
   | 'TX1'
   | 'TX2'
+  | 'TX-TRANSFER-FUNGIBLE-GASPAYER'
+  | 'TX-BURN-FUNGIBLE-GASPAYER'
+  | 'TX-MINT-FUNGIBLE'
   | 'TX-CREATE-TOKEN'
   | 'TX-CREATE-TOKEN-SERIES'
   | 'TX-MINT-NON-FUNGIBLE';
@@ -273,6 +280,9 @@ const encoders: Partial<Record<Kind, Enc>> = {
   VMSTRUCT02: (_c, w) => {},
   TX1: (_c, w) => {},
   TX2: (_c, w) => {},
+  'TX-TRANSFER-FUNGIBLE-GASPAYER': (_c, w) => {},
+  'TX-BURN-FUNGIBLE-GASPAYER': (_c, w) => {},
+  'TX-MINT-FUNGIBLE': (_c, w) => {},
   'TX-CREATE-TOKEN': (_c, w) => {},
   'TX-CREATE-TOKEN-SERIES': (_c, w) => {},
   'TX-MINT-NON-FUNGIBLE': (_c, w) => {},
@@ -311,6 +321,9 @@ const decoders: Partial<Record<Kind, Dec>> = {
   VMSTRUCT02: (_c, r) => VmDynamicStruct.read(r),
   TX1: (_c, r) => TxMsg.read(r),
   TX2: (_c, r) => SignedTxMsg.read(r),
+  'TX-TRANSFER-FUNGIBLE-GASPAYER': (_c, r) => TxMsg.read(r),
+  'TX-BURN-FUNGIBLE-GASPAYER': (_c, r) => TxMsg.read(r),
+  'TX-MINT-FUNGIBLE': (_c, r) => TxMsg.read(r),
   'TX-CREATE-TOKEN': (_c, r) => TxMsg.read(r),
   'TX-CREATE-TOKEN-SERIES': (_c, r) => TxMsg.read(r),
   'TX-MINT-NON-FUNGIBLE': (_c, r) => TxMsg.read(r),
@@ -456,6 +469,9 @@ describe('CarbonSerialization.ts ↔ C# fixtures (encode)', () => {
       c.kind === 'VMSTRUCT02' ||
       c.kind === 'TX1' ||
       c.kind === 'TX2' ||
+      c.kind === 'TX-TRANSFER-FUNGIBLE-GASPAYER' ||
+      c.kind === 'TX-BURN-FUNGIBLE-GASPAYER' ||
+      c.kind === 'TX-MINT-FUNGIBLE' ||
       c.kind === 'TX-CREATE-TOKEN' ||
       c.kind === 'TX-CREATE-TOKEN-SERIES' ||
       c.kind === 'TX-MINT-NON-FUNGIBLE'
@@ -626,6 +642,84 @@ describe('CarbonSerialization.ts ↔ C# fixtures (decode)', () => {
         expect(decoded.witnesses?.length).toBe(1);
         expect(decoded.witnesses![0].address.equals(senderPub)).toBe(true);
         expect(decoded.witnesses![0].signature?.bytes.length).toBe(64);
+
+        expectReencodedHex(decoded, c.hex);
+
+        break;
+      }
+      case 'TX-TRANSFER-FUNGIBLE-GASPAYER': {
+        const txSender = PhantasmaKeys.fromWIF(
+          'KwPpBSByydVKqStGHAnZzQofCqhDmD2bfRgc9BmZqM3ZmsdWJw4d'
+        );
+        const txReceiver = PhantasmaKeys.fromWIF(
+          'KwVG94yjfVg1YKFyRxAGtug93wdRbmLnqqrFV6Yd2CiA9KZDAp4H'
+        );
+        const senderPub = new Bytes32(txSender.PublicKey);
+        const receiverPub = new Bytes32(txReceiver.PublicKey);
+
+        const decoded = v as TxMsg;
+        expect(decoded.type).toBe(TxTypes.TransferFungible_GasPayer);
+        expect(decoded.expiry).toBe(1759711416000n);
+        expect(decoded.maxGas).toBe(10000000n);
+        expect(decoded.maxData).toBe(1000n);
+        expect(decoded.gasFrom.equals(senderPub)).toBe(true);
+        expect(decoded.payload.data).toBe('test-payload');
+
+        const msg = decoded.msg as TxMsgTransferFungibleGasPayer;
+        expect(msg.tokenId).toBe(1n);
+        expect(msg.amount).toBe(100000000n);
+        expect(msg.to.equals(receiverPub)).toBe(true);
+        expect(msg.from.equals(senderPub)).toBe(true);
+
+        expectReencodedHex(decoded, c.hex);
+
+        break;
+      }
+      case 'TX-BURN-FUNGIBLE-GASPAYER': {
+        const txSender = PhantasmaKeys.fromWIF(
+          'KwPpBSByydVKqStGHAnZzQofCqhDmD2bfRgc9BmZqM3ZmsdWJw4d'
+        );
+        const senderPub = new Bytes32(txSender.PublicKey);
+
+        const decoded = v as TxMsg;
+        expect(decoded.type).toBe(TxTypes.BurnFungible_GasPayer);
+        expect(decoded.expiry).toBe(1759711416000n);
+        expect(decoded.maxGas).toBe(10000000n);
+        expect(decoded.maxData).toBe(1000n);
+        expect(decoded.gasFrom.equals(senderPub)).toBe(true);
+        expect(decoded.payload.data).toBe('test-payload');
+
+        const msg = decoded.msg as TxMsgBurnFungibleGasPayer;
+        expect(msg.tokenId).toBe(1n);
+        expect(msg.amount.toString()).toBe('100000000');
+        expect(msg.from.equals(senderPub)).toBe(true);
+
+        expectReencodedHex(decoded, c.hex);
+
+        break;
+      }
+      case 'TX-MINT-FUNGIBLE': {
+        const txSender = PhantasmaKeys.fromWIF(
+          'KwPpBSByydVKqStGHAnZzQofCqhDmD2bfRgc9BmZqM3ZmsdWJw4d'
+        );
+        const txReceiver = PhantasmaKeys.fromWIF(
+          'KwVG94yjfVg1YKFyRxAGtug93wdRbmLnqqrFV6Yd2CiA9KZDAp4H'
+        );
+        const senderPub = new Bytes32(txSender.PublicKey);
+        const receiverPub = new Bytes32(txReceiver.PublicKey);
+
+        const decoded = v as TxMsg;
+        expect(decoded.type).toBe(TxTypes.MintFungible);
+        expect(decoded.expiry).toBe(1759711416000n);
+        expect(decoded.maxGas).toBe(10000000n);
+        expect(decoded.maxData).toBe(1000n);
+        expect(decoded.gasFrom.equals(senderPub)).toBe(true);
+        expect(decoded.payload.data).toBe('test-payload');
+
+        const msg = decoded.msg as TxMsgMintFungible;
+        expect(msg.tokenId).toBe(1n);
+        expect(msg.amount.toString()).toBe('100000000');
+        expect(msg.to.equals(receiverPub)).toBe(true);
 
         expectReencodedHex(decoded, c.hex);
 
