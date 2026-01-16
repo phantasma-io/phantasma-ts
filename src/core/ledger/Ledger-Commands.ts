@@ -4,17 +4,17 @@ import {
   LedgerSignerData,
   PublicKeyResponse,
   Signature,
-} from '..';
-import { Transaction } from '../tx';
-import { Address, Base16, Ed25519Signature, PBinaryReader } from '../types';
-import { GetAddressFromPublicKey, GetAddressPublicKeyFromPublicKey } from './Address-Transcode';
-import { LedgerConfig } from './interfaces/LedgerConfig';
-import { GetPublicFromPrivate, Sign, Verify } from './Transaction-Sign';
-import { GetExpirationDate } from './Transaction-Transcode';
-import { GetVersion, GetApplicationName, GetPublicKey, SignLedger } from './Ledger-Utils';
-import { LedgerDeviceInfoResponse } from './interfaces/LedgerDeviceInfoResponse';
-import { LedgerBalanceFromLedgerResponse } from './interfaces/LedgerBalanceFromLedgerResponse';
-import { LedgerSigner } from './interfaces/LedgerSigner';
+} from '../index.js';
+import { Transaction } from '../tx/index.js';
+import { Address, Base16, Ed25519Signature, PBinaryReader } from '../types/index.js';
+import { GetAddressFromPublicKey, GetAddressPublicKeyFromPublicKey } from './Address-Transcode.js';
+import { LedgerConfig } from './interfaces/LedgerConfig.js';
+import { GetPublicFromPrivate, Sign, Verify } from './Transaction-Sign.js';
+import { GetExpirationDate } from './Transaction-Transcode.js';
+import { GetVersion, GetApplicationName, GetPublicKey, SignLedger } from './Ledger-Utils.js';
+import { LedgerDeviceInfoResponse } from './interfaces/LedgerDeviceInfoResponse.js';
+import { LedgerBalanceFromLedgerResponse } from './interfaces/LedgerBalanceFromLedgerResponse.js';
+import { LedgerSigner } from './interfaces/LedgerSigner.js';
 
 /**
  *

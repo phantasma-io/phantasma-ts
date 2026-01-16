@@ -1,4 +1,4 @@
-import { Address } from '../../types';
+import { Address } from '../../types/index.js';
 
 export interface LedgerBalanceFromLedgerResponse {
   success: boolean;

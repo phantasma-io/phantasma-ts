@@ -1,1 +1,1 @@
-export * from './interfaces';
+export * from './interfaces/index.js';

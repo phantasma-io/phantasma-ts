@@ -1,11 +1,11 @@
-import { ICarbonBlob } from '../../../interfaces/Carbon/ICarbonBlob';
-import { CarbonBinaryReader, CarbonBinaryWriter } from '../../CarbonSerialization';
-import { TxMsgBurnFungibleGasPayer } from './TxMsgBurnFungibleGasPayer';
-import { TxMsgBurnNonFungibleGasPayer } from './TxMsgBurnNonFungibleGasPayer';
-import { TxMsgMintFungible } from './TxMsgMintFungible';
-import { TxMsgMintNonFungible } from './TxMsgMintNonFungible';
-import { TxMsgTransferFungibleGasPayer } from './TxMsgTransferFungibleGasPayer';
-import { TxMsgTransferNonFungibleSingleGasPayer } from './TxMsgTransferNonFungibleSingleGasPayer';
+import { ICarbonBlob } from '../../../interfaces/Carbon/ICarbonBlob.js';
+import { CarbonBinaryReader, CarbonBinaryWriter } from '../../CarbonSerialization.js';
+import { TxMsgBurnFungibleGasPayer } from './TxMsgBurnFungibleGasPayer.js';
+import { TxMsgBurnNonFungibleGasPayer } from './TxMsgBurnNonFungibleGasPayer.js';
+import { TxMsgMintFungible } from './TxMsgMintFungible.js';
+import { TxMsgMintNonFungible } from './TxMsgMintNonFungible.js';
+import { TxMsgTransferFungibleGasPayer } from './TxMsgTransferFungibleGasPayer.js';
+import { TxMsgTransferNonFungibleSingleGasPayer } from './TxMsgTransferNonFungibleSingleGasPayer.js';
 
 export class TxMsgTrade implements ICarbonBlob {
   transferF: TxMsgTransferFungibleGasPayer[];

@@ -1,9 +1,9 @@
-import { ICarbonBlob } from '../../../../interfaces/Carbon/ICarbonBlob';
-import type { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSerialization';
-import { SmallString } from '../../SmallString';
-import { VmNamedDynamicVariable } from './VmNamedDynamicVariable';
-import { VmDynamicVariable } from './VmDynamicVariable';
-import { VmStructSchema } from './VmStructSchema';
+import { ICarbonBlob } from '../../../../interfaces/Carbon/ICarbonBlob.js';
+import type { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSerialization.js';
+import { SmallString } from '../../SmallString.js';
+import { VmNamedDynamicVariable } from './VmNamedDynamicVariable.js';
+import { VmDynamicVariable } from './VmDynamicVariable.js';
+import { VmStructSchema } from './VmStructSchema.js';
 
 export class VmDynamicStruct implements ICarbonBlob {
   // NOTE: fields must be sorted by name

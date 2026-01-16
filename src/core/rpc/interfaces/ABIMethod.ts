@@ -1,4 +1,4 @@
-import { ABIParameter } from './ABIParameter';
+import { ABIParameter } from './ABIParameter.js';
 
 export interface ABIMethod {
   name: string; //Name of method

@@ -1,2 +1,2 @@
-export * from "./DisasmUtils";
-export * from "./DisasmMethodCall";
+export * from "./DisasmUtils.js";
+export * from "./DisasmMethodCall.js";

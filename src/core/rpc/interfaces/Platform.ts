@@ -1,4 +1,4 @@
-import { Interop } from './Interop';
+import { Interop } from './Interop.js';
 
 export interface Platform {
   platform: string;

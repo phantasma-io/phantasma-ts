@@ -7,10 +7,10 @@
  *   payload: little-endian two's complement without extra sign byte
  */
 
-import { ICarbonBlob } from '../interfaces/Carbon/ICarbonBlob';
-import { Bytes16 } from './Carbon/Bytes16';
-import { Bytes32 } from './Carbon/Bytes32';
-import { Bytes64 } from './Carbon/Bytes64';
+import { ICarbonBlob } from '../interfaces/Carbon/ICarbonBlob.js';
+import { Bytes16 } from './Carbon/Bytes16.js';
+import { Bytes32 } from './Carbon/Bytes32.js';
+import { Bytes64 } from './Carbon/Bytes64.js';
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();

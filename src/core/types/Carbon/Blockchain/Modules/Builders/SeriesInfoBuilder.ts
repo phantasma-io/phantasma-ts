@@ -1,8 +1,8 @@
-import { Bytes32 } from '../../../Bytes32';
-import { VmStructSchema } from '../../Vm';
-import { SeriesInfo } from '../SeriesInfo';
-import { MetadataField } from './MetadataHelper';
-import { TokenSeriesMetadataBuilder } from './TokenSeriesMetadataBuilder';
+import { Bytes32 } from '../../../Bytes32.js';
+import { VmStructSchema } from '../../Vm/index.js';
+import { SeriesInfo } from '../SeriesInfo.js';
+import { MetadataField } from './MetadataHelper.js';
+import { TokenSeriesMetadataBuilder } from './TokenSeriesMetadataBuilder.js';
 
 export class SeriesInfoBuilder {
   static build(

@@ -1,10 +1,10 @@
 import BigInteger from 'big-integer';
 import { BinaryWriter, BinaryReader, Encoding } from 'csharp-binary-stream';
-import { ISignature, SignatureKind, Signature } from '../../interfaces';
-import { bytesToHex, stringToUint8Array } from '../../utils';
-import { VMType } from '../../vm';
-import { Ed25519Signature } from '../Ed25519Signature';
-import { Timestamp } from '../Timestamp';
+import { ISignature, SignatureKind, Signature } from '../../interfaces/index.js';
+import { bytesToHex, stringToUint8Array } from '../../utils/index.js';
+import { VMType } from '../../vm/index.js';
+import { Ed25519Signature } from '../Ed25519Signature.js';
+import { Timestamp } from '../Timestamp.js';
 
 export class PBinaryReader {
   reader: BinaryReader;

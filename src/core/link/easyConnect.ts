@@ -1,7 +1,7 @@
-import { PhantasmaLink } from './phantasmaLink';
-import { ProofOfWork } from './interfaces/ProofOfWork';
-import { EasyScript, Nexus } from './easyScript';
-import { TxMsg } from '../types/Carbon/Blockchain';
+import { PhantasmaLink } from './phantasmaLink.js';
+import { ProofOfWork } from './interfaces/ProofOfWork.js';
+import { EasyScript, Nexus } from './easyScript.js';
+import { TxMsg } from '../types/Carbon/Blockchain/index.js';
 
 export class EasyConnect {
   requiredVersion: number;

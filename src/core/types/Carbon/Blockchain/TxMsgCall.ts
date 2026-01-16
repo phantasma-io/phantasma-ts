@@ -1,5 +1,5 @@
-import { ICarbonBlob } from '../../../interfaces/Carbon/ICarbonBlob';
-import { CarbonBinaryReader, CarbonBinaryWriter, Throw } from '../../CarbonSerialization';
+import { ICarbonBlob } from '../../../interfaces/Carbon/ICarbonBlob.js';
+import { CarbonBinaryReader, CarbonBinaryWriter, Throw } from '../../CarbonSerialization.js';
 
 export type MsgCallArgs = {
   registerOffset: number;

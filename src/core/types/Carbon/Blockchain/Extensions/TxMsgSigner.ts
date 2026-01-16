@@ -1,12 +1,12 @@
-import { CarbonBinaryWriter } from '../../../CarbonSerialization';
-import { Ed25519Signature } from '../../../Ed25519Signature';
-import { PhantasmaKeys } from '../../../PhantasmaKeys';
-import { Bytes32 } from '../../Bytes32';
-import { Bytes64 } from '../../Bytes64';
-import { CarbonBlob } from '../../CarbonBlob';
-import { Witness } from '../../Witness';
-import { SignedTxMsg } from '../SignedTxMsg';
-import { TxMsg } from '../TxMsg';
+import { CarbonBinaryWriter } from '../../../CarbonSerialization.js';
+import { Ed25519Signature } from '../../../Ed25519Signature.js';
+import { PhantasmaKeys } from '../../../PhantasmaKeys.js';
+import { Bytes32 } from '../../Bytes32.js';
+import { Bytes64 } from '../../Bytes64.js';
+import { CarbonBlob } from '../../CarbonBlob.js';
+import { Witness } from '../../Witness.js';
+import { SignedTxMsg } from '../SignedTxMsg.js';
+import { TxMsg } from '../TxMsg.js';
 
 export class TxMsgSigner {
   static sign(msg: TxMsg, key: PhantasmaKeys): SignedTxMsg {

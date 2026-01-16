@@ -1,7 +1,7 @@
-import { TokenExternal } from './TokenExternal';
-import { TokenPrice } from './TokenPrice';
-import { TokenSeries } from './TokenSeries';
-import type { TokenSchemasResult } from './TokenSchemasResult';
+import { TokenExternal } from './TokenExternal.js';
+import { TokenPrice } from './TokenPrice.js';
+import { TokenSeries } from './TokenSeries.js';
+import type { TokenSchemasResult } from './TokenSchemasResult.js';
 
 export interface Token {
   symbol: string; //Ticker symbol for the token

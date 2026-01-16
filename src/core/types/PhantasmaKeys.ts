@@ -1,18 +1,18 @@
-import { IKeyPair } from '../interfaces/IKeyPair';
-import { Address } from './Address';
+import { IKeyPair } from '../interfaces/IKeyPair.js';
+import { Address } from './Address.js';
 import base58 from 'bs58';
 import WIF from 'wif';
-import { Signature } from '../interfaces/Signature';
-import { bytesToHex } from '../utils';
-import { Ed25519Signature } from './Ed25519Signature';
+import { Signature } from '../interfaces/Signature.js';
+import { bytesToHex } from '../utils/index.js';
+import { Ed25519Signature } from './Ed25519Signature.js';
 import pkg from 'elliptic';
-import { Entropy } from './Entropy';
+import { Entropy } from './Entropy.js';
 import {
   generateNewWif,
   getAddressFromWif,
   getPublicKeyFromPrivateKey,
   getWifFromPrivateKey,
-} from '../tx';
+} from '../tx/index.js';
 const { eddsa } = pkg;
 const ed25519 = new eddsa('ed25519');
 

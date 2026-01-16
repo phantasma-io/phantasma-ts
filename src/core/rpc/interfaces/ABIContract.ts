@@ -1,4 +1,4 @@
-import { ABIMethod } from './ABIMethod';
+import { ABIMethod } from './ABIMethod.js';
 
 export interface ABIContract {
   name: string; //Name of contract

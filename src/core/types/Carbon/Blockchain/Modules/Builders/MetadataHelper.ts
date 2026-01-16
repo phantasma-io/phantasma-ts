@@ -1,7 +1,7 @@
-import { hexToBytes } from "../../../../../utils";
-import { Bytes16 } from "../../../Bytes16";
-import { Bytes32 } from "../../../Bytes32";
-import { Bytes64 } from "../../../Bytes64";
+import { hexToBytes } from "../../../../../utils/index.js";
+import { Bytes16 } from "../../../Bytes16.js";
+import { Bytes32 } from "../../../Bytes32.js";
+import { Bytes64 } from "../../../Bytes64.js";
 import {
   VmDynamicStruct,
   VmNamedDynamicVariable,
@@ -10,8 +10,8 @@ import {
   VmStructSchema,
   VmType,
   VmVariableSchema,
-} from "../../Vm";
-import { StandardMeta } from "../StandardMeta";
+} from "../../Vm/index.js";
+import { StandardMeta } from "../StandardMeta.js";
 
 const INT64_MIN = -(1n << 63n);
 const INT64_MAX = (1n << 63n) - 1n;

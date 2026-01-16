@@ -1,10 +1,10 @@
-import { bytesToHex } from '../../../../../utils';
-import { CarbonBinaryWriter } from '../../../../CarbonSerialization';
-import { VmNamedVariableSchema } from '../../Vm/VmNamedVariableSchema';
-import { VmStructSchema } from '../../Vm/VmStructSchema';
-import { vmTypeFromString, VmType } from '../../Vm/VmType';
-import { TokenSchemas } from '../TokenSchemas';
-import { FieldType, nftDefaultMetadataFields, seriesDefaultMetadataFields, standardMetadataFields } from './MetadataHelper';
+import { bytesToHex } from '../../../../../utils/index.js';
+import { CarbonBinaryWriter } from '../../../../CarbonSerialization.js';
+import { VmNamedVariableSchema } from '../../Vm/VmNamedVariableSchema.js';
+import { VmStructSchema } from '../../Vm/VmStructSchema.js';
+import { vmTypeFromString, VmType } from '../../Vm/VmType.js';
+import { TokenSchemas } from '../TokenSchemas.js';
+import { FieldType, nftDefaultMetadataFields, seriesDefaultMetadataFields, standardMetadataFields } from './MetadataHelper.js';
 
 export class TokenSchemasJson {
   seriesMetadata: FieldType[];

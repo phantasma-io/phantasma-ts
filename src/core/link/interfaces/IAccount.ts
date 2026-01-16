@@ -1,5 +1,5 @@
-import { Balance } from '../../rpc/interfaces/Balance';
-import { IFile } from './IFile';
+import { Balance } from '../../rpc/interfaces/Balance.js';
+import { IFile } from './IFile.js';
 
 export interface IAccount {
   alias: string;

@@ -1,5 +1,5 @@
 import * as bs58 from 'bs58';
-import { Address, Base16, PhantasmaKeys } from '../types';
+import { Address, Base16, PhantasmaKeys } from '../types/index.js';
 
 /**
  * Gets the address from a private key.

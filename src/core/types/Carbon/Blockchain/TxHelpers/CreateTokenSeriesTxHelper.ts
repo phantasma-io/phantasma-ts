@@ -1,15 +1,15 @@
-import { bytesToHex, hexToBytes } from '../../../../utils';
-import { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSerialization';
-import { PhantasmaKeys } from '../../../PhantasmaKeys';
-import { Bytes32 } from '../../Bytes32';
-import { SmallString } from '../../SmallString';
-import { TxTypes } from '../../TxTypes';
-import { TxMsgSigner } from '../Extensions/TxMsgSigner';
-import { ModuleId } from '../ModuleId';
-import { SeriesInfo, TokenContract_Methods } from '../Modules';
-import { TxMsg } from '../TxMsg';
-import { TxMsgCall } from '../TxMsgCall';
-import { CreateSeriesFeeOptions } from './FeeOptions';
+import { bytesToHex, hexToBytes } from '../../../../utils/index.js';
+import { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSerialization.js';
+import { PhantasmaKeys } from '../../../PhantasmaKeys.js';
+import { Bytes32 } from '../../Bytes32.js';
+import { SmallString } from '../../SmallString.js';
+import { TxTypes } from '../../TxTypes.js';
+import { TxMsgSigner } from '../Extensions/TxMsgSigner.js';
+import { ModuleId } from '../ModuleId.js';
+import { SeriesInfo, TokenContract_Methods } from '../Modules/index.js';
+import { TxMsg } from '../TxMsg.js';
+import { TxMsgCall } from '../TxMsgCall.js';
+import { CreateSeriesFeeOptions } from './FeeOptions.js';
 
 export class CreateTokenSeriesTxHelper {
   /** Build a Tx without signing. */

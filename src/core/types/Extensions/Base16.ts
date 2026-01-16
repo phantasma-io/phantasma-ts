@@ -1,4 +1,4 @@
-import { hexStringToUint8Array, stringToUint8Array } from "../../utils";
+import { hexStringToUint8Array, stringToUint8Array } from "../../utils/index.js";
 
 export class Base16 {
   static encode(str: string) {

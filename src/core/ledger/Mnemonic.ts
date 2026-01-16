@@ -1,7 +1,7 @@
 // coin used by ledger nano s.
 
-import { bytesToHex, hexToBytes } from '../utils';
-import { LedgerConfig } from './interfaces/LedgerConfig';
+import { bytesToHex, hexToBytes } from '../utils/index.js';
+import { LedgerConfig } from './interfaces/LedgerConfig.js';
 
 // 60   | 0x80000273 | SOUL   | [Phantasma](https://phantasma.info/)
 export const SOUL_COIN: number = 60;

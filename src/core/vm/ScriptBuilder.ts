@@ -1,11 +1,11 @@
 import base58 from 'bs58';
-import { ISerializable } from '../interfaces';
-import { Address, PBinaryWriter, Serialization, Timestamp } from '../types';
-import { numberToByteArray, stringToUint8Array, bytesToHex } from '../utils';
-import { Opcode } from './Opcode';
-import { VMObject } from './VMObject';
-import { VMType } from './VMType';
-import { Contracts } from './Contracts';
+import { ISerializable } from '../interfaces/index.js';
+import { Address, PBinaryWriter, Serialization, Timestamp } from '../types/index.js';
+import { numberToByteArray, stringToUint8Array, bytesToHex } from '../utils/index.js';
+import { Opcode } from './Opcode.js';
+import { VMObject } from './VMObject.js';
+import { VMType } from './VMType.js';
+import { Contracts } from './Contracts.js';
 
 type byte = number;
 

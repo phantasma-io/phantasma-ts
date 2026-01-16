@@ -1,4 +1,4 @@
-import { DomainSettings } from '../types/DomainSettings';
+import { DomainSettings } from '../types/DomainSettings.js';
 
 export const ANONYMOUS_NAME = 'anonymous';
 export const GENESIS_NAME = 'genesis';

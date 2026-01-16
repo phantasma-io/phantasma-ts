@@ -1,9 +1,9 @@
-import { Int2Buffer, hex2ascii } from '../utils';
-import { ApplicationNameResponse } from './interfaces/ApplicationNameResponse';
-import { DeviceResponse } from './interfaces/DeviceResponse';
-import { PublicKeyResponse } from './interfaces/PublicKeyResponse';
-import { SignResponse } from './interfaces/SignResponse';
-import { VersionResponse } from './interfaces/VersionResponse';
+import { Int2Buffer, hex2ascii } from '../utils/index.js';
+import { ApplicationNameResponse } from './interfaces/ApplicationNameResponse.js';
+import { DeviceResponse } from './interfaces/DeviceResponse.js';
+import { PublicKeyResponse } from './interfaces/PublicKeyResponse.js';
+import { SignResponse } from './interfaces/SignResponse.js';
+import { VersionResponse } from './interfaces/VersionResponse.js';
 
 export const MAX_SIGNED_TX_LEN = 1024;
 

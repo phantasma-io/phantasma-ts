@@ -1,6 +1,6 @@
-import { Balance } from './Balance';
-import { Stake } from './Stake';
-import { Storage } from './Storage';
+import { Balance } from './Balance.js';
+import { Stake } from './Stake.js';
+import { Storage } from './Storage.js';
 
 export interface Account {
   address: string;

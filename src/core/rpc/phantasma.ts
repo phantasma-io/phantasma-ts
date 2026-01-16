@@ -1,24 +1,24 @@
 /* eslint-disable */
 
 import fetch from 'cross-fetch';
-import { Balance } from './interfaces/Balance';
-import { Organization } from './interfaces/Organization';
-import { Nexus } from './interfaces/Nexus';
-import { Account } from './interfaces/Account';
-import { Leaderboard } from './interfaces/Leaderboard';
-import { Chain } from './interfaces/Chain';
-import { Contract } from './interfaces/Contract';
-import { TransactionData } from './interfaces/TransactionData';
-import { AccountTransactions } from './interfaces/AccountTransactions';
-import { Paginated } from './interfaces/Paginated';
-import { Block } from './interfaces/Block';
-import { Token } from './interfaces/Token';
-import { TokenData } from './interfaces/TokenData';
-import { Auction } from './interfaces/Auction';
-import { Script } from './interfaces/Script';
-import { Archive } from './interfaces/Archive';
-import { NFT } from './interfaces/NFT';
-import { CursorPaginatedResult, TokenSeriesResult } from './interfaces';
+import { Balance } from './interfaces/Balance.js';
+import { Organization } from './interfaces/Organization.js';
+import { Nexus } from './interfaces/Nexus.js';
+import { Account } from './interfaces/Account.js';
+import { Leaderboard } from './interfaces/Leaderboard.js';
+import { Chain } from './interfaces/Chain.js';
+import { Contract } from './interfaces/Contract.js';
+import { TransactionData } from './interfaces/TransactionData.js';
+import { AccountTransactions } from './interfaces/AccountTransactions.js';
+import { Paginated } from './interfaces/Paginated.js';
+import { Block } from './interfaces/Block.js';
+import { Token } from './interfaces/Token.js';
+import { TokenData } from './interfaces/TokenData.js';
+import { Auction } from './interfaces/Auction.js';
+import { Script } from './interfaces/Script.js';
+import { Archive } from './interfaces/Archive.js';
+import { NFT } from './interfaces/NFT.js';
+import { CursorPaginatedResult, TokenSeriesResult } from './interfaces/index.js';
 
 export class PhantasmaAPI {
   host: string;

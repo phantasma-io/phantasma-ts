@@ -1,7 +1,7 @@
 import bigInt from "big-integer";
 import { isCallSignatureDeclaration } from "typescript";
-import { Decoder } from "./Decoder";
-import { VMType } from "./VMType";
+import { Decoder } from "./Decoder.js";
+import { VMType } from "./VMType.js";
 
 export enum EventKind {
   Unknown = 0,

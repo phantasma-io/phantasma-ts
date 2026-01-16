@@ -1,5 +1,5 @@
-import { VmStructSchema } from "./VmStructSchema"
-import { VmDynamicStruct } from "./VmDynamicStruct"
+import { VmStructSchema } from "./VmStructSchema.js"
+import { VmDynamicStruct } from "./VmDynamicStruct.js"
 
 export class VmStructArray {
   schema: VmStructSchema = new VmStructSchema()

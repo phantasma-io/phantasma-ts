@@ -1,9 +1,9 @@
-import { ICarbonBlob } from '../../interfaces/Carbon/ICarbonBlob';
+import { ICarbonBlob } from '../../interfaces/Carbon/ICarbonBlob.js';
 import {
   CarbonBinaryReader,
   CarbonBinaryWriter,
   twosComplementLEToBigInt,
-} from '../CarbonSerialization';
+} from '../CarbonSerialization.js';
 
 export class IntX implements ICarbonBlob {
   private big: bigint = 0n;

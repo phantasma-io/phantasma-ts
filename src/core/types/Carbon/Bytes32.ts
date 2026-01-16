@@ -1,6 +1,6 @@
-import { ICarbonBlob } from '../../interfaces/Carbon/ICarbonBlob';
-import { CarbonBinaryReader, CarbonBinaryWriter } from '../CarbonSerialization';
-import { bytesToHex } from '../../utils/Hex';
+import { ICarbonBlob } from '../../interfaces/Carbon/ICarbonBlob.js';
+import { CarbonBinaryReader, CarbonBinaryWriter } from '../CarbonSerialization.js';
+import { bytesToHex } from '../../utils/Hex.js';
 
 export class Bytes32 implements ICarbonBlob {
   static readonly Empty = new Bytes32(new Uint8Array(32));

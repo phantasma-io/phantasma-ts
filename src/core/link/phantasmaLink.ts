@@ -1,11 +1,11 @@
-import { Storage } from '../rpc/interfaces/Storage';
-import { Stake } from '../rpc/interfaces/Stake';
-import { ScriptBuilder } from '../vm';
-import { ProofOfWork } from './interfaces/ProofOfWork';
-import { IAccount } from './interfaces/IAccount';
-import { TxMsg } from '../types/Carbon/Blockchain';
-import { CarbonBlob } from '../types/Carbon/CarbonBlob';
-import { bytesToHex } from '../utils/Hex';
+import { Storage } from '../rpc/interfaces/Storage.js';
+import { Stake } from '../rpc/interfaces/Stake.js';
+import { ScriptBuilder } from '../vm/index.js';
+import { ProofOfWork } from './interfaces/ProofOfWork.js';
+import { IAccount } from './interfaces/IAccount.js';
+import { TxMsg } from '../types/Carbon/Blockchain/index.js';
+import { CarbonBlob } from '../types/Carbon/CarbonBlob.js';
+import { bytesToHex } from '../utils/Hex.js';
 
 export class PhantasmaLink {
   //Declarations

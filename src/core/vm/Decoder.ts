@@ -1,6 +1,6 @@
 import bigInt from "big-integer";
-import { ISignature, SignatureKind } from "../interfaces";
-import { VMType } from "./VMType";
+import { ISignature, SignatureKind } from "../interfaces/index.js";
+import { VMType } from "./VMType.js";
 
 export class Decoder {
   str: string;

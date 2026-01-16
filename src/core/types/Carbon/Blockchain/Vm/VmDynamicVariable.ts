@@ -1,13 +1,13 @@
-import { ICarbonBlob } from '../../../../interfaces/Carbon/ICarbonBlob';
-import { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSerialization';
-import { VmType } from './VmType';
-import { VmStructSchema } from './VmStructSchema';
-import { VmDynamicStruct } from './VmDynamicStruct';
-import { VmStructArray } from './VmStructArray';
-import { Bytes16 } from '../../Bytes16';
-import { Bytes32 } from '../../Bytes32';
-import { Bytes64 } from '../../Bytes64';
-import { VmVariableSchema } from './VmVariableSchema';
+import { ICarbonBlob } from '../../../../interfaces/Carbon/ICarbonBlob.js';
+import { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSerialization.js';
+import { VmType } from './VmType.js';
+import { VmStructSchema } from './VmStructSchema.js';
+import { VmDynamicStruct } from './VmDynamicStruct.js';
+import { VmStructArray } from './VmStructArray.js';
+import { Bytes16 } from '../../Bytes16.js';
+import { Bytes32 } from '../../Bytes32.js';
+import { Bytes64 } from '../../Bytes64.js';
+import { VmVariableSchema } from './VmVariableSchema.js';
 
 export class VmDynamicVariable implements ICarbonBlob {
   type: VmType = VmType.Dynamic;

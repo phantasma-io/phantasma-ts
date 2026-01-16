@@ -1,12 +1,12 @@
 import pkg from 'elliptic';
 const { eddsa } = pkg;
-import { Decoder, ScriptBuilder } from '../vm';
-import { bytesToHex, hexToBytes, getDifficulty, uint8ArrayToStringDefault } from '../utils';
+import { Decoder, ScriptBuilder } from '../vm/index.js';
+import { bytesToHex, hexToBytes, getDifficulty, uint8ArrayToStringDefault } from '../utils/index.js';
 import hexEncoding from 'crypto-js/enc-hex';
 import SHA256 from 'crypto-js/sha256';
-import { ISerializable, ISignature, Signature } from '../interfaces';
-import { Base16, PBinaryReader, PBinaryWriter, PhantasmaKeys } from '../types';
-import { getWifFromPrivateKey } from './utils';
+import { ISerializable, ISignature, Signature } from '../interfaces/index.js';
+import { Base16, PBinaryReader, PBinaryWriter, PhantasmaKeys } from '../types/index.js';
+import { getWifFromPrivateKey } from './utils.js';
 const curve = new eddsa('ed25519');
 
 export class Transaction implements ISerializable {

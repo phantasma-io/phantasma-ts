@@ -1,9 +1,9 @@
-import { ISerializable } from '../interfaces';
-import { VMType } from '../vm/VMType';
+import { ISerializable } from '../interfaces/index.js';
+import { VMType } from '../vm/VMType.js';
 import { BinaryReader, BinaryWriter, Encoding } from 'csharp-binary-stream';
-import { arrayNumberToUint8Array, uint8ArrayToNumberArray } from '../utils';
-import { TokenTrigger } from './DomainSettings';
-import { PBinaryReader, PBinaryWriter } from './Extensions';
+import { arrayNumberToUint8Array, uint8ArrayToNumberArray } from '../utils/index.js';
+import { TokenTrigger } from './DomainSettings.js';
+import { PBinaryReader, PBinaryWriter } from './Extensions/index.js';
 
 export class ContractParameter {
   name: string;

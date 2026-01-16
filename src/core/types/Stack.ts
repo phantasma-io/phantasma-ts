@@ -1,4 +1,4 @@
-import { IStack } from "../interfaces";
+import { IStack } from "../interfaces/index.js";
 
 export class Stack<T> implements IStack<T> {
   private storage: T[] = [];

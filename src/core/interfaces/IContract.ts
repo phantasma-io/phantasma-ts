@@ -1,4 +1,4 @@
-import { ContractInterface } from "../types";
+import { ContractInterface } from "../types/index.js";
 
 export interface IContract {
   Name: string;
