@@ -1,1 +1,1 @@
-export * from "./TxMsgSigner";
+export * from "./TxMsgSigner.js";

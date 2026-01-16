@@ -1,7 +1,7 @@
-import { ICarbonBlob } from '../../../../interfaces/Carbon/ICarbonBlob';
-import { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSerialization';
-import { VmType } from './VmType';
-import { VmStructSchema } from './VmStructSchema';
+import { ICarbonBlob } from '../../../../interfaces/Carbon/ICarbonBlob.js';
+import { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSerialization.js';
+import { VmType } from './VmType.js';
+import { VmStructSchema } from './VmStructSchema.js';
 
 export class VmVariableSchema implements ICarbonBlob {
   type!: VmType;

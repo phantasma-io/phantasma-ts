@@ -1,10 +1,10 @@
-import { Bytes32 } from '../../../Bytes32';
-import { IntX } from '../../../IntX';
-import { SmallString } from '../../../SmallString';
-import { CarbonTokenFlags } from '../../CarbonTokenFlags';
-import { TokenInfo } from '../TokenInfo';
-import { TokenSchemas } from '../TokenSchemas';
-import { TokenSchemasBuilder } from './TokenSchemasBuilder';
+import { Bytes32 } from '../../../Bytes32.js';
+import { IntX } from '../../../IntX.js';
+import { SmallString } from '../../../SmallString.js';
+import { CarbonTokenFlags } from '../../CarbonTokenFlags.js';
+import { TokenInfo } from '../TokenInfo.js';
+import { TokenSchemas } from '../TokenSchemas.js';
+import { TokenSchemasBuilder } from './TokenSchemasBuilder.js';
 
 export class TokenInfoBuilder {
   static build(

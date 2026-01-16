@@ -16,12 +16,13 @@ import {
 
 describe('test phantasma_ts', function () {
   test('test phantasma-ts.Transaction.SerializeData', function (done) {
+    // Behavior: signing + SerializeData should not throw for valid hex script/payload.
     const writer = new PBinaryWriter();
     const keys = PhantasmaKeys.generate();
 
     const nexusName = 'nexus';
     const chainName = 'main';
-    const script = 'script';
+    const script = bytesToHex(new TextEncoder().encode('script'));
     const expiration = new Date(17898129498);
     const payload = bytesToHex(new TextEncoder().encode('payload'));
     /*let signatures = [*/ new Ed25519Signature() /*]*/;
@@ -37,6 +38,7 @@ describe('test phantasma_ts', function () {
   });
 
   test('signature', function (done) {
+    // Behavior: signing helpers accept valid hex script/payload without throwing.
     // const writer = new PBinaryWriter();
     const keys = PhantasmaKeys.generate();
 
@@ -47,7 +49,7 @@ describe('test phantasma_ts', function () {
 
     const nexusName = 'nexus';
     const chainName = 'main';
-    const script = 'script';
+    const script = bytesToHex(new TextEncoder().encode('script'));
     const expiration = new Date(17898129498);
     const payload = bytesToHex(new TextEncoder().encode('payload'));
     const tx = new Transaction(nexusName, chainName, script, expiration, payload);
@@ -72,6 +74,7 @@ describe('test phantasma_ts', function () {
   });
 
   test('Test signature ts and c#', function (done) {
+    // Behavior: TS tx matches C# serialized fields after round-trip.
     const nexusName = 'testnet';
     const chainName = 'main';
     const wif = 'L5UEVHBjujaR1721aZM5Zm5ayjDyamMZS9W35RE9Y9giRkdf3dVx';
@@ -104,6 +107,7 @@ describe('test phantasma_ts', function () {
   });
 
   test('Transaction Serialized to bytes', function (done) {
+    // Behavior: serialized tx bytes match the expected reference.
     const nexusName = 'testnet';
     const chainName = 'main';
     const subject = 'system.nexus.protocol.version';
@@ -146,6 +150,7 @@ describe('test phantasma_ts', function () {
   });
 
   test('New MultiSig Tests', function (done) {
+    // Behavior: multisig tx with empty script serializes to expected bytes.
     const keys = PhantasmaKeys.fromWIF('L5UEVHBjujaR1721aZM5Zm5ayjDyamMZS9W35RE9Y9giRkdf3dVx');
     const nexusName = 'testnet';
     const chainName = 'main';
@@ -183,6 +188,7 @@ describe('test phantasma_ts', function () {
   });
 
   test('New MultiSig With addressTests', function (done) {
+    // Behavior: multisig tx with address list serializes to expected bytes.
     const keys = PhantasmaKeys.fromWIF('L5UEVHBjujaR1721aZM5Zm5ayjDyamMZS9W35RE9Y9giRkdf3dVx');
     const nexusName = 'testnet';
     const chainName = 'main';
@@ -230,6 +236,7 @@ describe('test phantasma_ts', function () {
     done();
   });
   test('SimpleScript', function (done) {
+    // Behavior: ScriptBuilder can build a simple contract call without throwing.
     const keys = PhantasmaKeys.fromWIF('L5UEVHBjujaR1721aZM5Zm5ayjDyamMZS9W35RE9Y9giRkdf3dVx');
 
     const sb = new ScriptBuilder();
@@ -243,6 +250,7 @@ describe('test phantasma_ts', function () {
   });
 
   test('Test ScriptBuilder', function (done) {
+    // Behavior: ScriptBuilder can build AllowGas + TransferTokens + SpendGas flow.
     const keys = PhantasmaKeys.fromWIF('L5UEVHBjujaR1721aZM5Zm5ayjDyamMZS9W35RE9Y9giRkdf3dVx');
 
     const sb = new ScriptBuilder();

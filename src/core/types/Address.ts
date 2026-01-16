@@ -1,11 +1,11 @@
 import base58 from 'bs58';
-import { encodeBase16, stringToUint8Array, uint8ArrayToString } from '../utils';
-import SHA256 from 'crypto-js/sha256';
-import hexEncoding from 'crypto-js/enc-hex';
-import { IKeyPair, ISerializable } from '../interfaces';
-import { getPrivateKeyFromWif, getPublicKeyFromPrivateKey, getWifFromPrivateKey } from '../tx';
+import { encodeBase16, stringToUint8Array, uint8ArrayToString } from '../utils/index.js';
+import SHA256 from 'crypto-js/sha256.js';
+import hexEncoding from 'crypto-js/enc-hex.js';
+import { IKeyPair, ISerializable } from '../interfaces/index.js';
+import { getPrivateKeyFromWif, getPublicKeyFromPrivateKey, getWifFromPrivateKey } from '../tx/index.js';
 import pkg from 'elliptic';
-import { PBinaryWriter, PBinaryReader } from './Extensions';
+import { PBinaryWriter, PBinaryReader } from './Extensions/index.js';
 const { eddsa } = pkg;
 const curve = new eddsa('ed25519');
 

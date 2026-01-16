@@ -1,24 +1,25 @@
 /* eslint-disable */
 
+import { logger } from '../utils/logger.js';
 import fetch from 'cross-fetch';
-import { Balance } from './interfaces/Balance';
-import { Organization } from './interfaces/Organization';
-import { Nexus } from './interfaces/Nexus';
-import { Account } from './interfaces/Account';
-import { Leaderboard } from './interfaces/Leaderboard';
-import { Chain } from './interfaces/Chain';
-import { Contract } from './interfaces/Contract';
-import { TransactionData } from './interfaces/TransactionData';
-import { AccountTransactions } from './interfaces/AccountTransactions';
-import { Paginated } from './interfaces/Paginated';
-import { Block } from './interfaces/Block';
-import { Token } from './interfaces/Token';
-import { TokenData } from './interfaces/TokenData';
-import { Auction } from './interfaces/Auction';
-import { Script } from './interfaces/Script';
-import { Archive } from './interfaces/Archive';
-import { NFT } from './interfaces/NFT';
-import { CursorPaginatedResult, TokenSeriesResult } from './interfaces';
+import { Balance } from './interfaces/Balance.js';
+import { Organization } from './interfaces/Organization.js';
+import { Nexus } from './interfaces/Nexus.js';
+import { Account } from './interfaces/Account.js';
+import { Leaderboard } from './interfaces/Leaderboard.js';
+import { Chain } from './interfaces/Chain.js';
+import { Contract } from './interfaces/Contract.js';
+import { TransactionData } from './interfaces/TransactionData.js';
+import { AccountTransactions } from './interfaces/AccountTransactions.js';
+import { Paginated } from './interfaces/Paginated.js';
+import { Block } from './interfaces/Block.js';
+import { Token } from './interfaces/Token.js';
+import { TokenData } from './interfaces/TokenData.js';
+import { Auction } from './interfaces/Auction.js';
+import { Script } from './interfaces/Script.js';
+import { Archive } from './interfaces/Archive.js';
+import { NFT } from './interfaces/NFT.js';
+import { CursorPaginatedResult, TokenSeriesResult } from './interfaces/index.js';
 
 export class PhantasmaAPI {
   host: string;
@@ -66,15 +67,15 @@ export class PhantasmaAPI {
       fetch(peersUrlJson + '?_=' + new Date().getTime()).then(async (res) => {
         const data = await res.json();
         for (var i = 0; i < data.length; i++) {
-          console.log('Checking RPC: ', data[i]);
+          logger.log('Checking RPC: ', data[i]);
           try {
             const msecs = await this.pingAsync(data[i].url);
             data[i].info = data[i].location + ' • ' + msecs + ' ms';
             data[i].msecs = msecs;
-            console.log(data[i].location + ' • ' + msecs + ' ms • ' + data[i].url + '/rpc');
+            logger.log(data[i].location + ' • ' + msecs + ' ms • ' + data[i].url + '/rpc');
             this.availableHosts.push(data[i]);
           } catch (err) {
-            console.log('Error with RPC: ' + data[i]);
+            logger.log('Error with RPC: ' + data[i]);
           }
         }
         this.availableHosts.sort((a, b) => a.msecs - b.msecs);
@@ -96,7 +97,7 @@ export class PhantasmaAPI {
       headers: { 'Content-Type': 'application/json' },
     });
     let resJson = await res.json();
-    console.log('method', method, resJson);
+    logger.log('method', method, resJson);
     if (resJson.error) {
       if (resJson.error.message) return { error: resJson.error.message };
       return { error: resJson.error };
@@ -119,7 +120,7 @@ export class PhantasmaAPI {
 
   updateRpc() {
     if (this.nexus === 'mainnet' && this.availableHosts.length > 0) {
-      console.log('%cUpdate RPC with name ' + this.rpcName, 'font-size: 20px');
+      logger.log('%cUpdate RPC with name ' + this.rpcName, 'font-size: 20px');
       if (this.rpcName == 'Auto') {
         this.host = this.availableHosts[0].url + '/rpc';
       } else {
@@ -127,7 +128,7 @@ export class PhantasmaAPI {
         if (rpc) this.host = rpc.url + '/rpc';
         else this.host = this.availableHosts[0].url + '/rpc';
       }
-      console.log('%cSet RPC api to ' + this.host, 'font-size: 20px');
+      logger.log('%cSet RPC api to ' + this.host, 'font-size: 20px');
     }
   }
 

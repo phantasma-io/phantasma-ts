@@ -1,4 +1,4 @@
-import { SmallString } from '../../SmallString';
+import { SmallString } from '../../SmallString.js';
 
 export const StandardMeta = {
   id: new SmallString('_i'),

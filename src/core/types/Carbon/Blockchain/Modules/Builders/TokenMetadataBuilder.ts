@@ -1,5 +1,5 @@
-import { CarbonBinaryWriter } from '../../../../CarbonSerialization';
-import { VmDynamicStruct, VmNamedDynamicVariable, VmType } from '../../Vm';
+import { CarbonBinaryWriter } from '../../../../CarbonSerialization.js';
+import { VmDynamicStruct, VmNamedDynamicVariable, VmType } from '../../Vm/index.js';
 
 export class TokenMetadataBuilder {
   private static readonly iconDataUriPrefixPattern =

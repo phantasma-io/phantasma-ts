@@ -1,10 +1,10 @@
-import { ICarbonBlob } from '../../../interfaces/Carbon/ICarbonBlob';
-import { CarbonBinaryReader, CarbonBinaryWriter } from '../../CarbonSerialization';
-import { Bytes32 } from '../Bytes32';
-import { Bytes64 } from '../Bytes64';
-import { TxTypes } from '../TxTypes';
-import { Witness } from '../Witness';
-import { TxMsg } from './TxMsg';
+import { ICarbonBlob } from '../../../interfaces/Carbon/ICarbonBlob.js';
+import { CarbonBinaryReader, CarbonBinaryWriter } from '../../CarbonSerialization.js';
+import { Bytes32 } from '../Bytes32.js';
+import { Bytes64 } from '../Bytes64.js';
+import { TxTypes } from '../TxTypes.js';
+import { Witness } from '../Witness.js';
+import { TxMsg } from './TxMsg.js';
 
 export class SignedTxMsg implements ICarbonBlob {
   constructor(

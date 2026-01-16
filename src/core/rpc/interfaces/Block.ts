@@ -1,6 +1,6 @@
-import { Event } from './Event';
-import { Oracle } from './Oracle';
-import { TransactionData } from './TransactionData';
+import { Event } from './Event.js';
+import { Oracle } from './Oracle.js';
+import { TransactionData } from './TransactionData.js';
 
 export interface Block {
   hash: string;

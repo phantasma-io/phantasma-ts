@@ -1,6 +1,6 @@
-import { Event } from './Event';
-import { EventExtended } from './EventExtended';
-import { SignatureResult } from './SignatureResult';
+import { Event } from './Event.js';
+import { EventExtended } from './EventExtended.js';
+import { SignatureResult } from './SignatureResult.js';
 
 export interface TransactionData {
   hash: string; //Hash of the transaction

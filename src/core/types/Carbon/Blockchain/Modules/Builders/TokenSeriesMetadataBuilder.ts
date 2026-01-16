@@ -1,7 +1,7 @@
-import { CarbonBinaryWriter } from '../../../../CarbonSerialization';
-import { VmDynamicStruct, VmNamedDynamicVariable, VmStructSchema, VmType } from '../../Vm';
-import { StandardMeta } from '../StandardMeta';
-import { findMetadataField, MetadataField, pushMetadataField, seriesDefaultMetadataFields } from './MetadataHelper';
+import { CarbonBinaryWriter } from '../../../../CarbonSerialization.js';
+import { VmDynamicStruct, VmNamedDynamicVariable, VmStructSchema, VmType } from '../../Vm/index.js';
+import { StandardMeta } from '../StandardMeta.js';
+import { findMetadataField, MetadataField, pushMetadataField, seriesDefaultMetadataFields } from './MetadataHelper.js';
 
 export class TokenSeriesMetadataBuilder {
   static buildAndSerialize(

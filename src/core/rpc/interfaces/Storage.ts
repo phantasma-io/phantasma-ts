@@ -1,4 +1,4 @@
-import { Archive } from './Archive';
+import { Archive } from './Archive.js';
 
 export interface Storage {
   available: number;

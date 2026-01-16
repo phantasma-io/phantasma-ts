@@ -1,5 +1,5 @@
-import { ABIEvent } from './ABIEvent';
-import { ABIMethod } from './ABIMethod';
+import { ABIEvent } from './ABIEvent.js';
+import { ABIMethod } from './ABIMethod.js';
 
 export interface Contract {
   name: string;

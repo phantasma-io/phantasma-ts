@@ -1,7 +1,8 @@
-import { PhantasmaLink } from './phantasmaLink';
-import { ProofOfWork } from './interfaces/ProofOfWork';
-import { EasyScript, Nexus } from './easyScript';
-import { TxMsg } from '../types/Carbon/Blockchain';
+import { PhantasmaLink } from './phantasmaLink.js';
+import { ProofOfWork } from './interfaces/ProofOfWork.js';
+import { EasyScript, Nexus } from './easyScript.js';
+import { TxMsg } from '../types/Carbon/Blockchain/index.js';
+import { logger } from '../utils/logger.js';
 
 export class EasyConnect {
   requiredVersion: number;
@@ -31,7 +32,7 @@ export class EasyConnect {
         this.platform = _options[1];
         this.providerHint = _options[2];
       } catch (error) {
-        console.log(error);
+        logger.log(error);
       }
     }
     this.script = new EasyScript();
@@ -64,7 +65,7 @@ export class EasyConnect {
   connect(
     onSuccess: any = (data) => {},
     onFail: any = (data) => {
-      console.log('%cError: ' + data, 'color:red');
+      logger.log('%cError: ' + data, 'color:red');
     }
   ) {
     let that = this;
@@ -75,13 +76,13 @@ export class EasyConnect {
         if (data) {
           that.connected = true;
           onSuccess(data);
-          console.log('%c[EasyConnect Connected]', 'color:green');
-          console.log(
+          logger.log('%c[EasyConnect Connected]', 'color:green');
+          logger.log(
             "Wallet Address '" + that.link.account.address + "' connected via " + that.link.wallet
           );
         } else {
           onFail();
-          console.log('EasyConnect could not connect to wallet');
+          logger.log('EasyConnect could not connect to wallet');
         }
       },
       onFail,
@@ -100,7 +101,7 @@ export class EasyConnect {
     _type: string = null,
     _arguments: Array<string> = null,
     _callback: any = (data) => {
-      console.log(data);
+      logger.log(data);
     }
   ) {
     if (this.connected == true) {
@@ -141,7 +142,7 @@ export class EasyConnect {
           break;
       }
     } else {
-      console.log('%cWallet is not connected', 'color:red');
+      logger.log('%cWallet is not connected', 'color:red');
     }
   }
 
@@ -150,7 +151,7 @@ export class EasyConnect {
     _arguments: Array<any> = null,
     onSuccess: any = (data) => {},
     onFail: any = (data) => {
-      console.log('%cError: ' + data, 'color:red');
+      logger.log('%cError: ' + data, 'color:red');
     }
   ) {
     if (this.connected == true) {
@@ -172,7 +173,7 @@ export class EasyConnect {
           break;
       }
     } else {
-      console.log('%cWallet is not connected', 'color:red');
+      logger.log('%cWallet is not connected', 'color:red');
     }
   }
 
@@ -181,7 +182,7 @@ export class EasyConnect {
     payload = null,
     onSuccess: any = (data) => {},
     onFail: any = (data) => {
-      console.log('%cError: ' + data, 'color:red');
+      logger.log('%cError: ' + data, 'color:red');
     }
   ) {
     this.link.signTx(script, payload, onSuccess, onFail);
@@ -191,7 +192,7 @@ export class EasyConnect {
     data: any,
     onSuccess: any = (data) => {},
     onFail: any = (data) => {
-      console.log('%cError: ' + data, 'color:red');
+      logger.log('%cError: ' + data, 'color:red');
     }
   ) {
     this.link.signData(data, onSuccess, onFail);
@@ -201,14 +202,14 @@ export class EasyConnect {
     txMsg: TxMsg,
     onSuccess: any = (data) => {},
     onFail: any = (data) => {
-      console.log('%cError: ' + data, 'color:red');
+      logger.log('%cError: ' + data, 'color:red');
     }
   ) {
     if (this.connected == true) {
     this.link.signCarbonTxAndBroadcast(txMsg, onSuccess, onFail);
     } else {
       const message = 'Wallet is not connected';
-      console.log('%c' + message, 'color:red');
+      logger.log('%c' + message, 'color:red');
       onFail(message);
     }
   }
@@ -223,7 +224,7 @@ export class EasyConnect {
     proofOfWork: ProofOfWork = ProofOfWork.Minimal,
     onSuccess: any = (data) => {},
     onFail: any = (data) => {
-      console.log('%cError: ' + data, 'color:red');
+      logger.log('%cError: ' + data, 'color:red');
     }
   ) {
     this.link.signTx(script, payload, onSuccess, onFail, proofOfWork);

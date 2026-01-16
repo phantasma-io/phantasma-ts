@@ -1,4 +1,4 @@
-import { LeaderboardRow } from './LeaderboardRow';
+import { LeaderboardRow } from './LeaderboardRow.js';
 
 export interface Leaderboard {
   name: string;

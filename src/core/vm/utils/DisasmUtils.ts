@@ -1,6 +1,6 @@
-import { IContract, NativeContractKind } from "../../interfaces";
-import { Stack } from "../../types";
-import { VMObject } from "../VMObject";
+import { IContract, NativeContractKind } from "../../interfaces/index.js";
+import { Stack } from "../../types/index.js";
+import { VMObject } from "../VMObject.js";
 
 export class DisasmUtils {
   private static PopArgs(

@@ -1,5 +1,5 @@
-import type { ABIMethod } from './ABIMethod';
-import type { KeyValue } from './KeyValue';
+import type { ABIMethod } from './ABIMethod.js';
+import type { KeyValue } from './KeyValue.js';
 
 export interface TokenSeriesResult {
   seriesId: string; // Phantasma series ID, up to 32 bytes

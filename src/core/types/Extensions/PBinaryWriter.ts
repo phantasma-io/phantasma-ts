@@ -1,9 +1,9 @@
 //import { BinaryWriter, BinaryReader, Encoding } from "csharp-binary-stream";
 import bigInt from 'big-integer';
 import { BinaryWriter, Encoding } from 'csharp-binary-stream';
-import { hexToBytes } from '../..';
-import { ISignature, Signature, SignatureKind } from '../../interfaces';
-import { Timestamp } from '../Timestamp';
+import { hexToBytes } from '../../utils/index.js';
+import { ISignature, Signature, SignatureKind } from '../../interfaces/index.js';
+import { Timestamp } from '../Timestamp.js';
 
 type byte = number;
 

@@ -1,9 +1,9 @@
 import BigInteger from 'big-integer';
-import { VMType } from './VMType';
-import { Timestamp } from '../types/Timestamp';
-import { Address, Base16, Describer, PBinaryReader, PBinaryWriter, Serialization } from '../types';
-import { ISerializable } from '../interfaces';
-import { uint8ArrayToBytes, uint8ArrayToStringDefault } from '../utils';
+import { VMType } from './VMType.js';
+import { Timestamp } from '../types/Timestamp.js';
+import { Address, Base16, Describer, PBinaryReader, PBinaryWriter, Serialization } from '../types/index.js';
+import { ISerializable } from '../interfaces/index.js';
+import { uint8ArrayToBytes, uint8ArrayToStringDefault } from '../utils/index.js';
 import { Type } from 'typescript';
 
 export class VMObject implements ISerializable {

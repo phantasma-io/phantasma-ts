@@ -1,6 +1,6 @@
-import { ICarbonBlob } from '../../../../interfaces/Carbon/ICarbonBlob';
-import type { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSerialization';
-import { VmStructSchema } from '../Vm/VmStructSchema';
+import { ICarbonBlob } from '../../../../interfaces/Carbon/ICarbonBlob.js';
+import type { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSerialization.js';
+import { VmStructSchema } from '../Vm/VmStructSchema.js';
 
 export class TokenSchemas implements ICarbonBlob {
   seriesMetadata: VmStructSchema;

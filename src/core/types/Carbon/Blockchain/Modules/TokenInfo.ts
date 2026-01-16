@@ -1,9 +1,9 @@
-import { ICarbonBlob } from '../../../../interfaces/Carbon/ICarbonBlob';
-import type { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSerialization';
-import { IntX } from '../../IntX';
-import { Bytes32 } from '../../Bytes32';
-import { SmallString } from '../../SmallString';
-import { CarbonTokenFlags } from '../CarbonTokenFlags';
+import { ICarbonBlob } from '../../../../interfaces/Carbon/ICarbonBlob.js';
+import type { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSerialization.js';
+import { IntX } from '../../IntX.js';
+import { Bytes32 } from '../../Bytes32.js';
+import { SmallString } from '../../SmallString.js';
+import { CarbonTokenFlags } from '../CarbonTokenFlags.js';
 
 export class TokenInfo implements ICarbonBlob {
   maxSupply: IntX;

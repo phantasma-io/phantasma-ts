@@ -4,17 +4,18 @@ import {
   LedgerSignerData,
   PublicKeyResponse,
   Signature,
-} from '..';
-import { Transaction } from '../tx';
-import { Address, Base16, Ed25519Signature, PBinaryReader } from '../types';
-import { GetAddressFromPublicKey, GetAddressPublicKeyFromPublicKey } from './Address-Transcode';
-import { LedgerConfig } from './interfaces/LedgerConfig';
-import { GetPublicFromPrivate, Sign, Verify } from './Transaction-Sign';
-import { GetExpirationDate } from './Transaction-Transcode';
-import { GetVersion, GetApplicationName, GetPublicKey, SignLedger } from './Ledger-Utils';
-import { LedgerDeviceInfoResponse } from './interfaces/LedgerDeviceInfoResponse';
-import { LedgerBalanceFromLedgerResponse } from './interfaces/LedgerBalanceFromLedgerResponse';
-import { LedgerSigner } from './interfaces/LedgerSigner';
+} from '../index.js';
+import { logger } from '../utils/logger.js';
+import { Transaction } from '../tx/index.js';
+import { Address, Base16, Ed25519Signature, PBinaryReader } from '../types/index.js';
+import { GetAddressFromPublicKey, GetAddressPublicKeyFromPublicKey } from './Address-Transcode.js';
+import { LedgerConfig } from './interfaces/LedgerConfig.js';
+import { GetPublicFromPrivate, Sign, Verify } from './Transaction-Sign.js';
+import { GetExpirationDate } from './Transaction-Transcode.js';
+import { GetVersion, GetApplicationName, GetPublicKey, SignLedger } from './Ledger-Utils.js';
+import { LedgerDeviceInfoResponse } from './interfaces/LedgerDeviceInfoResponse.js';
+import { LedgerBalanceFromLedgerResponse } from './interfaces/LedgerBalanceFromLedgerResponse.js';
+import { LedgerSigner } from './interfaces/LedgerSigner.js';
 
 /**
  *
@@ -95,7 +96,7 @@ export const GetLedgerAccountSigner = async (
   }
 
   const paths = await config.Transport.list();
-  console.log('paths', paths);
+  logger.log('paths', paths);
   if (paths.length == 0) {
     alert('NUmber of devices found:' + paths.length);
     return;
@@ -178,7 +179,7 @@ export const GetBalanceFromLedger = async (
   const msg = await GetPublicKey(config.Transport, options);
   /* istanbul ignore if */
   if (config.Debug) {
-    console.log('getBalanceFromLedger', 'msg', msg);
+    logger.log('getBalanceFromLedger', 'msg', msg);
   }
   let response: LedgerBalanceFromLedgerResponse = {
     address: Address.Null,
@@ -197,14 +198,14 @@ export const GetBalanceFromLedger = async (
   const address = GetAddressPublicKeyFromPublicKey(publicKey!);
   /* istanbul ignore if */
   if (config.Debug) {
-    console.log('address', address);
-    console.log('rpc', config.RPC);
+    logger.log('address', address);
+    logger.log('rpc', config.RPC);
   }
 
-  console.log('rpcAwait', await config.RPC.getAccount(address.Text));
+  logger.log('rpcAwait', await config.RPC.getAccount(address.Text));
   const rpcResponse = await config.RPC.getAccount(address.Text);
   if (config.Debug) {
-    console.log('rpcResponse', rpcResponse);
+    logger.log('rpcResponse', rpcResponse);
   }
   response.balances = new Map<string, { amount: number; decimals: number }>();
   if (rpcResponse.balances !== undefined) {
@@ -239,7 +240,7 @@ export const GetAddressFromLedeger = async (
   const msg = await GetPublicKey(config.Transport, options);
   /* istanbul ignore if */
   if (config.Debug) {
-    console.log('getBalanceFromLedger', 'msg', msg);
+    logger.log('getBalanceFromLedger', 'msg', msg);
   }
   if (msg.success) {
     const publicKey = msg.publicKey!;
@@ -260,7 +261,7 @@ async function SignEncodedTx(encodedTx: string, config: LedgerConfig): Promise<s
   const response = await SignLedger(config.Transport, encodedTx);
   /* istanbul ignore if */
   if (config.Debug) {
-    console.log('sendAmountUsingLedger', 'signCallback', 'response', response);
+    logger.log('sendAmountUsingLedger', 'signCallback', 'response', response);
   }
   if (response.success) {
     return response.signature;
@@ -287,7 +288,7 @@ export async function SendTransactionLedger(
   const msg_publicKey = await GetPublicKey(config.Transport, options);
   if (!msg_publicKey.success) {
     if (config.Debug) {
-      console.log('SendTransactionLedger', 'error ', msg_publicKey);
+      logger.log('SendTransactionLedger', 'error ', msg_publicKey);
     }
     return msg_publicKey;
   }
@@ -317,13 +318,13 @@ export async function SendTransactionLedger(
 
   try {
     if (config.Debug) {
-      console.log('sendAmountUsingCallback', 'encodedTx', encodedTx);
+      logger.log('sendAmountUsingCallback', 'encodedTx', encodedTx);
     }
 
     const signature = await SignEncodedTx(encodedTx, config);
 
     if (config.Debug) {
-      console.log('sendAmountUsingCallback', 'signature', signature);
+      logger.log('sendAmountUsingCallback', 'signature', signature);
     }
 
     if (config.VerifyResponse) {
@@ -335,7 +336,7 @@ export async function SendTransactionLedger(
       }
 
       if (config.Debug) {
-        console.log('verifyResponse', verifyResponse);
+        logger.log('verifyResponse', verifyResponse);
       }
     }
 
@@ -346,15 +347,15 @@ export async function SendTransactionLedger(
     myTransaction.signatures = myNewSignaturesArray;
 
     if (config.Debug) {
-      console.log('signedTx', myTransaction);
+      logger.log('signedTx', myTransaction);
     }
 
     const encodedSignedTx = Base16.encodeUint8Array(myTransaction.ToByteAray(true));
-    console.log('encoded signed tx: ', encodedSignedTx);
+    logger.log('encoded signed tx: ', encodedSignedTx);
 
     const txHash = await config.RPC.sendRawTransaction(encodedSignedTx);
     if (config.Debug) {
-      console.log('sendAmountUsingCallback', 'txHash', txHash);
+      logger.log('sendAmountUsingCallback', 'txHash', txHash);
     }
 
     const response: LedgerSendTransactionResponse = {
@@ -364,12 +365,12 @@ export async function SendTransactionLedger(
 
     /* istanbul ignore if */
     if (config.Debug) {
-      console.log('response', response);
+      logger.log('response', response);
     }
     return response;
   } catch (error) {
     if (config.Debug) {
-      console.log('error', error);
+      logger.log('error', error);
     }
 
     const errorResponse: LedgerSendTransactionResponse = {
@@ -400,24 +401,24 @@ export const GetBalanceFromPrivateKey = async (
   }
   /* istanbul ignore if */
   if (config.Debug) {
-    console.log('privateKey', privateKey);
+    logger.log('privateKey', privateKey);
   }
   // https://github.com/phantasma-io/phantasma-ts/blob/7d04aaed839851ae5640f68ab223ca7d92c42016/core/tx/utils.js
   const publicKey = GetPublicFromPrivate(privateKey);
   /* istanbul ignore if */
   if (config.Debug) {
-    console.log('publicKey', publicKey);
+    logger.log('publicKey', publicKey);
   }
   const address = GetAddressFromPublicKey(publicKey);
   /* istanbul ignore if */
   if (config.Debug) {
-    console.log('address', address);
+    logger.log('address', address);
   }
   // const path = `/address/${address}`;
   // const response = await httpRequestUtil.get(config, path);
   const rpcResponse = await config.RPC.getAccount(address);
   if (config.Debug) {
-    console.log('rpcResponse', rpcResponse);
+    logger.log('rpcResponse', rpcResponse);
   }
   let response: LedgerBalanceFromLedgerResponse;
   response.balances = new Map<string, { amount: number; decimals: number }>();
@@ -456,7 +457,7 @@ export const GetBalanceFromMnemonic = async (config: LedgerConfig, mnemonic: str
   }
   /* istanbul ignore if */
   if (config.Debug) {
-    console.log('mnemonic', mnemonic);
+    logger.log('mnemonic', mnemonic);
   }
   const privateKey = GetPrivateKeyFromMnemonic(config, mnemonic, index);
   return await GetBalanceFromPrivateKey(config, privateKey);

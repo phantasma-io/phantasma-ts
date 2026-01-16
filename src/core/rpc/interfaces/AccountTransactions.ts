@@ -1,4 +1,4 @@
-import { TransactionData } from './TransactionData';
+import { TransactionData } from './TransactionData.js';
 
 export interface AccountTransactions {
   address: string;

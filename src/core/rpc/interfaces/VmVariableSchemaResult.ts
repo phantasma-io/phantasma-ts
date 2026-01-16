@@ -1,4 +1,4 @@
-import type { VmStructSchemaResult } from './VmStructSchemaResult';
+import type { VmStructSchemaResult } from './VmStructSchemaResult.js';
 
 export interface VmVariableSchemaResult {
   type: string;

@@ -1,11 +1,11 @@
-import { IKeyPair } from '../interfaces/IKeyPair';
-import { Signature, SignatureKind } from '../interfaces/Signature';
-import { Address } from './Address';
+import { IKeyPair } from '../interfaces/IKeyPair.js';
+import { Signature, SignatureKind } from '../interfaces/Signature.js';
+import { Address } from './Address.js';
 import pkg from 'elliptic';
 
-import { stringToUint8Array, bytesToHex, uint8ArrayToString } from '../utils';
+import { stringToUint8Array, bytesToHex, uint8ArrayToString } from '../utils/index.js';
 import { BinaryReader, BinaryWriter, Encoding } from 'csharp-binary-stream';
-import { PBinaryWriter, PBinaryReader } from './Extensions';
+import { PBinaryWriter, PBinaryReader } from './Extensions/index.js';
 const { eddsa } = pkg;
 const ed25519 = new eddsa('ed25519');
 

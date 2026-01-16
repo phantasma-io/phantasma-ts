@@ -1,8 +1,8 @@
 import { Type } from "typescript";
-import { Base16, PBinaryReader, PBinaryWriter } from "./Extensions";
-import { Timestamp } from "./Timestamp";
-import { ISerializable } from "../interfaces";
-import { stringToUint8Array, uint8ArrayToBytes } from "../utils";
+import { Base16, PBinaryReader, PBinaryWriter } from "./Extensions/index.js";
+import { Timestamp } from "./Timestamp.js";
+import { ISerializable } from "../interfaces/index.js";
+import { stringToUint8Array, uint8ArrayToBytes } from "../utils/index.js";
 
 export interface CustomReader {
   (reader: PBinaryReader): any;

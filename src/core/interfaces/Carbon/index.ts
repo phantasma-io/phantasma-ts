@@ -1,1 +1,1 @@
-export * from "./ICarbonBlob";
+export * from "./ICarbonBlob.js";

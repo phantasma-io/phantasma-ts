@@ -1,4 +1,4 @@
-import type { KeyValue } from './KeyValue';
+import type { KeyValue } from './KeyValue.js';
 
 export interface TokenData {
   ID: string; //ID of token

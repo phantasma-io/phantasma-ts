@@ -1,5 +1,5 @@
-import { Address } from './Address';
-import { Timestamp } from './Timestamp';
+import { Address } from './Address.js';
+import { Timestamp } from './Timestamp.js';
 
 export enum TriggerResult {
   Failure,

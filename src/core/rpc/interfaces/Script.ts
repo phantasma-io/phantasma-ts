@@ -1,5 +1,5 @@
-import { Event } from './Event';
-import { Oracle } from './Oracle';
+import { Event } from './Event.js';
+import { Oracle } from './Oracle.js';
 
 export interface Script {
   events: Array<Event>; //List of events that triggered in the transaction

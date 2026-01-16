@@ -1,5 +1,5 @@
-import { ICarbonBlob } from '../../interfaces/Carbon/ICarbonBlob';
-import { CarbonBinaryReader, CarbonBinaryWriter } from '../CarbonSerialization';
+import { ICarbonBlob } from '../../interfaces/Carbon/ICarbonBlob.js';
+import { CarbonBinaryReader, CarbonBinaryWriter } from '../CarbonSerialization.js';
 
 type Ctor<T> = new () => T;
 

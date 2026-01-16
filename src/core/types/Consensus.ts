@@ -1,8 +1,8 @@
 import { Encoding } from 'csharp-binary-stream';
-import { ISerializable } from '../interfaces';
-import { bytesToHex, stringToUint8Array } from '../utils';
-import { Base16, PBinaryReader, PBinaryWriter } from './Extensions';
-import { Timestamp } from './Timestamp';
+import { ISerializable } from '../interfaces/index.js';
+import { bytesToHex, stringToUint8Array } from '../utils/index.js';
+import { Base16, PBinaryReader, PBinaryWriter } from './Extensions/index.js';
+import { Timestamp } from './Timestamp.js';
 
 export enum ConsensusMode {
   Unanimity,

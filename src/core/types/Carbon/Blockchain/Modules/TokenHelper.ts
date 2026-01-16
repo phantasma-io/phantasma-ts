@@ -1,5 +1,5 @@
-import { CarbonBinaryWriter } from '../../../CarbonSerialization';
-import { Bytes32 } from '../../Bytes32';
+import { CarbonBinaryWriter } from '../../../CarbonSerialization.js';
+import { Bytes32 } from '../../Bytes32.js';
 
 export class TokenHelper {
   static getNftAddress(carbonTokenId: bigint, instanceId: bigint): Bytes32 {

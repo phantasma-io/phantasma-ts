@@ -1,4 +1,4 @@
-import { PhantasmaAPI } from '../../rpc/phantasma';
+import { PhantasmaAPI } from '../../rpc/phantasma.js';
 
 export interface LedgerConfig {
   Debug: boolean;

@@ -1,9 +1,9 @@
-import { ICarbonBlob } from '../../../../interfaces/Carbon/ICarbonBlob';
-import { hexToBytes } from '../../../../utils';
-import { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSerialization';
-import { SmallString } from '../../SmallString';
-import { VmDynamicVariable } from './VmDynamicVariable';
-import { VmType } from './VmType';
+import { ICarbonBlob } from '../../../../interfaces/Carbon/ICarbonBlob.js';
+import { hexToBytes } from '../../../../utils/index.js';
+import { CarbonBinaryReader, CarbonBinaryWriter } from '../../../CarbonSerialization.js';
+import { SmallString } from '../../SmallString.js';
+import { VmDynamicVariable } from './VmDynamicVariable.js';
+import { VmType } from './VmType.js';
 
 export class VmNamedDynamicVariable implements ICarbonBlob {
   name!: SmallString;

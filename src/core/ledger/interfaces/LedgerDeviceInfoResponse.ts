@@ -1,5 +1,5 @@
-import { VersionResponse } from './VersionResponse';
-import { ApplicationNameResponse } from './ApplicationNameResponse';
+import { VersionResponse } from './VersionResponse.js';
+import { ApplicationNameResponse } from './ApplicationNameResponse.js';
 
 export interface LedgerDeviceInfoResponse {
   version: VersionResponse;

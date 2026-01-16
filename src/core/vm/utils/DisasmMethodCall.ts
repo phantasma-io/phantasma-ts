@@ -1,4 +1,4 @@
-import { VMObject } from "../VMObject";
+import { VMObject } from "../VMObject.js";
 
 export class DisasmMethodCall {
   public ContractName: string;

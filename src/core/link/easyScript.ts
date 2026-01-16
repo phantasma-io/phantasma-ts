@@ -1,4 +1,4 @@
-import { ScriptBuilder } from "../vm";
+import { ScriptBuilder } from "../vm/index.js";
 
 export enum Nexus {
   Mainnet = "mainnet",

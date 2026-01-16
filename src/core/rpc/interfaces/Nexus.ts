@@ -1,7 +1,7 @@
-import { Platform } from './Platform';
-import { Governance } from './Governance';
-import { Token } from './Token';
-import { Chain } from './Chain';
+import { Platform } from './Platform.js';
+import { Governance } from './Governance.js';
+import { Token } from './Token.js';
+import { Chain } from './Chain.js';
 
 export interface Nexus {
   name: string; //Name of the nexus

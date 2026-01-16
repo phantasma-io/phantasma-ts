@@ -1,6 +1,6 @@
-import { ICarbonBlob } from '../../../interfaces/Carbon/ICarbonBlob';
-import { CarbonBinaryReader, CarbonBinaryWriter } from '../../CarbonSerialization';
-import { Bytes32 } from '../Bytes32';
+import { ICarbonBlob } from '../../../interfaces/Carbon/ICarbonBlob.js';
+import { CarbonBinaryReader, CarbonBinaryWriter } from '../../CarbonSerialization.js';
+import { Bytes32 } from '../Bytes32.js';
 
 export class TxMsgTransferFungibleGasPayer implements ICarbonBlob {
   to: Bytes32;

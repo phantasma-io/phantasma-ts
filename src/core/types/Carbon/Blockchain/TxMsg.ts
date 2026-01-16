@@ -1,25 +1,25 @@
-import { ICarbonBlob } from '../../../interfaces/Carbon/ICarbonBlob';
-import { CarbonBinaryReader, CarbonBinaryWriter } from '../../CarbonSerialization';
-import { Bytes32 } from '../Bytes32';
-import { SmallString } from '../SmallString';
-import { TxTypes } from '../TxTypes';
-import { TxMsgCall } from './TxMsgCall';
-import { TxMsgCallMulti } from './TxMsgCallMulti';
-import { TxMsgMintFungible } from './TxMsgMintFungible';
-import { TxMsgMintNonFungible } from './TxMsgMintNonFungible';
-import { TxMsgTrade } from './TxMsgTrade';
-import { TxMsgTransferFungible } from './TxMsgTransferFungible';
-import { TxMsgTransferFungibleGasPayer } from './TxMsgTransferFungibleGasPayer';
-import { TxMsgTransferNonFungibleMulti } from './TxMsgTransferNonFungibleMulti';
-import { TxMsgTransferNonFungibleMultiGasPayer } from './TxMsgTransferNonFungibleMultiGasPayer';
-import { TxMsgTransferNonFungibleSingle } from './TxMsgTransferNonFungibleSingle';
-import { TxMsgTransferNonFungibleSingleGasPayer } from './TxMsgTransferNonFungibleSingleGasPayer';
-import { TxMsgBurnFungible } from './TxMsgBurnFungible';
-import { TxMsgBurnFungibleGasPayer } from './TxMsgBurnFungibleGasPayer';
-import { TxMsgBurnNonFungible } from './TxMsgBurnNonFungible';
-import { TxMsgBurnNonFungibleGasPayer } from './TxMsgBurnNonFungibleGasPayer';
-import { TxMsgPhantasma } from './TxMsgPhantasma';
-import { TxMsgPhantasmaRaw } from './TxMsgPhantasmaRaw';
+import { ICarbonBlob } from '../../../interfaces/Carbon/ICarbonBlob.js';
+import { CarbonBinaryReader, CarbonBinaryWriter } from '../../CarbonSerialization.js';
+import { Bytes32 } from '../Bytes32.js';
+import { SmallString } from '../SmallString.js';
+import { TxTypes } from '../TxTypes.js';
+import { TxMsgCall } from './TxMsgCall.js';
+import { TxMsgCallMulti } from './TxMsgCallMulti.js';
+import { TxMsgMintFungible } from './TxMsgMintFungible.js';
+import { TxMsgMintNonFungible } from './TxMsgMintNonFungible.js';
+import { TxMsgTrade } from './TxMsgTrade.js';
+import { TxMsgTransferFungible } from './TxMsgTransferFungible.js';
+import { TxMsgTransferFungibleGasPayer } from './TxMsgTransferFungibleGasPayer.js';
+import { TxMsgTransferNonFungibleMulti } from './TxMsgTransferNonFungibleMulti.js';
+import { TxMsgTransferNonFungibleMultiGasPayer } from './TxMsgTransferNonFungibleMultiGasPayer.js';
+import { TxMsgTransferNonFungibleSingle } from './TxMsgTransferNonFungibleSingle.js';
+import { TxMsgTransferNonFungibleSingleGasPayer } from './TxMsgTransferNonFungibleSingleGasPayer.js';
+import { TxMsgBurnFungible } from './TxMsgBurnFungible.js';
+import { TxMsgBurnFungibleGasPayer } from './TxMsgBurnFungibleGasPayer.js';
+import { TxMsgBurnNonFungible } from './TxMsgBurnNonFungible.js';
+import { TxMsgBurnNonFungibleGasPayer } from './TxMsgBurnNonFungibleGasPayer.js';
+import { TxMsgPhantasma } from './TxMsgPhantasma.js';
+import { TxMsgPhantasmaRaw } from './TxMsgPhantasmaRaw.js';
 
 type TxMsgPayload =
   | TxMsgCall

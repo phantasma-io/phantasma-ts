@@ -1,14 +1,14 @@
-import { bytesToHex, hexToBytes } from '../../../../utils';
-import { CarbonBinaryReader } from '../../../CarbonSerialization';
-import { PhantasmaKeys } from '../../../PhantasmaKeys';
-import { Bytes32 } from '../../Bytes32';
-import { SmallString } from '../../SmallString';
-import { TxTypes } from '../../TxTypes';
-import { TxMsgSigner } from '../Extensions/TxMsgSigner';
-import { TokenHelper } from '../Modules/TokenHelper';
-import { TxMsg } from '../TxMsg';
-import { TxMsgMintNonFungible } from '../TxMsgMintNonFungible';
-import { MintNftFeeOptions } from './FeeOptions';
+import { bytesToHex, hexToBytes } from '../../../../utils/index.js';
+import { CarbonBinaryReader } from '../../../CarbonSerialization.js';
+import { PhantasmaKeys } from '../../../PhantasmaKeys.js';
+import { Bytes32 } from '../../Bytes32.js';
+import { SmallString } from '../../SmallString.js';
+import { TxTypes } from '../../TxTypes.js';
+import { TxMsgSigner } from '../Extensions/TxMsgSigner.js';
+import { TokenHelper } from '../Modules/TokenHelper.js';
+import { TxMsg } from '../TxMsg.js';
+import { TxMsgMintNonFungible } from '../TxMsgMintNonFungible.js';
+import { MintNftFeeOptions } from './FeeOptions.js';
 
 export class MintNonFungibleTxHelper {
   // Build a Tx without signing
