@@ -1,15 +1,16 @@
 import * as crypto from 'crypto';
+import { logger } from '../utils/logger.js';
 
 const PUBLIC_KEY_PREFIX = '302A300506032B6570032100';
 const DEBUG = false;
 
 export const PrivateToDer = (privateKeyHex: string): Buffer => {
   if (DEBUG) {
-    console.log('privateToDer', 'privateKeyHex', privateKeyHex);
+    logger.log('privateToDer', 'privateKeyHex', privateKeyHex);
   }
   const derHex = `302e020100300506032b657004220420${privateKeyHex}`;
   if (DEBUG) {
-    console.log('privateToDer', 'derHex', derHex);
+    logger.log('privateToDer', 'derHex', derHex);
   }
   return Buffer.from(derHex, 'hex');
 };
@@ -27,12 +28,12 @@ export const PublicToPem = (publicKeyHex: string): string => {
 
 export const SignBytes = (hash: Buffer, privateKey: Buffer): string => {
   if (DEBUG) {
-    console.log('signBytes.hash', hash);
-    console.log('signBytes.privateKey', privateKey);
+    logger.log('signBytes.hash', hash);
+    logger.log('signBytes.privateKey', privateKey);
   }
   const privateKeyDer = PrivateToDer(privateKey.toString('hex'));
   if (DEBUG) {
-    console.log('signBytes.privateKeyDer', privateKeyDer);
+    logger.log('signBytes.privateKeyDer', privateKeyDer);
   }
   const privateKeyObj = crypto.createPrivateKey({
     key: privateKeyDer,
@@ -42,7 +43,7 @@ export const SignBytes = (hash: Buffer, privateKey: Buffer): string => {
   const signature = crypto.sign(undefined, hash, privateKeyObj);
   const signatureHex = signature.toString('hex');
   if (DEBUG) {
-    console.log('signatureHex', signatureHex);
+    logger.log('signatureHex', signatureHex);
   }
   return signatureHex;
 };
@@ -53,33 +54,33 @@ export const GetHash = (encodedTx: string, debug?: boolean): Buffer => {
 
 export const Sign = (encodedTx: string, privateKeyHex: string): string => {
   if (DEBUG) {
-    console.log('sign', 'encodedTx', encodedTx);
+    logger.log('sign', 'encodedTx', encodedTx);
   }
   const privateKey = Buffer.from(privateKeyHex, 'hex');
   if (DEBUG) {
-    console.log('sign', 'privateKey', privateKey.toString('hex'));
+    logger.log('sign', 'privateKey', privateKey.toString('hex'));
   }
 
   const hash = GetHash(encodedTx);
   if (DEBUG) {
-    console.log('sign', 'hash', hash.toString('hex'));
+    logger.log('sign', 'hash', hash.toString('hex'));
   }
   const signature = SignBytes(hash, privateKey);
   if (DEBUG) {
-    console.log('sign', 'signature', signature);
+    logger.log('sign', 'signature', signature);
   }
   return signature.toLowerCase();
 };
 
 export const Verify = (encodedTx: string, signatureHex: string, publicKeyHex: string): boolean => {
   if (DEBUG) {
-    console.log('verify', 'encodedTx', encodedTx);
-    console.log('verify', 'signatureHex', signatureHex);
-    console.log('verify', 'publicKeyHex', publicKeyHex);
+    logger.log('verify', 'encodedTx', encodedTx);
+    logger.log('verify', 'signatureHex', signatureHex);
+    logger.log('verify', 'publicKeyHex', publicKeyHex);
   }
   const publicKeyPem = PublicToPem(publicKeyHex);
   if (DEBUG) {
-    console.log('verify', 'publicKeyPem', publicKeyPem);
+    logger.log('verify', 'publicKeyPem', publicKeyPem);
   }
   const publicKeyObj = crypto.createPublicKey({
     key: publicKeyPem,
@@ -89,7 +90,7 @@ export const Verify = (encodedTx: string, signatureHex: string, publicKeyHex: st
   const signature = Buffer.from(signatureHex, 'hex');
   const hash = GetHash(encodedTx);
   if (DEBUG) {
-    console.log('verify', 'hash', hash.toString('hex'));
+    logger.log('verify', 'hash', hash.toString('hex'));
   }
   return crypto.verify(undefined, hash, publicKeyObj, signature);
 };

@@ -4,6 +4,7 @@ import { DeviceResponse } from './interfaces/DeviceResponse.js';
 import { PublicKeyResponse } from './interfaces/PublicKeyResponse.js';
 import { SignResponse } from './interfaces/SignResponse.js';
 import { VersionResponse } from './interfaces/VersionResponse.js';
+import { logger } from '../utils/logger.js';
 
 export const MAX_SIGNED_TX_LEN = 1024;
 
@@ -58,12 +59,12 @@ export const GetErrorMessage = (responseStr: string): string => {
 export const GetDevice = async (transport): Promise<DeviceResponse> => {
   /* istanbul ignore if */
   if (Debug) {
-    console.log('getDevice', 'transport', transport);
+    logger.log('getDevice', 'transport', transport);
   }
   const supported = await transport.isSupported();
   /* istanbul ignore if */
   if (Debug) {
-    console.log('getDevice', 'supported', supported);
+    logger.log('getDevice', 'supported', supported);
   }
 
   if (!supported) {
@@ -77,7 +78,7 @@ export const GetDevice = async (transport): Promise<DeviceResponse> => {
   const list = await transport.list();
   /* istanbul ignore if */
   if (Debug) {
-    console.log('getDevice', 'list', list);
+    logger.log('getDevice', 'list', list);
   }
 
   if (list.length == 0) {
@@ -91,13 +92,13 @@ export const GetDevice = async (transport): Promise<DeviceResponse> => {
   const path = list[0];
   /* istanbul ignore if */
   if (Debug) {
-    console.log('getDevice', 'path', path);
+    logger.log('getDevice', 'path', path);
   }
   const device = await transport.open(path);
 
   /* istanbul ignore if */
   if (Debug) {
-    console.log('getDevice', 'device', device);
+    logger.log('getDevice', 'device', device);
   }
   return {
     enabled: true,
@@ -124,13 +125,13 @@ export const GetApplicationName = async (transport): Promise<ApplicationNameResp
     const request = Buffer.from('E004000000', 'hex');
     /* istanbul ignore if */
     if (Debug) {
-      console.log('exchange', 'request', request.toString('hex').toUpperCase());
+      logger.log('exchange', 'request', request.toString('hex').toUpperCase());
     }
     const response = await device.device.exchange(request);
     const responseStr = response.toString('hex').toUpperCase();
     /* istanbul ignore if */
     if (Debug) {
-      console.log('exchange', 'response', responseStr);
+      logger.log('exchange', 'response', responseStr);
     }
     let success = false;
     let message = '';
@@ -151,7 +152,7 @@ export const GetApplicationName = async (transport): Promise<ApplicationNameResp
   } catch (error) {
     /* istanbul ignore if */
     if (Debug) {
-      console.trace('getApplicationName', 'error', error);
+      logger.trace('getApplicationName', 'error', error);
     }
     return {
       success: false,
@@ -187,13 +188,13 @@ export const GetVersion = async (transport): Promise<VersionResponse> => {
     const request = Buffer.from('E003000000', 'hex');
     /* istanbul ignore if */
     if (Debug) {
-      console.log('exchange', 'request', request.toString('hex').toUpperCase());
+      logger.log('exchange', 'request', request.toString('hex').toUpperCase());
     }
     const response = await device.device.exchange(request);
     const responseStr = response.toString('hex').toUpperCase();
     /* istanbul ignore if */
     if (Debug) {
-      console.log('exchange', 'response', responseStr);
+      logger.log('exchange', 'response', responseStr);
     }
     let success = false;
     let message = '';
@@ -214,7 +215,7 @@ export const GetVersion = async (transport): Promise<VersionResponse> => {
   } catch (error) {
     /* istanbul ignore if */
     if (Debug) {
-      console.trace('getVersion', 'error', error);
+      logger.trace('getVersion', 'error', error);
     }
     return {
       success: false,
@@ -253,19 +254,19 @@ export const GetBip44PathMessage = (messagePrefix: any): Buffer => {
   const payloadLen = Int2Buffer(payload.length);
 
   if (Debug) {
-    console.log(
+    logger.log(
       'getBip44PathMessage',
       'bip44PathBuffer',
       bip44PathBuffer.toString('hex').toUpperCase()
     );
-    console.log('getBip44PathMessage', 'bip44PathBufferLen', bip44PathBufferLen);
-    console.log(
+    logger.log('getBip44PathMessage', 'bip44PathBufferLen', bip44PathBufferLen);
+    logger.log(
       'getBip44PathMessage',
       'bip44PathBufferLenBuffer',
       bip44PathBufferLenBuffer.toString('hex').toUpperCase()
     );
-    console.log('getBip44PathMessage', 'payload', payload.toString('hex').toUpperCase());
-    console.log('getBip44PathMessage', 'payloadLen', payloadLen.toString('hex').toUpperCase());
+    logger.log('getBip44PathMessage', 'payload', payload.toString('hex').toUpperCase());
+    logger.log('getBip44PathMessage', 'payloadLen', payloadLen.toString('hex').toUpperCase());
   }
 
   const message = Buffer.concat([messagePrefix, payloadLen, payload]);
@@ -306,13 +307,13 @@ export const GetPublicKey = async (transport, options): Promise<PublicKeyRespons
     const request = GetBip44PathMessage(messagePrefix);
     /* istanbul ignore if */
     if (Debug) {
-      console.log('exchange', 'request', request.toString('hex').toUpperCase());
+      logger.log('exchange', 'request', request.toString('hex').toUpperCase());
     }
     const response = await device.device.exchange(request);
     const responseStr = response.toString('hex').toUpperCase();
     /* istanbul ignore if */
     if (Debug) {
-      console.log('exchange', 'response', responseStr);
+      logger.log('exchange', 'response', responseStr);
     }
     let success = false;
     let message = '';
@@ -332,7 +333,7 @@ export const GetPublicKey = async (transport, options): Promise<PublicKeyRespons
   } catch (error) {
     /* istanbul ignore if */
     if (Debug) {
-      console.trace('getPublicKey', 'error', error);
+      logger.trace('getPublicKey', 'error', error);
     }
     return {
       success: false,
@@ -371,7 +372,7 @@ export const SplitMessageIntoChunks = (ledgerMessage) => {
   messages.push(GetBip44PathMessage(Buffer.from('E006' + '00' + '80', 'hex')));
 
   if (Debug) {
-    console.log('splitMessageIntoChunks', 'ledgerMessage.length', ledgerMessage.length);
+    logger.log('splitMessageIntoChunks', 'ledgerMessage.length', ledgerMessage.length);
   }
 
   // MAX 250, as theres 5 header bytes, and max total buffer size is 255.
@@ -385,11 +386,11 @@ export const SplitMessageIntoChunks = (ledgerMessage) => {
     const chunk = chunks[chunkIx];
     const chunkNbr = chunkIx + 1;
     if (Debug) {
-      console.log('splitMessageIntoChunks', 'chunk.length', chunk.length);
+      logger.log('splitMessageIntoChunks', 'chunk.length', chunk.length);
     }
     const p1 = chunkNbr.toString(16).padStart(2, '0');
     if (Debug) {
-      console.log('splitMessageIntoChunks', 'p1', p1);
+      logger.log('splitMessageIntoChunks', 'p1', p1);
     }
 
     let p2;
@@ -401,7 +402,7 @@ export const SplitMessageIntoChunks = (ledgerMessage) => {
       p2 = '80';
     }
     if (Debug) {
-      console.log('splitMessageIntoChunks', 'p2', p2);
+      logger.log('splitMessageIntoChunks', 'p2', p2);
     }
 
     const chunkLength = chunk.length / 2;
@@ -409,17 +410,17 @@ export const SplitMessageIntoChunks = (ledgerMessage) => {
     const chunkLengthHex = chunkLength.toString(16).padStart(2, '0');
 
     if (Debug) {
-      console.log('splitMessageIntoChunks', 'chunkLengthHex', chunkLengthHex);
+      logger.log('splitMessageIntoChunks', 'chunkLengthHex', chunkLengthHex);
     }
 
     const messageHex = 'E006' + p1 + p2 + chunkLengthHex + chunk;
 
     if (Debug) {
-      console.log('splitMessageIntoChunks', 'messageHex', messageHex);
+      logger.log('splitMessageIntoChunks', 'messageHex', messageHex);
     }
     const message = Buffer.from(messageHex, 'hex');
     if (Debug) {
-      console.log('splitMessageIntoChunks', 'message', message);
+      logger.log('splitMessageIntoChunks', 'message', message);
     }
     messages.push(message);
   }
@@ -430,12 +431,12 @@ export const SplitMessageIntoChunks = (ledgerMessage) => {
 export const DecodeSignature = (response) => {
   /* istanbul ignore if */
   if (Debug) {
-    console.log('decodeSignature', 'response', response);
+    logger.log('decodeSignature', 'response', response);
   }
   const signature = response.substring(0, 128);
   /* istanbul ignore if */
   if (Debug) {
-    console.log('decodeSignature', 'signature', signature);
+    logger.log('decodeSignature', 'signature', signature);
   }
   return signature;
 };
@@ -443,7 +444,7 @@ export const DecodeSignature = (response) => {
 export const SignLedger = async (transport, transactionHex): Promise<SignResponse> => {
   /* istanbul ignore if */
   if (Debug) {
-    console.log('sign', 'transactionHex', transactionHex);
+    logger.log('sign', 'transactionHex', transactionHex);
   }
   // transactionHex = '0200000000000000';
   const transactionByteLength = Math.ceil(transactionHex.length / 2);
@@ -458,14 +459,14 @@ export const SignLedger = async (transport, transactionHex): Promise<SignRespons
 
   const messages = SplitMessageIntoChunks(ledgerMessage);
   if (Debug) {
-    console.log('sign', 'transport', transport);
+    logger.log('sign', 'transport', transport);
   }
 
   const device = await GetDevice(transport);
 
   if (Debug) {
-    console.log('sign', 'device', device);
-    console.log('sign', 'messages.length', messages.length);
+    logger.log('sign', 'device', device);
+    logger.log('sign', 'messages.length', messages.length);
   }
   if (!device.enabled) {
     return {
@@ -481,7 +482,7 @@ export const SignLedger = async (transport, transactionHex): Promise<SignRespons
       const message = messages[ix];
       /* istanbul ignore if */
       if (Debug) {
-        console.log(
+        logger.log(
           'exchange',
           ix,
           'of',
@@ -494,7 +495,7 @@ export const SignLedger = async (transport, transactionHex): Promise<SignRespons
       const response = await device.device.exchange(message);
       const responseStr = response.toString('hex').toUpperCase();
       if (Debug) {
-        console.log('exchange', ix, 'of', messages.length, 'response', responseStr);
+        logger.log('exchange', ix, 'of', messages.length, 'response', responseStr);
       }
       if (responseStr !== undefined) {
         if (!responseStr.endsWith('9000')) {
@@ -530,7 +531,7 @@ export const SignLedger = async (transport, transactionHex): Promise<SignRespons
   } catch (error) {
     /* istanbul ignore if */
     if (Debug) {
-      console.trace('sign', 'error', error);
+      logger.trace('sign', 'error', error);
     }
     return {
       success: false,

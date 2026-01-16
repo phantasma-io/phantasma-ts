@@ -6,6 +6,7 @@ import { IAccount } from './interfaces/IAccount.js';
 import { TxMsg } from '../types/Carbon/Blockchain/index.js';
 import { CarbonBlob } from '../types/Carbon/CarbonBlob.js';
 import { bytesToHex } from '../utils/Hex.js';
+import { logger } from '../utils/logger.js';
 
 export class PhantasmaLink {
   //Declarations
@@ -39,7 +40,7 @@ export class PhantasmaLink {
       this.messageLogging = false;
     } else {
       this.messageLogging = true;
-      console.log('%cPhantasmaLink created', 'color:green');
+      logger.log('%cPhantasmaLink created', 'color:green');
     }
 
     this.requestID = 0;
@@ -53,7 +54,7 @@ export class PhantasmaLink {
   //Message Logging
   onMessage = (msg: string) => {
     if (this.messageLogging == true) {
-      console.log(msg);
+      logger.log(msg);
     }
   };
 
@@ -504,7 +505,7 @@ export class PhantasmaLink {
     this.socket.onmessage = function (event) {
       const obj = JSON.parse(event.data);
       if (that.messageLogging == true) {
-        console.log('%c' + event.data, 'color:blue');
+        logger.log('%c' + event.data, 'color:blue');
       }
 
       //Checks What To Do Based On Message

@@ -16,6 +16,17 @@ npm install phantasma-sdk-ts
 const { PhantasmaTS } = require("phantasma-sdk-ts");
 ```
 
+## Logging
+
+SDK logging is opt-in. To enable logs, pass your logger (for example, `console`) to `setLogger`. Leave it unset for silent operation.
+
+```javascript
+const { setLogger } = require("phantasma-sdk-ts");
+
+setLogger(console); // enable SDK logs
+// setLogger(); // disable SDK logs
+```
+
 ## Standalone HTML Import
 
 ```html

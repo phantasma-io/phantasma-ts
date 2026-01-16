@@ -1,6 +1,7 @@
 import bigInt from "big-integer";
 import { ISignature, SignatureKind } from "../interfaces/index.js";
 import { VMType } from "./VMType.js";
+import { logger } from '../utils/logger.js';
 
 export class Decoder {
   str: string;
@@ -131,7 +132,7 @@ export class Decoder {
 
   readVmObject() {
     const type = this.readByte();
-    console.log("type", type);
+    logger.log("type", type);
     switch (type) {
       case VMType.String:
         return this.readString();
@@ -144,9 +145,9 @@ export class Decoder {
         let res: any = {};
         for (let i = 0; i < numFields; ++i) {
           const key: any = this.readVmObject();
-          console.log("  key", key);
+          logger.log("  key", key);
           const value = this.readVmObject();
-          console.log("  value", value);
+          logger.log("  value", value);
           res[key] = value;
         }
         return res;

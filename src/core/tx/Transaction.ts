@@ -1,4 +1,5 @@
 import pkg from 'elliptic';
+import { logger } from '../utils/logger.js';
 const { eddsa } = pkg;
 import { Decoder, ScriptBuilder } from '../vm/index.js';
 import { bytesToHex, hexToBytes, getDifficulty, uint8ArrayToStringDefault } from '../utils/index.js';
@@ -152,7 +153,7 @@ export class Transaction implements ISerializable {
     if (withSignature) {
       sb.EmitVarInt(this.signatures.length);
       this.signatures.forEach((sig) => {
-        console.log('adding signature ', sig);
+        logger.log('adding signature ', sig);
         if (sig.Kind == 1) {
           sb.AppendByte(1); // Signature Type
           sb.EmitVarInt(sig.Bytes.length / 2);
@@ -180,7 +181,7 @@ export class Transaction implements ISerializable {
 
   public mineTransaction(difficulty: number) {
     if (difficulty < 0 || difficulty > 256) {
-      console.log('Error adding difficulty');
+      logger.log('Error adding difficulty');
       return;
     }
 
@@ -197,7 +198,7 @@ export class Transaction implements ISerializable {
     while (true) {
       if (getDifficulty(deepCopy.getHash()) >= difficulty) {
         this.payload = deepCopy.payload;
-        console.log('It took ' + nonce + ' iterations to get a difficulty of >' + difficulty);
+        logger.log('It took ' + nonce + ' iterations to get a difficulty of >' + difficulty);
         return;
       }
 
