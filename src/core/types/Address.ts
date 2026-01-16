@@ -1,7 +1,7 @@
 import base58 from 'bs58';
 import { encodeBase16, stringToUint8Array, uint8ArrayToString } from '../utils/index.js';
-import SHA256 from 'crypto-js/sha256';
-import hexEncoding from 'crypto-js/enc-hex';
+import SHA256 from 'crypto-js/sha256.js';
+import hexEncoding from 'crypto-js/enc-hex.js';
 import { IKeyPair, ISerializable } from '../interfaces/index.js';
 import { getPrivateKeyFromWif, getPublicKeyFromPrivateKey, getWifFromPrivateKey } from '../tx/index.js';
 import pkg from 'elliptic';
