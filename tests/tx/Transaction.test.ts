@@ -189,6 +189,52 @@ describe('test phantasma_ts', function () {
     expect(Base16.encodeUint8Array(reserialized)).toBe(Base16.encodeUint8Array(serialized));
   });
 
+  test('Transaction.VerifySignature returns true for the signer and false for others', () => {
+    // Behavior: VerifySignature should only pass for addresses that actually signed the tx.
+    const keyBytesA = Uint8Array.from(Array.from({ length: 32 }, (_, i) => i + 1));
+    const keyBytesB = Uint8Array.from(Array.from({ length: 32 }, (_, i) => 0xff - i));
+    const keysA = new PhantasmaKeys(keyBytesA);
+    const keysB = new PhantasmaKeys(keyBytesB);
+    const script = bytesToHex(Uint8Array.from([0x01, 0x02, 0x03]));
+    const payload = bytesToHex(Uint8Array.from([0x04, 0x05]));
+    const tx = new Transaction('simnet', 'main', script, new Date(1700000000000), payload);
+    tx.signWithKeys(keysA);
+
+    expect(tx.VerifySignature(keysA.Address)).toBe(true);
+    expect(tx.VerifySignature(keysA.Address.Text)).toBe(true);
+    expect(tx.VerifySignature(keysB.Address)).toBe(false);
+  });
+
+  test('Transaction.VerifySignature returns false when no signatures exist', () => {
+    // Behavior: unsigned transactions should not verify for any address.
+    const keyBytes = Uint8Array.from(Array.from({ length: 32 }, (_, i) => i + 1));
+    const keys = new PhantasmaKeys(keyBytes);
+    const script = bytesToHex(Uint8Array.from([0x00]));
+    const payload = bytesToHex(Uint8Array.from([0x01]));
+    const tx = new Transaction('simnet', 'main', script, new Date(1700000000000), payload);
+
+    expect(tx.VerifySignature(keys.Address)).toBe(false);
+  });
+
+  test('Transaction.VerifySignature survives roundtrip with multiple signatures', () => {
+    // Behavior: VerifySignature remains valid after serialize/unserialize with multiple signers.
+    const keyBytesA = Uint8Array.from(Array.from({ length: 32 }, (_, i) => i + 1));
+    const keyBytesB = Uint8Array.from(Array.from({ length: 32 }, (_, i) => 0xaa - i));
+    const keysA = new PhantasmaKeys(keyBytesA);
+    const keysB = new PhantasmaKeys(keyBytesB);
+    const script = bytesToHex(Uint8Array.from([0x10, 0x20]));
+    const payload = bytesToHex(Uint8Array.from([0x30, 0x40]));
+    const tx = new Transaction('simnet', 'main', script, new Date(1700000000000), payload);
+    tx.signWithKeys(keysA);
+    tx.signWithKeys(keysB);
+
+    const raw = tx.ToByteAray(true);
+    const roundtrip = Transaction.Unserialize(raw);
+
+    expect(roundtrip.VerifySignature(keysA.Address)).toBe(true);
+    expect(roundtrip.VerifySignature(keysB.Address)).toBe(true);
+  });
+
   test('New MultiSig Tests', function (done) {
     // Behavior: multisig tx with empty script serializes to expected bytes.
     const keys = PhantasmaKeys.fromWIF('L5UEVHBjujaR1721aZM5Zm5ayjDyamMZS9W35RE9Y9giRkdf3dVx');

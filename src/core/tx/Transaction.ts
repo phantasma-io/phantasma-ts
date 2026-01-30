@@ -6,7 +6,7 @@ import { bytesToHex, hexToBytes, getDifficulty, uint8ArrayToStringDefault } from
 import hexEncoding from 'crypto-js/enc-hex.js';
 import SHA256 from 'crypto-js/sha256.js';
 import { ISerializable, ISignature, Signature } from '../interfaces/index.js';
-import { Base16, PBinaryReader, PBinaryWriter, PhantasmaKeys } from '../types/index.js';
+import { Address, Base16, PBinaryReader, PBinaryWriter, PhantasmaKeys } from '../types/index.js';
 import { getWifFromPrivateKey } from './utils.js';
 const curve = new eddsa('ed25519');
 
@@ -76,6 +76,21 @@ export class Transaction implements ISerializable {
     sigs.push(sig);
 
     this.signatures = sigs;
+  }
+
+  public VerifySignature(address: Address | string): boolean {
+    // Verify that at least one stored signature matches the given address for the unsigned tx bytes.
+    if (!this.signatures || this.signatures.length === 0) {
+      return false;
+    }
+    const addr = typeof address === 'string' ? Address.FromText(address) : address;
+    const message = this.ToByteAray(false);
+    for (const sig of this.signatures) {
+      if (sig.Verify(message, addr)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public ToByteAray(withSignature: boolean): Uint8Array {
