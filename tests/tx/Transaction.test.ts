@@ -251,7 +251,7 @@ describe('test phantasma_ts', function () {
     tx.signWithKeys(keysB);
 
     const result = tx.VerifySignatures([
-      keysA.Address.Text,
+      keysA.Address,
       keysB.Address.Text,
       keysC.Address.Text,
     ]);
@@ -275,6 +275,8 @@ describe('test phantasma_ts', function () {
     const unsigned = tx.GetUnsignedBytes();
     const expected = tx.ToByteAray(false);
     expect(Base16.encodeUint8Array(unsigned)).toBe(Base16.encodeUint8Array(expected));
+    const signed = tx.ToByteAray(true);
+    expect(unsigned.length).toBeLessThan(signed.length);
   });
 
   test('Transaction.GetSignatureInfo reports kind and length', () => {
@@ -292,9 +294,23 @@ describe('test phantasma_ts', function () {
     const info = tx.GetSignatureInfo();
     expect(info.length).toBe(2);
     expect(info[0].kind).toBe(SignatureKind.Ed25519);
-    expect(info[0].length).toBeGreaterThan(0);
+    expect(info[0].length).toBe(64);
     expect(info[1].kind).toBe(SignatureKind.Ed25519);
-    expect(info[1].length).toBeGreaterThan(0);
+    expect(info[1].length).toBe(64);
+  });
+
+  test('Transaction.VerifySignature fails after unsigned bytes change', () => {
+    // Behavior: modifying unsigned fields after signing must invalidate the signature.
+    const keyBytes = Uint8Array.from(Array.from({ length: 32 }, (_, i) => i + 1));
+    const keys = new PhantasmaKeys(keyBytes);
+    const script = bytesToHex(Uint8Array.from([0x01, 0x02]));
+    const payload = bytesToHex(Uint8Array.from([0x03, 0x04]));
+    const tx = new Transaction('simnet', 'main', script, new Date(1700000000000), payload);
+    tx.signWithKeys(keys);
+
+    expect(tx.VerifySignature(keys.Address)).toBe(true);
+    tx.script = bytesToHex(Uint8Array.from([0x01, 0x02, 0x03]));
+    expect(tx.VerifySignature(keys.Address)).toBe(false);
   });
 
   test('New MultiSig Tests', function (done) {
