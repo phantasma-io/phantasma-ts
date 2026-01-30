@@ -93,6 +93,42 @@ export class Transaction implements ISerializable {
     return false;
   }
 
+  public VerifySignatures(addresses: Array<Address | string>): { ok: boolean; matched: string[] } {
+    // Verify which of the provided addresses signed this transaction (no public-key recovery).
+    if (!this.signatures || this.signatures.length === 0 || !addresses || addresses.length === 0) {
+      return { ok: false, matched: [] };
+    }
+    const message = this.ToByteAray(false);
+    const matched = new Set<string>();
+    for (const address of addresses) {
+      const addr = typeof address === 'string' ? Address.FromText(address) : address;
+      for (const sig of this.signatures) {
+        if (sig.Verify(message, addr)) {
+          matched.add(addr.Text);
+          break;
+        }
+      }
+    }
+    const result = Array.from(matched);
+    return { ok: result.length > 0, matched: result };
+  }
+
+  public GetUnsignedBytes(): Uint8Array {
+    // Expose unsigned bytes for diagnostics and SDK-level verification helpers.
+    return this.ToByteAray(false);
+  }
+
+  public GetSignatureInfo(): Array<{ kind: number; length: number }> {
+    // Return signature metadata without exposing signature contents.
+    if (!this.signatures || this.signatures.length === 0) {
+      return [];
+    }
+    return this.signatures.map((sig) => ({
+      kind: sig.Kind,
+      length: sig.Bytes ? sig.Bytes.length : 0,
+    }));
+  }
+
   public ToByteAray(withSignature: boolean): Uint8Array {
     let writer = new PBinaryWriter();
     writer.writeString(this.nexusName);

@@ -7,6 +7,7 @@ import {
   PBinaryWriter,
   PhantasmaKeys,
   ScriptBuilder,
+  SignatureKind,
   Serialization,
   stringToUint8Array,
   Timestamp,
@@ -233,6 +234,67 @@ describe('test phantasma_ts', function () {
 
     expect(roundtrip.VerifySignature(keysA.Address)).toBe(true);
     expect(roundtrip.VerifySignature(keysB.Address)).toBe(true);
+  });
+
+  test('Transaction.VerifySignatures returns matched signer addresses', () => {
+    // Behavior: VerifySignatures should identify which provided addresses signed the tx.
+    const keyBytesA = Uint8Array.from(Array.from({ length: 32 }, (_, i) => i + 1));
+    const keyBytesB = Uint8Array.from(Array.from({ length: 32 }, (_, i) => 0xaa - i));
+    const keyBytesC = Uint8Array.from(Array.from({ length: 32 }, (_, i) => 0x55 - i));
+    const keysA = new PhantasmaKeys(keyBytesA);
+    const keysB = new PhantasmaKeys(keyBytesB);
+    const keysC = new PhantasmaKeys(keyBytesC);
+    const script = bytesToHex(Uint8Array.from([0x11, 0x22]));
+    const payload = bytesToHex(Uint8Array.from([0x33, 0x44]));
+    const tx = new Transaction('simnet', 'main', script, new Date(1700000000000), payload);
+    tx.signWithKeys(keysA);
+    tx.signWithKeys(keysB);
+
+    const result = tx.VerifySignatures([
+      keysA.Address.Text,
+      keysB.Address.Text,
+      keysC.Address.Text,
+    ]);
+    expect(result.ok).toBe(true);
+    expect(result.matched).toStrictEqual([keysA.Address.Text, keysB.Address.Text]);
+
+    const noMatch = tx.VerifySignatures([keysC.Address.Text]);
+    expect(noMatch.ok).toBe(false);
+    expect(noMatch.matched).toStrictEqual([]);
+  });
+
+  test('Transaction.GetUnsignedBytes matches ToByteAray(false)', () => {
+    // Behavior: GetUnsignedBytes must return the same bytes as ToByteAray(false).
+    const keyBytes = Uint8Array.from(Array.from({ length: 32 }, (_, i) => i + 1));
+    const keys = new PhantasmaKeys(keyBytes);
+    const script = bytesToHex(Uint8Array.from([0x01]));
+    const payload = bytesToHex(Uint8Array.from([0x02]));
+    const tx = new Transaction('simnet', 'main', script, new Date(1700000000000), payload);
+    tx.signWithKeys(keys);
+
+    const unsigned = tx.GetUnsignedBytes();
+    const expected = tx.ToByteAray(false);
+    expect(Base16.encodeUint8Array(unsigned)).toBe(Base16.encodeUint8Array(expected));
+  });
+
+  test('Transaction.GetSignatureInfo reports kind and length', () => {
+    // Behavior: GetSignatureInfo should expose signature kind/length without raw bytes.
+    const keyBytesA = Uint8Array.from(Array.from({ length: 32 }, (_, i) => i + 1));
+    const keyBytesB = Uint8Array.from(Array.from({ length: 32 }, (_, i) => 0xaa - i));
+    const keysA = new PhantasmaKeys(keyBytesA);
+    const keysB = new PhantasmaKeys(keyBytesB);
+    const script = bytesToHex(Uint8Array.from([0x10, 0x20]));
+    const payload = bytesToHex(Uint8Array.from([0x30, 0x40]));
+    const tx = new Transaction('simnet', 'main', script, new Date(1700000000000), payload);
+    tx.signWithKeys(keysA);
+    tx.signWithKeys(keysB);
+
+    const info = tx.GetSignatureInfo();
+    expect(info.length).toBe(2);
+    expect(info[0].kind).toBe(SignatureKind.Ed25519);
+    expect(info[0].length).toBeGreaterThan(0);
+    expect(info[1].kind).toBe(SignatureKind.Ed25519);
+    expect(info[1].length).toBeGreaterThan(0);
   });
 
   test('New MultiSig Tests', function (done) {
