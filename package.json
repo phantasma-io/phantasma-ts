@@ -74,7 +74,6 @@
     "crypto-js": "^4.2.0",
     "csharp-binary-stream": "^1.1.0",
     "elliptic": "^6.6.1",
-    "ethereumjs-wallet": "^1.0.2",
     "tiny-secp256k1": "^2.2.4",
     "wif": "^2.0.6"
   },

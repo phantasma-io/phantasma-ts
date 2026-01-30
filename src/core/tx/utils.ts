@@ -2,7 +2,6 @@ import WIF from 'wif';
 import pkg from 'elliptic';
 import base58 from 'bs58';
 import * as bip39 from 'bip39';
-import { hdkey } from 'ethereumjs-wallet';
 import crypto from 'crypto';
 const { eddsa } = pkg;
 const curve = new eddsa('ed25519');
