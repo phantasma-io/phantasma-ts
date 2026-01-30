@@ -149,6 +149,46 @@ describe('test phantasma_ts', function () {
     done();
   });
 
+  test('Transaction roundtrip preserves script/payload hex (leading zeros)', () => {
+    // Behavior: Unserialize should preserve hex bytes, including leading zeros.
+    const nexusName = 'simnet';
+    const chainName = 'main';
+    const keys = PhantasmaKeys.fromWIF('L5UEVHBjujaR1721aZM5Zm5ayjDyamMZS9W35RE9Y9giRkdf3dVx');
+    const scriptBytes = Uint8Array.from([0x00, 0x01, 0x02, 0x0f, 0x10, 0x2a, 0xff]);
+    const payloadBytes = Uint8Array.from([0x00, 0x00, 0x01, 0x0a, 0x0b, 0x0c]);
+    const script = bytesToHex(scriptBytes);
+    const payload = bytesToHex(payloadBytes);
+    const expiration = new Date(1700000000000);
+    const tx = new Transaction(nexusName, chainName, script, expiration, payload);
+    tx.signWithKeys(keys);
+
+    const serialized = tx.ToByteAray(true);
+    const roundtrip = Transaction.Unserialize(serialized);
+
+    expect(roundtrip.script).toBe(script);
+    expect(roundtrip.payload).toBe(payload);
+  });
+
+  test('Transaction roundtrip preserves bytes exactly', () => {
+    // Behavior: serializing and deserializing should not mutate tx bytes.
+    const nexusName = 'simnet';
+    const chainName = 'main';
+    const keys = PhantasmaKeys.fromWIF('L5UEVHBjujaR1721aZM5Zm5ayjDyamMZS9W35RE9Y9giRkdf3dVx');
+    const scriptBytes = Uint8Array.from([0x00, 0x01, 0x10, 0x11, 0x20, 0x2f, 0xff]);
+    const payloadBytes = Uint8Array.from([0x00, 0x05, 0x0a, 0x0f, 0x10, 0xff]);
+    const script = bytesToHex(scriptBytes);
+    const payload = bytesToHex(payloadBytes);
+    const expiration = new Date(1700001234000);
+    const tx = new Transaction(nexusName, chainName, script, expiration, payload);
+    tx.signWithKeys(keys);
+
+    const serialized = tx.ToByteAray(true);
+    const roundtrip = Transaction.Unserialize(serialized);
+    const reserialized = roundtrip.ToByteAray(true);
+
+    expect(Base16.encodeUint8Array(reserialized)).toBe(Base16.encodeUint8Array(serialized));
+  });
+
   test('New MultiSig Tests', function (done) {
     // Behavior: multisig tx with empty script serializes to expected bytes.
     const keys = PhantasmaKeys.fromWIF('L5UEVHBjujaR1721aZM5Zm5ayjDyamMZS9W35RE9Y9giRkdf3dVx');

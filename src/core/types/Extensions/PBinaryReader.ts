@@ -129,7 +129,7 @@ export class PBinaryReader {
 
       case SignatureKind.Ed25519:
         let len = this.readVarInt();
-        signature.Bytes = stringToUint8Array(this.read(len));
+        signature.Bytes = new Uint8Array(this.readBytes(len));
         break;
       case SignatureKind.ECDSA:
         curve = this.readByte();
