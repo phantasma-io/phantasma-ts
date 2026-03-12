@@ -1,0 +1,413 @@
+{
+  "generatedFrom": {
+    "authority": "local-validator-runtime",
+    "int256Cpp": "/home/alex/github/pha/pavillion_chain/node_cpp/src/carbon/int256.cpp",
+    "vmCpp": "/home/alex/github/pha/pavillion_chain/node_cpp/src/carbon/contracts/contracts.cpp",
+    "tokenCpp": "/home/alex/github/pha/pavillion_chain/node_cpp/src/carbon/contracts/token.cpp"
+  },
+  "int256": [
+    {
+      "id": "zero",
+      "sourceDec": "0",
+      "sourceKind": "signed-decimal",
+      "readBackSignedDec": "0",
+      "wireHex": "00",
+      "wireLen": 1
+    },
+    {
+      "id": "one",
+      "sourceDec": "1",
+      "sourceKind": "signed-decimal",
+      "readBackSignedDec": "1",
+      "wireHex": "0101",
+      "wireLen": 2
+    },
+    {
+      "id": "plus_255",
+      "sourceDec": "255",
+      "sourceKind": "signed-decimal",
+      "readBackSignedDec": "255",
+      "wireHex": "01FF",
+      "wireLen": 2
+    },
+    {
+      "id": "plus_256",
+      "sourceDec": "256",
+      "sourceKind": "signed-decimal",
+      "readBackSignedDec": "256",
+      "wireHex": "020001",
+      "wireLen": 3
+    },
+    {
+      "id": "minus_one",
+      "sourceDec": "-1",
+      "sourceKind": "signed-decimal",
+      "readBackSignedDec": "-1",
+      "wireHex": "80",
+      "wireLen": 1
+    },
+    {
+      "id": "minus_255",
+      "sourceDec": "-255",
+      "sourceKind": "signed-decimal",
+      "readBackSignedDec": "-255",
+      "wireHex": "8101",
+      "wireLen": 2
+    },
+    {
+      "id": "plus_i64_max",
+      "sourceDec": "9223372036854775807",
+      "sourceKind": "signed-decimal",
+      "readBackSignedDec": "9223372036854775807",
+      "wireHex": "08FFFFFFFFFFFFFF7F",
+      "wireLen": 9
+    },
+    {
+      "id": "minus_i64_min",
+      "sourceDec": "-9223372036854775808",
+      "sourceKind": "signed-decimal",
+      "readBackSignedDec": "-9223372036854775808",
+      "wireHex": "880000000000000080",
+      "wireLen": 9
+    },
+    {
+      "id": "plus_i64_max_plus_1",
+      "sourceDec": "9223372036854775808",
+      "sourceKind": "signed-decimal",
+      "readBackSignedDec": "9223372036854775808",
+      "wireHex": "080000000000000080",
+      "wireLen": 9
+    },
+    {
+      "id": "minus_i64_min_minus_1",
+      "sourceDec": "-9223372036854775809",
+      "sourceKind": "signed-decimal",
+      "readBackSignedDec": "-9223372036854775809",
+      "wireHex": "88FFFFFFFFFFFFFF7F",
+      "wireLen": 9
+    },
+    {
+      "id": "plus_u64_max",
+      "sourceDec": "18446744073709551615",
+      "sourceKind": "unsigned-decimal",
+      "readBackSignedDec": "18446744073709551615",
+      "wireHex": "08FFFFFFFFFFFFFFFF",
+      "wireLen": 9
+    },
+    {
+      "id": "minus_u64_max",
+      "sourceDec": "-18446744073709551615",
+      "sourceKind": "signed-decimal",
+      "readBackSignedDec": "-18446744073709551615",
+      "wireHex": "880100000000000000",
+      "wireLen": 9
+    },
+    {
+      "id": "plus_2_pow_127_minus_1",
+      "sourceDec": "170141183460469231731687303715884105727",
+      "sourceKind": "signed-decimal",
+      "readBackSignedDec": "170141183460469231731687303715884105727",
+      "wireHex": "10FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7F",
+      "wireLen": 17
+    },
+    {
+      "id": "minus_2_pow_127",
+      "sourceDec": "-170141183460469231731687303715884105728",
+      "sourceKind": "signed-decimal",
+      "readBackSignedDec": "-170141183460469231731687303715884105728",
+      "wireHex": "9000000000000000000000000000000080",
+      "wireLen": 17
+    },
+    {
+      "id": "live_problematic_positive_248",
+      "sourceDec": "342701406799689386264365071881606655601301200422094937311139938246178500459",
+      "sourceKind": "unsigned-decimal",
+      "readBackSignedDec": "342701406799689386264365071881606655601301200422094937311139938246178500459",
+      "wireHex": "1F6BEF11AE0FCA02D9B4B755ED7520861D2424EC2EE58931065269D5A84DF6C1",
+      "wireLen": 32
+    },
+    {
+      "id": "plus_i256_max",
+      "sourceDec": "57896044618658097711785492504343953926634992332820282019728792003956564819967",
+      "sourceKind": "signed-decimal",
+      "readBackSignedDec": "57896044618658097711785492504343953926634992332820282019728792003956564819967",
+      "wireHex": "20FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7F",
+      "wireLen": 33
+    },
+    {
+      "id": "plus_2_pow_255",
+      "sourceDec": "57896044618658097711785492504343953926634992332820282019728792003956564819968",
+      "sourceKind": "unsigned-decimal",
+      "readBackSignedDec": "-57896044618658097711785492504343953926634992332820282019728792003956564819968",
+      "wireHex": "A00000000000000000000000000000000000000000000000000000000000000080",
+      "wireLen": 33
+    },
+    {
+      "id": "plus_u256_max",
+      "sourceDec": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+      "sourceKind": "unsigned-decimal",
+      "readBackSignedDec": "-1",
+      "wireHex": "80",
+      "wireLen": 1
+    }
+  ],
+  "intx": [
+    {
+      "id": "zero",
+      "sourceDec": "0",
+      "readBackDec": "0",
+      "wireHex": "080000000000000000",
+      "wireLen": 9
+    },
+    {
+      "id": "one",
+      "sourceDec": "1",
+      "readBackDec": "1",
+      "wireHex": "080100000000000000",
+      "wireLen": 9
+    },
+    {
+      "id": "minus_one",
+      "sourceDec": "-1",
+      "readBackDec": "-1",
+      "wireHex": "88FFFFFFFFFFFFFFFF",
+      "wireLen": 9
+    },
+    {
+      "id": "plus_127",
+      "sourceDec": "127",
+      "readBackDec": "127",
+      "wireHex": "087F00000000000000",
+      "wireLen": 9
+    },
+    {
+      "id": "minus_128",
+      "sourceDec": "-128",
+      "readBackDec": "-128",
+      "wireHex": "8880FFFFFFFFFFFFFF",
+      "wireLen": 9
+    },
+    {
+      "id": "plus_255",
+      "sourceDec": "255",
+      "readBackDec": "255",
+      "wireHex": "08FF00000000000000",
+      "wireLen": 9
+    },
+    {
+      "id": "minus_256",
+      "sourceDec": "-256",
+      "readBackDec": "-256",
+      "wireHex": "8800FFFFFFFFFFFFFF",
+      "wireLen": 9
+    },
+    {
+      "id": "plus_i64_max",
+      "sourceDec": "9223372036854775807",
+      "readBackDec": "9223372036854775807",
+      "wireHex": "08FFFFFFFFFFFFFF7F",
+      "wireLen": 9
+    },
+    {
+      "id": "minus_i64_min",
+      "sourceDec": "-9223372036854775808",
+      "readBackDec": "-9223372036854775808",
+      "wireHex": "880000000000000080",
+      "wireLen": 9
+    },
+    {
+      "id": "plus_i64_max_plus_1",
+      "sourceDec": "9223372036854775808",
+      "readBackDec": "9223372036854775808",
+      "wireHex": "080000000000000080",
+      "wireLen": 9
+    },
+    {
+      "id": "minus_i64_min_minus_1",
+      "sourceDec": "-9223372036854775809",
+      "readBackDec": "-9223372036854775809",
+      "wireHex": "88FFFFFFFFFFFFFF7F",
+      "wireLen": 9
+    },
+    {
+      "id": "plus_u64_max",
+      "sourceDec": "18446744073709551615",
+      "readBackDec": "18446744073709551615",
+      "wireHex": "08FFFFFFFFFFFFFFFF",
+      "wireLen": 9
+    },
+    {
+      "id": "minus_u64_max",
+      "sourceDec": "-18446744073709551615",
+      "readBackDec": "-18446744073709551615",
+      "wireHex": "880100000000000000",
+      "wireLen": 9
+    },
+    {
+      "id": "plus_2_pow_128_minus_1",
+      "sourceDec": "340282366920938463463374607431768211455",
+      "readBackDec": "340282366920938463463374607431768211455",
+      "wireHex": "10FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+      "wireLen": 17
+    },
+    {
+      "id": "minus_2_pow_128",
+      "sourceDec": "-340282366920938463463374607431768211456",
+      "readBackDec": "-340282366920938463463374607431768211456",
+      "wireHex": "9000000000000000000000000000000000",
+      "wireLen": 17
+    },
+    {
+      "id": "live_problematic_positive_248",
+      "sourceDec": "342701406799689386264365071881606655601301200422094937311139938246178500459",
+      "readBackDec": "342701406799689386264365071881606655601301200422094937311139938246178500459",
+      "wireHex": "1F6BEF11AE0FCA02D9B4B755ED7520861D2424EC2EE58931065269D5A84DF6C1",
+      "wireLen": 32
+    },
+    {
+      "id": "minus_2_pow_255",
+      "sourceDec": "-57896044618658097711785492504343953926634992332820282019728792003956564819968",
+      "readBackDec": "-57896044618658097711785492504343953926634992332820282019728792003956564819968",
+      "wireHex": "A00000000000000000000000000000000000000000000000000000000000000080",
+      "wireLen": 33
+    }
+  ],
+  "vmDynamicInt256": [
+    {
+      "id": "zero",
+      "sourceDec": "0",
+      "wireHex": "0E00",
+      "wireLen": 2
+    },
+    {
+      "id": "minus_one",
+      "sourceDec": "-1",
+      "wireHex": "0E80",
+      "wireLen": 2
+    },
+    {
+      "id": "plus_i64_max_plus_1",
+      "sourceDec": "9223372036854775808",
+      "wireHex": "0E080000000000000080",
+      "wireLen": 10
+    },
+    {
+      "id": "live_problematic_positive_248",
+      "sourceDec": "342701406799689386264365071881606655601301200422094937311139938246178500459",
+      "wireHex": "0E1F6BEF11AE0FCA02D9B4B755ED7520861D2424EC2EE58931065269D5A84DF6C1",
+      "wireLen": 33
+    },
+    {
+      "id": "plus_2_pow_255",
+      "sourceDec": "57896044618658097711785492504343953926634992332820282019728792003956564819968",
+      "wireHex": "0EA00000000000000000000000000000000000000000000000000000000000000080",
+      "wireLen": 34
+    },
+    {
+      "id": "plus_u256_max",
+      "sourceDec": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+      "wireHex": "0E80",
+      "wireLen": 2
+    }
+  ],
+  "vmDynamicInt256Array": [
+    {
+      "id": "empty",
+      "values": [],
+      "wireHex": "0F00000000",
+      "wireLen": 5
+    },
+    {
+      "id": "small_mix",
+      "values": ["0", "1", "-1", "255", "-255"],
+      "wireHex": "0F050000000001018001FF8101",
+      "wireLen": 13
+    },
+    {
+      "id": "boundary_mix",
+      "values": [
+        "9223372036854775808",
+        "342701406799689386264365071881606655601301200422094937311139938246178500459",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+      ],
+      "wireHex": "0F030000000800000000000000801F6BEF11AE0FCA02D9B4B755ED7520861D2424EC2EE58931065269D5A84DF6C180",
+      "wireLen": 47
+    }
+  ],
+  "metadataStructs": [
+    {
+      "id": "nft_default_zero",
+      "shape": "nft-default",
+      "_iDec": "0",
+      "romHex": "010203",
+      "wireHex": "02000000025F690E0003726F6D0203000000010203",
+      "wireLen": 21
+    },
+    {
+      "id": "nft_default_problematic",
+      "shape": "nft-default",
+      "_iDec": "342701406799689386264365071881606655601301200422094937311139938246178500459",
+      "romHex": "00112233",
+      "wireHex": "02000000025F690E1F6BEF11AE0FCA02D9B4B755ED7520861D2424EC2EE58931065269D5A84DF6C103726F6D020400000000112233",
+      "wireLen": 53
+    },
+    {
+      "id": "series_default_zero",
+      "shape": "series-default",
+      "_iDec": "0",
+      "mode": 0,
+      "romHex": "",
+      "wireHex": "03000000025F690E00046D6F6465060003726F6D0200000000",
+      "wireLen": 25
+    },
+    {
+      "id": "series_default_problematic",
+      "shape": "series-default",
+      "_iDec": "342701406799689386264365071881606655601301200422094937311139938246178500459",
+      "mode": 1,
+      "romHex": "AABBCC",
+      "wireHex": "03000000025F690E1F6BEF11AE0FCA02D9B4B755ED7520861D2424EC2EE58931065269D5A84DF6C1046D6F6465060103726F6D0203000000AABBCC",
+      "wireLen": 59
+    }
+  ],
+  "tokenInfo": [
+    {
+      "id": "fungible_zero_supply",
+      "maxSupplyDec": "0",
+      "flags": 0,
+      "decimals": 8,
+      "symbol": "FUEL",
+      "metadataHex": "01000000046E616D65164669787475726520546F6B656E00",
+      "wireHex": "0800000000000000000008101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F044655454C1800000001000000046E616D65164669787475726520546F6B656E00",
+      "wireLen": 76
+    },
+    {
+      "id": "big_fungible_u64max_supply",
+      "maxSupplyDec": "18446744073709551615",
+      "flags": 1,
+      "decimals": 8,
+      "symbol": "BIGMAX",
+      "metadataHex": "01000000046E616D651642696720537570706C7920546F6B656E00",
+      "wireHex": "08FFFFFFFFFFFFFFFF0108202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F064249474D41581B00000001000000046E616D651642696720537570706C7920546F6B656E00",
+      "wireLen": 81
+    }
+  ],
+  "seriesInfo": [
+    {
+      "id": "series_zero_metaid",
+      "maxMint": 1,
+      "maxSupply": 1,
+      "metadataHex": "03000000025F690E00046D6F6465060003726F6D0200000000",
+      "wireHex": "0100000001000000303132333435363738393A3B3C3D3E3F404142434445464748494A4B4C4D4E4F1900000003000000025F690E00046D6F6465060003726F6D020000000000000000000000000000",
+      "wireLen": 79
+    },
+    {
+      "id": "series_problematic_metaid",
+      "maxMint": 5,
+      "maxSupply": 1000,
+      "metadataHex": "03000000025F690E1F6BEF11AE0FCA02D9B4B755ED7520861D2424EC2EE58931065269D5A84DF6C1046D6F6465060103726F6D0203000000AABBCC",
+      "wireHex": "05000000E8030000404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F3B00000003000000025F690E1F6BEF11AE0FCA02D9B4B755ED7520861D2424EC2EE58931065269D5A84DF6C1046D6F6465060103726F6D0203000000AABBCC00000000000000000000",
+      "wireLen": 113
+    }
+  ]
+}

@@ -3,8 +3,8 @@
  * - Little-endian for all integers
  * - Zero-terminated UTF-8 strings
  * - BigInt compact format:
- *   header: 0 -> zero; otherwise lower 6 bits = length (1..32), bit7 = sign (1 for negative)
- *   payload: little-endian two's complement without extra sign byte
+ *   header: 0 -> zero; otherwise lower 6 bits = payload length (0..32), bit7 = sign fill
+ *   payload: the low-order bytes of the validator/runtime 256-bit word after trailing fill trimming
  */
 
 import { ICarbonBlob } from '../interfaces/Carbon/ICarbonBlob.js';
@@ -113,36 +113,25 @@ export class CarbonBinaryWriter {
     }
   }
 
-  // BigInt compact format (<= 32 bytes)
+  // BigInt compact format (<= 32 payload bytes after validator trimming)
   writeBigInt(value: bigint): void {
     if (value === 0n) {
       this.write1(0);
       return;
     }
-    // Convert to minimal little-endian two's complement
-    let bytes = bigIntToTwosComplementLE(value);
-    // If longer than 32 and is only sign extension to 33, trim to 32 and recurse (mimics C#)
-    if (bytes.length > 32) {
-      Throw.Assert(
-        bytes.length === 33 && (bytes[32] === 0x00 || bytes[32] === 0xff),
-        'BigInt overflow'
-      );
-      bytes = bytes.slice(0, 32);
-      this.writeBigInt(twosComplementLEToBigInt(bytes));
-      return;
-    }
-    this.writeBigIntRaw(bytes);
-  }
-
-  private writeBigIntRaw(bytes: Uint8Array): void {
-    const length = bytes.length;
-    Throw.Assert(length > 0 && length <= 32, 'BigInt too big');
-    // infer sign from inherent top bit
-    const signFromBytes = (bytes[length - 1] & 0x80) !== 0 ? -1 : 1;
-    const signBit = signFromBytes < 0 ? 0x80 : 0;
-    const header = (length & 0x3f) | signBit;
+    // Carbon wire bytes follow the validator/runtime contract, not JS BigInt's sign-safe minimal form.
+    // We therefore rebuild the full 256-bit two's-complement word first and only then trim high fill bytes.
+    const word = normalizeBigIntWord(bigIntToTwosComplementLE(value));
+    // The sign bit in the reconstructed 256-bit word determines which fill byte the validator would omit.
+    const fill = (word[31] & 0x80) !== 0 ? 0xff : 0x00;
+    // Validator trimming is intentionally simple: drop every trailing fill byte from the 256-bit word.
+    const length = computeBigIntSerializedLength(word, fill);
+    // The header stores the sign of the reconstructed 256-bit word, even when the payload is empty.
+    const header = (length & 0x3f) | (fill & 0x80);
     this.write1(header);
-    this.writeExactly(bytes, length);
+    if (length > 0) {
+      this.write(word.subarray(0, length));
+    }
   }
 
   public writeArrayBigInt(items: bigint[]): void {
@@ -312,32 +301,27 @@ export class CarbonBinaryReader {
     return arr;
   }
 
-  // BigInt compact format
-  readBigInt(): bigint {
-    const header = this.read1();
+  // BigInt compact format.
+  // `preReadHeader` lets IntX reuse the exact same validator reader after consuming its own framing byte.
+  readBigInt(preReadHeader = -1): bigint {
+    const header = preReadHeader < 0 ? this.read1() : preReadHeader & 0xff;
     if (header === 0) {
       return 0n;
     }
-    const sign = (header & 0x80) !== 0 ? -1 : 1;
     const length = header & 0x3f;
-    Throw.If(length > 32, 'BigInt too big');
-    if (length === 0) {
-      return 0n;
+    Throw.If((header & 0x40) !== 0 || length > 32, 'BigInt too big');
+    // The header sign bit defines the bytes that were omitted from the high side of the 256-bit word.
+    const fill = (header & 0x80) !== 0 ? 0xff : 0x00;
+    // Rebuild the full validator/runtime 256-bit word before decoding two's complement.
+    // This is what makes shortest negative forms like `0x80` decode to `-1` instead of `0`.
+    const word = new Uint8Array(32);
+    if (length > 0) {
+      word.set(this.readExactly(length), 0);
     }
-    let bytes = this.readExactly(length);
-    // Ensure inherent sign matches header by adding explicit sign extension byte if needed
-    const inherentSign = (bytes[bytes.length - 1] & 0x80) !== 0 ? -1 : 1;
-    if (inherentSign !== sign) {
-      const ext = sign >= 0 ? 0x00 : 0xff;
-      const tmp = new Uint8Array(bytes.length + 1);
-      tmp.set(bytes, 0);
-      tmp[tmp.length - 1] = ext;
-      bytes = tmp;
-    }
-    const bi = twosComplementLEToBigInt(bytes);
-    // Sanity check: signs must match
-    Throw.Assert((bi < 0n ? -1 : bi > 0n ? 1 : 0) === sign || bi === 0n, 'BigInt sign mismatch');
-    return bi;
+    word.fill(fill, length);
+    // If the reconstructed sign bit disagrees with the header, the payload is not a valid validator word.
+    Throw.Assert((word[31] & 0x80) === (header & 0x80), 'non-standard BigInt header');
+    return twosComplementLEToBigInt(word);
   }
 
   readArrayBigInt(): bigint[] {
@@ -441,6 +425,50 @@ export function bigIntToTwosComplementLE(value: bigint): Uint8Array {
     if (out.length === 0 || (out[out.length - 1] & 0x80) === 0) out.push(0xff);
   }
   return Uint8Array.from(out);
+}
+
+/**
+ * Rebuild the validator/runtime 256-bit word from a sign-safe minimal two's-complement payload.
+ *
+ * The Carbon protocol does not serialize JS/.NET style sign-guard bytes directly.
+ * Instead it reconstructs the full 256-bit two's-complement word first, then trims all high fill bytes.
+ * This helper performs the "reconstruct the word" half of that contract.
+ */
+function normalizeBigIntWord(bytes: Uint8Array): Uint8Array {
+  if (bytes.length === 0) {
+    return new Uint8Array(32);
+  }
+
+  const sourceFill = (bytes[bytes.length - 1] & 0x80) !== 0 ? 0xff : 0x00;
+  let normalized = bytes;
+
+  if (normalized.length > 32) {
+    // Any bytes above 256 bits must be pure sign extension. If not, the value does not fit Carbon Int256.
+    for (let i = 32; i < normalized.length; i++) {
+      Throw.Assert(normalized[i] === sourceFill, 'BigInt overflow');
+    }
+    normalized = normalized.slice(0, 32);
+  }
+
+  const word = new Uint8Array(32);
+  word.set(normalized, 0);
+  // Shorter sign-safe encodings are expanded back to the full 256-bit two's-complement word.
+  word.fill(sourceFill, normalized.length);
+  return word;
+}
+
+/**
+ * Compute the validator/runtime payload length for a reconstructed 256-bit word.
+ *
+ * The validator does not keep an extra guard byte once the word is expanded.
+ * It simply removes every contiguous high fill byte from the full word.
+ */
+function computeBigIntSerializedLength(word: Uint8Array, fill: number): number {
+  let length = word.length;
+  while (length > 0 && word[length - 1] === fill) {
+    length--;
+  }
+  return length;
 }
 
 /** Convert little-endian two's complement bytes to bigint */

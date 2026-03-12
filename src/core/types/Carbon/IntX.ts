@@ -68,46 +68,41 @@ export class IntX implements ICarbonBlob {
   // Deserialization (must match C# IntX.Read)
   read(r: CarbonBinaryReader): void {
     const header = r.read1();
-    if (header === 0) {
-      // Zero in compact format
-      this.isBig = false;
-      this.small = 0n;
-      return;
-    }
-
     const len = header & 0x3f;
-    const signBit = (header & 0x80) !== 0;
+    if (len < 8) {
+      throw new Error('invalid intx packing');
+    }
 
     if (len === 8) {
-      // Fast int64 path
-      this.isBig = false;
-      this.small = r.read8();
-      const valueIsNegative = this.small < 0;
-      if (valueIsNegative !== signBit) {
-        throw new Error('invalid intx sign header');
+      // IntX keeps the 8-byte fast path, but the header sign bit still refers to the reconstructed
+      // 256-bit value. If those signs disagree, this payload is not an int64; it is a wider IntX
+      // whose compact validator encoding happens to fit in 8 serialized bytes.
+      const value = r.read8();
+      const headerIsNegative = (header & 0x80) !== 0;
+      const valueIsNegative = value < 0n;
+
+      if (headerIsNegative === valueIsNegative) {
+        this.isBig = false;
+        this.small = value;
+        return;
       }
+
+      // Rebuild the full 256-bit word using the header sign bit as the omitted fill byte.
+      const rawBytes = new Uint8Array(8);
+      new DataView(rawBytes.buffer).setBigInt64(0, value, true);
+      const fill = headerIsNegative ? 0xff : 0x00;
+      const word = new Uint8Array(32);
+      word.set(rawBytes, 0);
+      word.fill(fill, rawBytes.length);
+
+      this.isBig = true;
+      this.big = twosComplementLEToBigInt(word);
       return;
     }
 
-    // Compact BigInt path - we already consumed header, so read payload manually
-    // and convert LE two’s complement to bigint
-    if (len > 32) {
-      throw new Error('BigInt too big');
-    }
-    let bytes = r.readExactly(len);
-
-    // Ensure sign extension byte matches header sign
-    const inherentNegative = (bytes[bytes.length - 1] & 0x80) !== 0;
-    if (inherentNegative !== signBit) {
-      const ext = signBit ? 0xff : 0x00;
-      const tmp = new Uint8Array(bytes.length + 1);
-      tmp.set(bytes, 0);
-      tmp[tmp.length - 1] = ext;
-      bytes = tmp;
-    }
-
+    // Wider IntX values reuse the exact validator BigInt reader contract with the already-consumed header.
     this.isBig = true;
-    this.big = twosComplementLEToBigInt(bytes);
+    this.big = r.readBigInt(header);
   }
 
   static read(r: CarbonBinaryReader): IntX {
