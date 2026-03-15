@@ -1,5 +1,6 @@
 import base58 from 'bs58';
 import { ISerializable } from '../interfaces/index.js';
+import { bigIntToTwosComplementLE } from '../types/CarbonSerialization.js';
 import { Address, PBinaryWriter, Serialization, Timestamp } from '../types/index.js';
 import { numberToByteArray, stringToUint8Array, bytesToHex } from '../utils/index.js';
 import { Opcode } from './Opcode.js';
@@ -117,6 +118,12 @@ export class ScriptBuilder {
     return data;
   }
 
+  private EmitLoadBigInt(reg: number, value: bigint): this {
+    const bytes = Array.from(bigIntToTwosComplementLE(value));
+    this.EmitLoadBytes(reg, bytes, VMType.Number);
+    return this;
+  }
+
   public EmitLoad(reg: number, obj: any): this {
     let structType = Object.getPrototypeOf(obj).constructor.name;
 
@@ -130,6 +137,11 @@ export class ScriptBuilder {
       case 'boolean': {
         let bytes = [(obj as boolean) ? 1 : 0];
         this.EmitLoadBytes(reg, bytes, VMType.Bool);
+        break;
+      }
+
+      case 'bigint': {
+        this.EmitLoadBigInt(reg, obj as bigint);
         break;
       }
 
