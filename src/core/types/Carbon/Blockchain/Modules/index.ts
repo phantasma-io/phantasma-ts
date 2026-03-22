@@ -1,4 +1,7 @@
 export * from "./Builders/index.js"
+export * from "./MintPhantasmaNonFungibleArgs.js"
+export * from "./PhantasmaNftMintInfo.js"
+export * from "./PhantasmaNftMintResult.js"
 export * from "./SeriesInfo.js"
 export * from "./StandardMeta.js"
 export * from "./TokenContract_Methods.js"

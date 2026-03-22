@@ -1,5 +1,6 @@
 export * from './IdHelper.js';
 export * from './NftRomBuilder.js';
+export * from './PhantasmaNftRomBuilder.js';
 export * from './SeriesInfoBuilder.js';
 export * from './TokenInfoBuilder.js';
 export * from './TokenMetadataBuilder.js';
