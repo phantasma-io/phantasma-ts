@@ -158,7 +158,8 @@ export class PhantasmaAPI {
   //Returns the height of a chain.
   async getBlockHeight(chainInput: string): Promise<number> {
     let params: Array<any> = [chainInput];
-    return (await this.JSONRPC('getBlockHeight', params)) as number;
+    const result = await this.JSONRPC('getBlockHeight', params);
+    return typeof result === 'string' ? parseInt(result, 10) : (result as number);
   }
 
   //Returns the number of transactions of given block hash or error if given hash is invalid or is not found.
