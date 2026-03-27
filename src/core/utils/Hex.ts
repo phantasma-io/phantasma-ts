@@ -19,7 +19,7 @@ export function bytesToHex(bytes: ArrayLike<number>): string {
 
 export function hexToBytes(hex: string): Uint8Array {
   const trimmed = hex.trim();
-  const normalized = trimmed.startsWith('0x') ? trimmed.slice(2) : trimmed;
+  const normalized = trimmed.startsWith('0x') || trimmed.startsWith('0X') ? trimmed.slice(2) : trimmed;
   if (normalized.length === 0) {
     return new Uint8Array();
   }
