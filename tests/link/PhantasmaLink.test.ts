@@ -153,6 +153,60 @@ describe('PhantasmaLink socket error handling', () => {
   });
 });
 
+describe('PhantasmaLink wallet error reporting', () => {
+  const originalWindow = (globalThis as any).window;
+  const originalWebSocket = (globalThis as any).WebSocket;
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    (globalThis as any).window = originalWindow;
+    (globalThis as any).WebSocket = originalWebSocket;
+  });
+
+  it('preserves wallet-side authorize errors instead of collapsing them', () => {
+    const fakeSocket: Record<string, any> = {
+      close: jest.fn(),
+      readyState: 1,
+    };
+
+    (globalThis as any).window = {};
+    (globalThis as any).WebSocket = jest.fn(() => fakeSocket);
+
+    const link = new PhantasmaLink('test', false);
+    const onError = jest.fn();
+    jest.spyOn(link as any, 'sendLinkRequest').mockImplementation((_request: string, callback: (result: any) => void) => {
+      callback({ success: false, message: 'A previous request is still pending' });
+    });
+    const disconnectSpy = jest.spyOn(link, 'disconnect').mockImplementation(() => {});
+
+    link.login(jest.fn(), onError);
+    fakeSocket.onopen({});
+
+    expect(onError).toHaveBeenCalledWith('A previous request is still pending');
+    expect(disconnectSpy).toHaveBeenCalledWith('Auth Failure');
+  });
+
+  it('surfaces pending-request wallet messages from socket events', () => {
+    const fakeSocket: Record<string, any> = {
+      close: jest.fn(),
+      readyState: 1,
+    };
+
+    (globalThis as any).window = {};
+    (globalThis as any).WebSocket = jest.fn(() => fakeSocket);
+
+    const link = new PhantasmaLink('test', false);
+    const onError = jest.fn();
+
+    link.login(jest.fn(), onError);
+    fakeSocket.onmessage({
+      data: JSON.stringify({ message: 'A previous request is still pending', success: false }),
+    });
+
+    expect(onError).toHaveBeenCalledWith('A previous request is still pending');
+  });
+});
+
 describe('PhantasmaLink.sendLinkRequest safeguards', () => {
   it('fails fast when socket is missing or closed', () => {
     const link = new PhantasmaLink('test', false);
@@ -181,5 +235,15 @@ describe('PhantasmaLink.sendLinkRequest safeguards', () => {
     (link as any).sendLinkRequest('signTx/foo', callback);
 
     expect(callback).toHaveBeenCalledWith({ success: false, error: 'boom' });
+  });
+
+  it('accepts injected sockets that do not expose readyState once onopen fired', () => {
+    const link = new PhantasmaLink('test', false);
+    (link as any).socket = { send: jest.fn() };
+    (link as any).socketOpen = true;
+
+    (link as any).sendLinkRequest('signTx/foo', jest.fn());
+
+    expect((link as any).socket.send).toHaveBeenCalledWith('1,signTx/foo');
   });
 });

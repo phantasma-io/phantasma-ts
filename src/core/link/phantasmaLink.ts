@@ -18,6 +18,8 @@ export class PhantasmaLink {
   socket: any;
   requestCallback: any;
   private lastSocketErrorMessage: string | null = null;
+  socketTransport: 'websocket' | 'injected' | null = null;
+  socketOpen: boolean = false;
   token: any;
   requestID: number = 0;
   account: IAccount;
@@ -57,6 +59,23 @@ export class PhantasmaLink {
       logger.log(msg);
     }
   };
+
+  // Preserve wallet-side failure details whenever the transport provides them.
+  private describeFailure(result: any, fallback: string): string {
+    if (typeof result === 'string' && result.length > 0) {
+      return result;
+    }
+
+    if (result && typeof result.error === 'string' && result.error.length > 0) {
+      return result.error;
+    }
+
+    if (result && typeof result.message === 'string' && result.message.length > 0) {
+      return result.message;
+    }
+
+    return fallback;
+  }
 
   //Connect To Wallet
   login(
@@ -450,12 +469,22 @@ export class PhantasmaLink {
       this.socket.close();
     }
 
+    const useInjectedSocket =
+      // @ts-ignore
+      !!window.PhantasmaLinkSocket && this.providerHint !== 'poltergeist';
+    this.socketTransport = useInjectedSocket ? 'injected' : 'websocket';
+    this.socketOpen = false;
+    this.onMessage(
+      useInjectedSocket
+        ? 'Using injected PhantasmaLinkSocket transport'
+        : `Using raw WebSocket transport: ${path}`
+    );
+
     //@ts-ignore
-    this.socket = //@ts-ignore
-      window.PhantasmaLinkSocket && this.providerHint !== 'poltergeist'
-        ? // @ts-ignore
-          new PhantasmaLinkSocket()
-        : new WebSocket(path);
+    this.socket = useInjectedSocket
+      ? // @ts-ignore
+        new PhantasmaLinkSocket()
+      : new WebSocket(path);
 
     this.requestCallback = null;
     this.lastSocketErrorMessage = null;
@@ -468,6 +497,7 @@ export class PhantasmaLink {
 
     //Once Socket Opened
     this.socket.onopen = function (e) {
+      that.socketOpen = true;
       that.onMessage('Connection established, authorizing dapp in wallet...');
       if (isResume) {
         that.fetchWallet(undefined, undefined);
@@ -494,7 +524,7 @@ export class PhantasmaLink {
               that.onLogin = null;
             });
           } else {
-            that.onError('Authorization failed...');
+            that.onError(that.describeFailure(result, 'Authorization failed...'));
             that.disconnect('Auth Failure');
           }
         });
@@ -525,8 +555,9 @@ export class PhantasmaLink {
           that.disconnect(true);
           break;
 
-        case 'A previouus request is still pending' || 'A previous request is still pending':
-          that.onError('You have a pending action in your wallet');
+        case 'A previouus request is still pending':
+        case 'A previous request is still pending':
+          that.onError(that.describeFailure(obj, 'You have a pending action in your wallet'));
           break;
 
         case 'user rejected':
@@ -555,6 +586,7 @@ export class PhantasmaLink {
 
     //Cleanup After Socket Closes
     this.socket.onclose = function (event) {
+      that.socketOpen = false;
       const reason =
         event.reason && event.reason.length > 0
           ? event.reason
@@ -616,9 +648,13 @@ export class PhantasmaLink {
     const socket = this.socket;
     const openState =
       typeof WebSocket !== 'undefined' && typeof WebSocket.OPEN === 'number' ? WebSocket.OPEN : 1;
-    const isSocketOpen = socket && socket.readyState === openState;
+    const hasSend = socket && typeof socket.send === 'function';
+    const hasReadyState = socket && typeof socket.readyState === 'number';
+    const isSocketOpen =
+      hasSend &&
+      (hasReadyState ? socket.readyState === openState : this.socketOpen);
 
-    if (!socket || !isSocketOpen) {
+    if (!socket || !hasSend || !isSocketOpen) {
       this.handleSocketFailure('Wallet connection is closed. Please reconnect to your wallet.');
       return;
     }
@@ -658,6 +694,7 @@ export class PhantasmaLink {
   //Disconnect The Wallet Connection Socket
   disconnect(triggered: string | boolean | undefined) {
     this.onMessage('Disconnecting Phantasma Link: ' + triggered);
+    this.socketOpen = false;
     if (this.socket) this.socket.close();
   }
 
