@@ -2,6 +2,7 @@ import { PhantasmaLink } from './phantasmaLink.js';
 import { ProofOfWork } from './interfaces/ProofOfWork.js';
 import { EasyScript, Nexus } from './easyScript.js';
 import { TxMsg } from '../types/Carbon/Blockchain/index.js';
+import { Transaction } from '../tx/Transaction.js';
 import { logger } from '../utils/logger.js';
 
 export class EasyConnect {
@@ -213,6 +214,22 @@ export class EasyConnect {
   ) {
     if (this.connected == true) {
     this.link.signCarbonTxAndBroadcast(txMsg, onSuccess, onFail);
+    } else {
+      const message = 'Wallet is not connected';
+      logger.log('%c' + message, 'color:red');
+      onFail(message);
+    }
+  }
+
+  signPrebuiltTransaction(
+    tx: Transaction,
+    onSuccess: any = (data) => {},
+    onFail: any = (data) => {
+      logger.log('%cError: ' + data, 'color:red');
+    }
+  ) {
+    if (this.connected == true) {
+      this.link.signPrebuiltTransaction(tx, onSuccess, onFail);
     } else {
       const message = 'Wallet is not connected';
       logger.log('%c' + message, 'color:red');

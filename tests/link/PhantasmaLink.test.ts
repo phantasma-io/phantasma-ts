@@ -11,6 +11,9 @@ import { bytesToHex } from '../../src/core/utils/Hex';
 import { ScriptBuilder } from '../../src/core/vm';
 import { ProofOfWork } from '../../src/core/link/interfaces/ProofOfWork';
 import { EasyConnect } from '../../src/core/link/easyConnect';
+import { Transaction } from '../../src/core/tx/Transaction';
+import { PhantasmaKeys } from '../../src/core/types/PhantasmaKeys';
+import { Ed25519Signature } from '../../src/core/types/Ed25519Signature';
 
 const buildBytes32 = (seed: number): Bytes32 => {
   const bytes = new Uint8Array(32);
@@ -97,6 +100,103 @@ describe('PhantasmaLink.signTx', () => {
   });
 });
 
+describe('PhantasmaLink.signTxSignature', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('allows serialized transactions larger than the old 1KB guard', () => {
+    const link = new PhantasmaLink('test', false);
+    (link as any).socket = { readyState: 1, send: jest.fn() };
+    const sendLinkSpy = jest.spyOn(link as any, 'sendLinkRequest').mockImplementation(() => {});
+    const tx = 'AB'.repeat(2000);
+
+    link.signTxSignature(tx, jest.fn(), jest.fn());
+
+    expect(sendLinkSpy).toHaveBeenCalledWith(
+      `signTxSignature/${tx}/Ed25519/${link.platform}`,
+      expect.any(Function)
+    );
+  });
+
+  it('propagates wallet-side rejection details to the error callback', () => {
+    const link = new PhantasmaLink('test', false);
+    (link as any).socket = { readyState: 1, send: jest.fn() };
+    jest.spyOn(link as any, 'sendLinkRequest').mockImplementation((_request: string, callback: (result: any) => void) => {
+      callback({ success: false, message: 'signData: Expected nexus mainnet, instead got testnet' });
+    });
+
+    const onError = jest.fn();
+
+    link.signTxSignature('ABCD', jest.fn(), onError);
+
+    expect(onError).toHaveBeenCalledWith('signData: Expected nexus mainnet, instead got testnet');
+  });
+});
+
+describe('PhantasmaLink.signPrebuiltTransaction', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('assembles a signed transaction from a wallet signature response', () => {
+    const link = new PhantasmaLink('test', false);
+    (link as any).socket = { readyState: 1, send: jest.fn() };
+    const keys = PhantasmaKeys.generate();
+    link.account = { address: keys.Address.Text } as any;
+
+    const tx = new Transaction(
+      'testnet',
+      'main',
+      '0D0004',
+      new Date('2026-03-29T01:00:00.000Z'),
+      '706F77'
+    );
+
+    const signatureBytes = Ed25519Signature.Generate(keys, tx.GetUnsignedBytes()).Bytes;
+    const walletSignatureHex = bytesToHex(new Uint8Array([signatureBytes.length, ...signatureBytes]));
+    const expectedSignedTx = Transaction.FromBytes(tx.ToStringEncoded(false).toUpperCase());
+    expectedSignedTx.signatures = [new Ed25519Signature(signatureBytes)];
+
+    jest.spyOn(link as any, 'sendLinkRequest').mockImplementation((_request: string, callback: (result: any) => void) => {
+      callback({ success: true, signature: walletSignatureHex });
+    });
+
+    const onSuccess = jest.fn();
+    const onError = jest.fn();
+
+    link.signPrebuiltTransaction(tx, onSuccess, onError);
+
+    expect(onError).not.toHaveBeenCalled();
+    expect(onSuccess).toHaveBeenCalledWith({
+      success: true,
+      signature: walletSignatureHex,
+      signedTx: expectedSignedTx.ToStringEncoded(true).toUpperCase(),
+    });
+  });
+
+  it('propagates signTxSignature rejection details without collapsing them to a generic fallback', () => {
+    const link = new PhantasmaLink('test', false);
+    const tx = new Transaction(
+      'testnet',
+      'main',
+      '0D0004',
+      new Date('2026-03-29T01:00:00.000Z'),
+      '706F77'
+    );
+
+    jest.spyOn(link, 'signTxSignature').mockImplementation((_tx, _ok, onError) => {
+      onError('signData: Expected nexus mainnet, instead got testnet');
+    });
+
+    const onError = jest.fn();
+
+    link.signPrebuiltTransaction(tx, jest.fn(), onError);
+
+    expect(onError).toHaveBeenCalledWith('signData: Expected nexus mainnet, instead got testnet');
+  });
+});
+
 describe('EasyConnect.signCarbonTransaction', () => {
   beforeAll(() => {
     (globalThis as any).window = (globalThis as any).window || {};
@@ -128,6 +228,25 @@ describe('EasyConnect.signCarbonTransaction', () => {
     easy.signCarbonTransaction(buildCarbonTransfer(), jest.fn(), onFail);
 
     expect(onFail).toHaveBeenCalledWith('Wallet is not connected');
+  });
+
+  it('forwards prebuilt transaction signing to PhantasmaLink when connected', () => {
+    const easy = new EasyConnect();
+    easy.connected = true;
+    const tx = new Transaction(
+      'testnet',
+      'main',
+      '0D0004',
+      new Date('2026-03-29T01:00:00.000Z'),
+      '706F77'
+    );
+    const spy = jest.spyOn(easy.link, 'signPrebuiltTransaction').mockImplementation(() => {});
+    const onSuccess = jest.fn();
+    const onFail = jest.fn();
+
+    easy.signPrebuiltTransaction(tx, onSuccess, onFail);
+
+    expect(spy).toHaveBeenCalledWith(tx, onSuccess, onFail);
   });
 });
 

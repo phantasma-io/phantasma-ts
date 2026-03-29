@@ -1,12 +1,20 @@
 import { Storage } from '../rpc/interfaces/Storage.js';
 import { Stake } from '../rpc/interfaces/Stake.js';
+import { Transaction } from '../tx/Transaction.js';
 import { ScriptBuilder } from '../vm/index.js';
 import { ProofOfWork } from './interfaces/ProofOfWork.js';
 import { IAccount } from './interfaces/IAccount.js';
 import { TxMsg } from '../types/Carbon/Blockchain/index.js';
 import { CarbonBlob } from '../types/Carbon/CarbonBlob.js';
-import { bytesToHex } from '../utils/Hex.js';
+import { bytesToHex, hexToBytes } from '../utils/Hex.js';
+import { Ed25519Signature, PBinaryReader } from '../types/index.js';
 import { logger } from '../utils/logger.js';
+
+export interface PrebuiltTransactionSignResult {
+  success: true;
+  signature: string;
+  signedTx: string;
+}
 
 export class PhantasmaLink {
   //Declarations
@@ -260,26 +268,33 @@ export class PhantasmaLink {
   signTxSignature(
     tx: string,
     callback: (result: string) => void,
-    onErrorCallback: () => void,
+    onErrorCallback: (message?: string) => void,
     signature: string = 'Ed25519'
   ) {
     if (!this.socket) {
       this.onMessage('not logged in');
+      if (onErrorCallback) {
+        onErrorCallback('Wallet is not connected');
+      }
       return;
     }
     if (tx == null) {
       this.onMessage('invalid data, sorry :(');
-      return;
-    }
-
-    if (tx.length >= 1024) {
-      this.onMessage('data too big, sorry :(');
       if (onErrorCallback) {
-        onErrorCallback();
+        onErrorCallback('Invalid transaction data');
       }
       return;
     }
 
+    if (tx.length >= 65536) {
+      this.onMessage('data too big, sorry :(');
+      if (onErrorCallback) {
+        onErrorCallback('Transaction data is too big');
+      }
+      return;
+    }
+
+    this.onError = onErrorCallback;
     let signDataStr = 'signTxSignature/' + tx + '/' + signature + '/' + this.platform;
 
     var that = this; //Allows the use of 'this' inside sendLinkRequest Object
@@ -292,10 +307,96 @@ export class PhantasmaLink {
         }
       } else {
         if (onErrorCallback) {
-          onErrorCallback();
+          onErrorCallback(that.describeFailure(result, 'Wallet rejected transaction signature'));
         }
       }
     });
+  }
+
+  private decodeWalletSignatureBytes(signatureHex: string, signature: string): Uint8Array {
+    if (signature !== 'Ed25519') {
+      throw new Error(`Unsupported transaction signature type: ${signature}`);
+    }
+
+    const reader = new PBinaryReader(hexToBytes(signatureHex));
+    const rawSignatureHex = reader.readByteArray();
+
+    if (typeof rawSignatureHex !== 'string' || rawSignatureHex.length === 0) {
+      throw new Error('Wallet returned an empty transaction signature');
+    }
+
+    return hexToBytes(rawSignatureHex);
+  }
+
+  signPrebuiltTransaction(
+    tx: Transaction,
+    callback: (result: PrebuiltTransactionSignResult) => void,
+    onErrorCallback: (message?: string) => void,
+    signature: string = 'Ed25519'
+  ) {
+    if (!tx) {
+      const message = 'Error: Invalid transaction';
+      this.onMessage(message);
+      if (onErrorCallback) {
+        onErrorCallback(message);
+      }
+      return;
+    }
+
+    let unsignedTxHex: string;
+    try {
+      unsignedTxHex = tx.ToStringEncoded(false).toUpperCase();
+    } catch (err: any) {
+      const message = 'Error: Unable to encode unsigned transaction';
+      this.onMessage(message + (err?.message ? ` (${err.message})` : ''));
+      if (onErrorCallback) {
+        onErrorCallback(message);
+      }
+      return;
+    }
+
+    this.signTxSignature(
+      unsignedTxHex,
+      (result: any) => {
+        if (!result?.success || typeof result.signature !== 'string' || result.signature.length === 0) {
+          const failure = this.describeFailure(result, 'Wallet rejected transaction signature');
+          if (onErrorCallback) {
+            onErrorCallback(failure);
+          }
+          return;
+        }
+
+        try {
+          const signedTx = Transaction.FromBytes(unsignedTxHex);
+          signedTx.signatures = [
+            new Ed25519Signature(this.decodeWalletSignatureBytes(result.signature, signature)),
+          ];
+
+          if (this.account?.address && !signedTx.VerifySignature(this.account.address)) {
+            throw new Error('Wallet returned a signature that does not match the connected account');
+          }
+
+          callback({
+            success: true,
+            signature: result.signature,
+            signedTx: signedTx.ToStringEncoded(true).toUpperCase(),
+          });
+        } catch (err: any) {
+          const message = err?.message || 'Unable to assemble signed transaction';
+          if (onErrorCallback) {
+            onErrorCallback(message);
+          }
+        }
+      },
+      (message?: string) => {
+        const failure =
+          message || this.lastSocketErrorMessage || 'Wallet rejected transaction signature';
+        if (onErrorCallback) {
+          onErrorCallback(failure);
+        }
+      },
+      signature
+    );
   }
 
   multiSig(
