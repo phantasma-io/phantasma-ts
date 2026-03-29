@@ -205,6 +205,51 @@ describe('PhantasmaLink wallet error reporting', () => {
 
     expect(onError).toHaveBeenCalledWith('A previous request is still pending');
   });
+
+  it('starts with no nexus and syncs the wallet nexus from authorize responses', () => {
+    const fakeSocket: Record<string, any> = {
+      close: jest.fn(),
+      readyState: 1,
+    };
+
+    (globalThis as any).window = {};
+    (globalThis as any).WebSocket = jest.fn(() => fakeSocket);
+
+    const link = new PhantasmaLink('test', false);
+    const onLogin = jest.fn();
+
+    expect(link.nexus).toBe('');
+
+    jest
+      .spyOn(link as any, 'sendLinkRequest')
+      .mockImplementation((request: string, callback: (result: any) => void) => {
+        if (request.startsWith('authorize/')) {
+          callback({
+            success: true,
+            wallet: 'Poltergeist Lite',
+            nexus: 'simnet',
+            token: 'abc',
+          });
+          return;
+        }
+
+        if (request.startsWith('getAccount/')) {
+          callback({
+            success: true,
+            address: 'P2K8J3j8g4P5mS5F5k67A8z9jz6Jb1qX2k3W4m5n6p7q8r9s',
+          });
+          return;
+        }
+
+        throw new Error(`Unexpected request: ${request}`);
+      });
+
+    link.login(onLogin, jest.fn());
+    fakeSocket.onopen({});
+
+    expect(link.nexus).toBe('simnet');
+    expect(onLogin).toHaveBeenCalledWith(true);
+  });
 });
 
 describe('PhantasmaLink.sendLinkRequest safeguards', () => {

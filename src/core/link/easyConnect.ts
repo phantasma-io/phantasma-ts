@@ -11,7 +11,7 @@ export class EasyConnect {
   link: PhantasmaLink;
   connected: boolean;
   script: EasyScript;
-  nexus: Nexus;
+  nexus: Nexus | null;
 
   constructor(_options: Array<string> = null) {
     this.platform = 'phantasma';
@@ -21,8 +21,7 @@ export class EasyConnect {
     this.connected = false;
     this.requiredVersion = 4;
 
-    //Make This Auto In Future
-    this.nexus = Nexus.Mainnet;
+    this.nexus = null;
 
     if (_options == null) {
       this.setConfig('auto');
@@ -75,6 +74,12 @@ export class EasyConnect {
         //Console Logging for Debugging Purposes
         if (data) {
           that.connected = true;
+          that.nexus =
+            that.link.nexus === Nexus.Mainnet ||
+            that.link.nexus === Nexus.Simnet ||
+            that.link.nexus === Nexus.Testnet
+              ? (that.link.nexus as Nexus)
+              : null;
           onSuccess(data);
           logger.log('%c[EasyConnect Connected]', 'color:green');
           logger.log(
@@ -95,6 +100,7 @@ export class EasyConnect {
   disconnect(_message: string = 'Graceful Disconect') {
     this.link.disconnect(_message);
     this.connected = false;
+    this.nexus = null;
   }
 
   async query(

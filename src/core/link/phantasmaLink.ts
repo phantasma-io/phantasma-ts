@@ -33,7 +33,7 @@ export class PhantasmaLink {
   //Construct The Link
   constructor(dappID: any, logging: boolean = true) {
     this.version = 4;
-    this.nexus = 'testnet';
+    this.nexus = '';
     this.chain = 'main';
     this.platform = 'poltergeist';
 
@@ -386,6 +386,9 @@ export class PhantasmaLink {
     //Sends Signiture Request To Connected Wallet For Script
     this.sendLinkRequest('getNexus/', function (result) {
       if (result.success) {
+        if (typeof result.nexus === 'string') {
+          that.nexus = result.nexus;
+        }
         that.onMessage('Nexus Query,: ' + result);
         if (callback) {
           callback(result);
@@ -490,6 +493,7 @@ export class PhantasmaLink {
     this.lastSocketErrorMessage = null;
     this.token = null;
     this.account = null;
+    this.nexus = '';
     this.requestID = 0;
     let authorizeRequest = 'authorize/' + this.dapp + '/' + this.version;
     let getAccountRequest = 'getAccount/' + this.platform;
@@ -507,6 +511,7 @@ export class PhantasmaLink {
           if (result.success) {
             that.token = result.token;
             that.wallet = result.wallet;
+            that.nexus = typeof result.nexus === 'string' ? result.nexus : '';
             that.onMessage('Authorized, obtaining account info...');
             that.sendLinkRequest(getAccountRequest, function (result) {
               if (result.success) {
