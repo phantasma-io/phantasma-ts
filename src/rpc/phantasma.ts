@@ -451,13 +451,27 @@ export class PhantasmaAPI {
     return (await this.JSONRPC('getAccountInfo', params)) as AccountInfo;
   }
 
-  //Returns the account name and balance of given address.
+  /**
+   * Returns the account name and balance of given address.
+   *
+   * @deprecated The response embeds every NFT id the address owns, so it grows without bound with
+   * the size of the account; the node caps each `balances[].ids` list at 10000 entries while
+   * `balances[].amount` keeps the true count, meaning the list is silently partial for large
+   * holders. Use {@link getAccountInfo} together with {@link getAccountFungibleTokens} and
+   * {@link getAccountNFTs}.
+   */
   async getAccount(account: string, extended: boolean = true): Promise<Account> {
     const params: JsonRpcParam[] = [account, extended];
     return (await this.JSONRPC('getAccount', params)) as Account;
   }
 
-  //Returns the accounts name and balance of given addresses.
+  /**
+   * Returns the accounts name and balance of given addresses.
+   *
+   * @deprecated Same unbounded-response problem as {@link getAccount}, multiplied by the number of
+   * addresses in one call. Use {@link getAccountInfo} together with
+   * {@link getAccountFungibleTokens} and {@link getAccountNFTs}.
+   */
   async getAccounts(accounts: string[], extended: boolean = true): Promise<Account[]> {
     const params: JsonRpcParam[] = [accounts.join(','), extended];
     return (await this.JSONRPC('getAccounts', params)) as Account[];
