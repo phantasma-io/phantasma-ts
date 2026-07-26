@@ -570,6 +570,7 @@ export class PhantasmaAPI {
 
   //Returns an array of all chains deployed in Phantasma.
   // Warning: current Carbon RPC endpoint is stubbed and returns an empty array.
+  // The extended flag is deprecated server-side and slated for removal.
   async getChains(extended: boolean = true): Promise<Chain[]> {
     const params: JsonRpcParam[] = [extended];
     return (await this.JSONRPC('getChains', params)) as Chain[];
@@ -614,6 +615,7 @@ export class PhantasmaAPI {
   }
 
   //Returns an array of contracts  deployed in Phantasma.
+  // The extended flag is deprecated server-side and slated for removal.
   async getContracts(
     chainAddressOrName: string = 'main',
     extended: boolean = true
@@ -684,6 +686,7 @@ export class PhantasmaAPI {
   }
 
   //Returns an array of tokens deployed in Phantasma.
+  // The extended flag is deprecated server-side and slated for removal.
   async getTokens(
     ownerAddress: string | undefined | null,
     extended: boolean = true
@@ -702,7 +705,12 @@ export class PhantasmaAPI {
     return (await this.JSONRPC('getToken', params)) as Token;
   }
 
-  //Returns data of a non-fungible token, in hexadecimal format.
+  /**
+   * Returns data of a non-fungible token, in hexadecimal format.
+   *
+   * @deprecated The node serves this as a strict subset of `getNFT` - same response, with property
+   * loading forced off - so {@link getNFT} covers it entirely.
+   */
   async getTokenData(symbol: string, IDtext: string): Promise<TokenData> {
     const params: JsonRpcParam[] = [symbol, IDtext];
     return (await this.JSONRPC('getTokenData', params)) as TokenData;
