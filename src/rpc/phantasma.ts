@@ -4,6 +4,7 @@ import { Balance } from './interfaces/balance.js';
 import { Organization, OrganizationMember, RpcAddressType } from './interfaces/organization.js';
 import { Nexus } from './interfaces/nexus.js';
 import { Account } from './interfaces/account.js';
+import { AccountInfo } from './interfaces/account-info.js';
 import { Leaderboard } from './interfaces/leaderboard.js';
 import { Chain } from './interfaces/chain.js';
 import { GasConfigResult } from './interfaces/gas-config.js';
@@ -436,6 +437,18 @@ export class PhantasmaAPI {
   convertDecimals(amount: number, decimals: number): number {
     const mult = Math.pow(10, decimals);
     return amount / mult;
+  }
+
+  /**
+   * Returns the account name and staking info of a given address.
+   *
+   * Cost is independent of how much the address holds, which makes this the endpoint to use in
+   * wallet refresh loops; balances and NFTs are fetched separately through the cursor-paginated
+   * account endpoints.
+   */
+  async getAccountInfo(account: string): Promise<AccountInfo> {
+    const params: JsonRpcParam[] = [account];
+    return (await this.JSONRPC('getAccountInfo', params)) as AccountInfo;
   }
 
   //Returns the account name and balance of given address.

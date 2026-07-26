@@ -3,6 +3,7 @@ export * from './abi-event.js';
 export * from './abi-method.js';
 export * from './abi-parameter.js';
 export * from './account.js';
+export * from './account-info.js';
 export * from './account-transactions.js';
 export * from './archive.js';
 export * from './auction.js';
