@@ -641,6 +641,7 @@ export class PhantasmaAPI {
     return (await this.JSONRPC('getOrganization', params)) as Organization;
   }
 
+  // pageSize must be 1..100; the node rejects anything outside that range.
   async getOrganizations(
     pageSize: number = 10,
     cursor: string = '',
@@ -652,6 +653,7 @@ export class PhantasmaAPI {
     >;
   }
 
+  // pageSize must be 1..100; the node rejects anything outside that range.
   async getOrganizationMembers(
     name: string,
     pageSize: number = 10,
@@ -719,6 +721,7 @@ export class PhantasmaAPI {
 
   //Returns series for specified token.
   // Returns NFT series for a specific token using cursor-based pagination.
+  // pageSize must be 1..100; the node rejects anything outside that range.
   async getTokenSeries(
     symbol: string,
     carbonTokenId: bigint,
@@ -743,6 +746,7 @@ export class PhantasmaAPI {
   }
 
   // Returns NFTs for a token (optionally restricted to a series) with cursor pagination.
+  // pageSize must be 1..100, or 1..50 when extended is true; the node rejects anything else.
   async getTokenNFTs(
     carbonTokenId: bigint,
     carbonSeriesId: number = 0,
@@ -761,6 +765,7 @@ export class PhantasmaAPI {
   }
 
   // Returns fungible token balances owned by an address, optionally filtered to one token.
+  // pageSize must be 1..100; the node rejects anything outside that range.
   async getAccountFungibleTokens(
     account: string,
     tokenSymbol: string = '',
@@ -783,6 +788,7 @@ export class PhantasmaAPI {
   }
 
   // Returns NFTs owned by an address, with optional token/series filters and extended properties.
+  // pageSize must be 1..100, or 1..50 when extended is true; the node rejects anything else.
   async getAccountNFTs(
     account: string,
     tokenSymbol: string = '',
@@ -807,6 +813,7 @@ export class PhantasmaAPI {
   }
 
   // Returns NFT tokens for which the address owns at least one NFT instance.
+  // pageSize must be 1..100; the node rejects anything outside that range.
   async getAccountOwnedTokens(
     account: string,
     tokenSymbol: string = '',
@@ -827,6 +834,7 @@ export class PhantasmaAPI {
   }
 
   // Returns NFT series for which the address owns at least one NFT instance.
+  // pageSize must be 1..100; the node rejects anything outside that range.
   async getAccountOwnedTokenSeries(
     account: string,
     tokenSymbol: string = '',
