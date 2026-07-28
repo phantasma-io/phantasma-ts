@@ -1,4 +1,6 @@
-export type JsonRpcParam = string | number | boolean | null | undefined;
+// string[] is the native-array parameter form batch endpoints take (e.g. getAccountInfos
+// addresses); the node binds JSON arrays element-wise, never comma-joined strings.
+export type JsonRpcParam = string | number | boolean | null | undefined | string[];
 
 export interface JsonRpcErrorObject {
   code?: number;

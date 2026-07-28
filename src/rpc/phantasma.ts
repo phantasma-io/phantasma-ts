@@ -452,6 +452,18 @@ export class PhantasmaAPI {
   }
 
   /**
+   * Returns the account name and staking info for a batch of up to 100 addresses in one call.
+   *
+   * Batch counterpart of {@link getAccountInfo} with the same per-account record: the node answers
+   * every address from a single state snapshot and returns results in request order. The addresses
+   * travel as a native JSON array parameter; a malformed address rejects the whole batch.
+   */
+  async getAccountInfos(accounts: string[]): Promise<AccountInfo[]> {
+    const params: JsonRpcParam[] = [accounts];
+    return (await this.JSONRPC('getAccountInfos', params)) as AccountInfo[];
+  }
+
+  /**
    * Returns the account name and balance of given address.
    *
    * @deprecated The response embeds every NFT id the address owns, so it grows without bound with
