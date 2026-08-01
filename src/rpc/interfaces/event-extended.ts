@@ -25,22 +25,6 @@ export interface TokenSeriesCreateData {
   metadata: Record<string, string>;
 }
 
-/**
- * Reserved shape: the node does not currently emit a TokenMint extended event, so this never
- * arrives on the wire today.
- */
-export interface TokenMintData {
-  symbol: string;
-  tokenId: string;
-  seriesId: string;
-  mintNumber: number;
-  carbonTokenId: number;
-  carbonSeriesId: number;
-  carbonInstanceId: number;
-  owner: string;
-  metadata: Record<string, string>;
-}
-
 export interface MarketOrderData {
   baseSymbol: string;
   quoteSymbol: string;
@@ -86,7 +70,6 @@ export interface SpecialResolutionData {
 export type ExtendedEventData =
   | TokenCreateData
   | TokenSeriesCreateData
-  | TokenMintData
   | MarketOrderData
   | SpecialResolutionData;
 
