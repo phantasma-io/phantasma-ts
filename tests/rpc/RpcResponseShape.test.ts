@@ -9,6 +9,8 @@ import type {
   Chain,
   Contract,
   CursorPaginatedResult,
+  EventExtended,
+  ImportContractsArguments,
   Leaderboard,
   Nexus,
   NFT,
@@ -16,11 +18,16 @@ import type {
   OrganizationMember,
   Paginated,
   PhantasmaVmConfig,
+  RawArguments,
   Script,
+  SpecialResolutionArgumentsByMethod,
+  SpecialResolutionCall,
+  SpecialResolutionData,
   Token,
   TokenData,
   TokenSeriesResult,
   TransactionData,
+  TransferFungibleArguments,
 } from '../../src/rpc/interfaces/index.js';
 import type { PhantasmaAPI } from '../../src/rpc/phantasma.js';
 
@@ -216,6 +223,141 @@ describe('RPC response model shape', () => {
 
     expect(token.metadata?.[1]?.value).toBe('Phantasma Crown');
     expect(series.mintCount).toBe('11593');
+  });
+
+  it('carries non-scalar token metadata as the VM shape the node answers', () => {
+    // Captured from devnet getToken("SOUL", true) on 2026-08-01: inflation targets (_ia) arrive as
+    // an array of VM structs, the remaining rows as scalar strings. The scalars stay strings
+    // because chain numbers are big integers. A DTO that declared value: string would reject this
+    // response, which is exactly what it used to do.
+    const soul: Token = {
+      symbol: 'SOUL',
+      name: 'Phantasma Stake',
+      decimals: 8,
+      currentSupply: '9151160937874318',
+      maxSupply: '10000000000000000',
+      burnedSupply: '848839062125682',
+      address: 'S3dApERMJUMRYECjyKLJmSixauaJ4XSFmVpUFmwgKyRfvNa',
+      owner: 'S3dBnyaAWFy1e4LjUmSAhtiTQFuUAyEqB1qc2WGYRnW1ANP',
+      flags: 'Transferable, Burnable, Fungible, Divisible, Stakable',
+      series: [],
+      carbonId: '1',
+      metadata: [
+        {
+          key: '_ia',
+          value: [
+            {
+              div: '10000',
+              mul: '25',
+              who: ['64D56AB3EA94769BDF30028DC00E9CC2077573DF6021DE1176738754B18A99A0'],
+            },
+            {
+              fix: '12500000000000',
+              who: ['0000000000000000000000000000000000000000000000030100000000000000'],
+            },
+          ],
+        },
+        { key: '_ip', value: '18446744073709551615' },
+        { key: 'name', value: 'Phantasma Stake' },
+      ],
+    };
+
+    const inflationTargets = soul.metadata?.[0]?.value;
+    expect(Array.isArray(inflationTargets)).toBe(true);
+    if (!Array.isArray(inflationTargets)) {
+      throw new Error('expected an array of inflation targets');
+    }
+
+    const firstTarget = inflationTargets[0];
+    expect(typeof firstTarget).toBe('object');
+    if (typeof firstTarget !== 'object' || Array.isArray(firstTarget)) {
+      throw new Error('expected an inflation target struct');
+    }
+
+    // Struct fields and the nested array inside them are readable without any cast, and every
+    // scalar leaf is a string.
+    expect(firstTarget.mul).toBe('25');
+    const recipients = firstTarget.who;
+    expect(Array.isArray(recipients) && recipients[0]).toBe(
+      '64D56AB3EA94769BDF30028DC00E9CC2077573DF6021DE1176738754B18A99A0'
+    );
+    expect(soul.metadata?.[1]?.value).toBe('18446744073709551615');
+  });
+
+  it('types special resolution call arguments by module and method', () => {
+    // Shapes, module/method ids and argument values captured from devnet blocks 8,736,266
+    // (token.TransferFungible, moduleId 1 methodId 0) and 8,736,257 (phantasma_vm.ImportContracts,
+    // moduleId 2 methodId 5) on 2026-08-01. Arguments used to be Record<string, string>, so the
+    // nested contract/table objects below could not be expressed at all.
+    const transfer: SpecialResolutionCall<TransferFungibleArguments> = {
+      moduleId: 1,
+      module: 'token',
+      methodId: 0,
+      method: 'TransferFungible',
+      arguments: {
+        token: 'KCAL',
+        tokenId: '1',
+        from: 'S3dPnV8dfdkHDHDcJiHY255FEUZCM7oAmDW78LpYZ4jveGW',
+        to: 'P2KFNXEbt65rQiWqogAzqkVGMqFirPmqPw8mQyxvRKsrXV8',
+        amount: '10000000000',
+      },
+    };
+
+    const importContracts: SpecialResolutionCall<ImportContractsArguments> = {
+      moduleId: 2,
+      module: 'phantasma_vm',
+      methodId: 5,
+      method: 'ImportContracts',
+      arguments: {
+        contractsCount: '1',
+        contracts: [
+          {
+            name: 'mail',
+            address: 'S3d6cUXRwJbudV4ADbRtMz3P9527ts7D2Lh9h2J96m48FPW',
+            owner: 'P2KFNXEbt65rQiWqogAzqkVGMqFirPmqPw8mQyxvRKsrXV8',
+            script: '0B',
+            abi: '090B507573684D65737361676500FFFFFFFF030466726F6D0806746172676574',
+            rootVariables: [{ key: '2E6D61696C', value: '01' }],
+            tables: [{ name: 'inbox', rows: [{ key: '00', value: '01' }] }],
+          },
+        ],
+      },
+    };
+
+    // A method the answering node cannot decode reports the argument buffer verbatim instead of a
+    // half-filled object.
+    const undecoded: SpecialResolutionCall<RawArguments> = {
+      moduleId: 2,
+      module: 'phantasma_vm',
+      methodId: 99,
+      method: 'SomeFutureMethod',
+      arguments: { rawArgs: '0102030405' },
+    };
+
+    // resolutionId is numeric on the wire (devnet answers 37 and 44 for the blocks above), unlike
+    // the string ids inside argument shapes.
+    const resolution: SpecialResolutionData = {
+      resolutionId: 31,
+      description: 'gen3 migration',
+      calls: [transfer, importContracts, undecoded],
+    };
+    const event: EventExtended<SpecialResolutionData> = {
+      address: 'S3dPnV8dfdkHDHDcJiHY255FEUZCM7oAmDW78LpYZ4jveGW',
+      contract: 'governance',
+      kind: 'SpecialResolution',
+      data: resolution,
+    };
+
+    // The per-method map is the same type as the annotation above, so consumers can reach a shape
+    // from the module/method pair alone.
+    expectType<SpecialResolutionArgumentsByMethod['token.TransferFungible']>(
+      transfer.arguments as TransferFungibleArguments
+    );
+
+    expect(event.data.calls).toHaveLength(3);
+    expect(transfer.arguments?.amount).toBe('10000000000');
+    expect(importContracts.arguments?.contracts[0]?.tables[0]?.rows[0]?.value).toBe('01');
+    expect(undecoded.arguments?.rawArgs).toBe('0102030405');
   });
 
   it('matches current paginated token, account, and auction result wrappers', () => {

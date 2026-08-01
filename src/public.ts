@@ -48,6 +48,10 @@ export type {
   Script,
   SendRawTx,
   SignatureResult,
+  SpecialResolutionArguments,
+  SpecialResolutionArgumentsByMethod,
+  SpecialResolutionCall,
+  SpecialResolutionData,
   Stake,
   Storage,
   Swap,
@@ -62,6 +66,7 @@ export type {
   Validator,
   VmNamedVariableSchemaResult,
   VmStructSchemaResult,
+  VmValue,
   VmVariableSchemaResult,
 } from './rpc/interfaces/index.js';
 export { vmStructSchemaFromRpcResult, vmVariableSchemaFromRpcResult } from './rpc/helpers/index.js';

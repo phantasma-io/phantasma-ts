@@ -79,10 +79,13 @@ import {
   type KeyPair,
   type LinkAccount,
   type JsonRpcParam,
+  type KeyValue,
   type RpcErrorResult,
   type RpcResult,
   type Serializable,
+  type SpecialResolutionArgumentsByMethod,
   type StackLike,
+  type VmValue,
 } from 'phantasma-sdk-ts/public';
 
 const keys = PhantasmaKeys.generate();
@@ -147,6 +150,19 @@ const rpcError: RpcErrorResult = { error: 'failure', code: -32601 };
 if (isRpcErrorResult(rpcResult)) {
   void rpcResult.error;
 }
+// Token metadata rows carry the VM shape the node answers, so a scalar and an array of structs
+// must both be assignable, and the per-method argument map must be reachable from the public entry.
+const scalarProperty: KeyValue = { key: 'name', value: 'Phantasma Stake' };
+const structuredProperty: KeyValue = { key: '_ia', value: [{ mul: '25', who: ['00'] }] };
+const inflationTargets: VmValue = structuredProperty.value;
+const transferArguments: SpecialResolutionArgumentsByMethod['token.TransferFungible'] = {
+  token: 'KCAL',
+  tokenId: '2',
+  from: 'S3dPnV8dfdkHDHDcJiHY255FEUZCM7oAmDW78LpYZ4jveGW',
+  to: 'P2KFNXEbt65rQiWqogAzqkVGMqFirPmqPw8mQyxvRKsrXV8',
+  amount: '10000000000',
+};
+
 const serializable: Serializable = {
   serializeData: () => undefined,
   unserializeData: () => undefined,
@@ -174,6 +190,9 @@ void rpcError;
 void serializable;
 void addressSerializable;
 void unwrappedNumber;
+void scalarProperty;
+void inflationTargets;
+void transferArguments;
 `
 );
 
